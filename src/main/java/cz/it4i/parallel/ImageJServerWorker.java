@@ -292,46 +292,54 @@ public class ImageJServerWorker implements ParallelWorker {
 	}
 
 	private Map<String, Object> wrapInputValues(Map<String, ?> map) {
-		return convertMap(map, this::wrapValue);
+		return convertMap(map, this::isEntryResolvable, this::wrapValue);
 	}
 	
 	private Map<String, Object> unwrapOutputValues(Map<String, Object> map) {
-		return convertMap(map, this::unwrapValue);
+		return convertMap(map, this::isEntryResolvable, this::unwrapValue);
 	}
 
 
-	private Map<String, Object> convertMap(Map<String, ?> map, Function<Object, Object> convertor) {
-		return map.entrySet().stream().filter(ImageJServerWorker::filterResolvableEntries)
-				.map(entry -> new SimpleImmutableEntry<String, Object>(entry.getKey(), convertor.apply(entry.getValue())))
+	/**
+	 * Converts an input map into an output map
+	 * @param map - an input map
+	 * @param converter - a converter to be applied on each map entry
+	 * @param filter - a filter to be applied on all map entries prior the actual conversion
+	 * @return a converted map
+	 */
+	private Map<String, Object> convertMap(Map<String, ?> map, Function<Map.Entry<String, ?>, Boolean> filter, Function<Object, Object> converter) {
+		return map.entrySet().stream()
+				.filter(entry -> filter.apply(entry))
+				.map(entry -> new SimpleImmutableEntry<String, Object>(entry.getKey(), converter.apply(entry.getValue())))
 				.collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
 	}
-
 	
+	// TODO: Should not we return null if it is not instance of any supported type? 
 	private Object wrapValue(Object value) {
 		if (value instanceof Dataset) {
 			Dataset ds = (Dataset) value;
 			Object id = mockedData2id.get(ds);
-			if(id != null) {
+			if (id != null) {
 				value = id;
 			}
 		}
 		return value;
 	}
 	
+	// TODO: Should not we return null if it is not instance of any supported type? 
 	private Object unwrapValue(Object value) {
 		Dataset obj = id2mockedData.get(value);
-		if(obj != null) {
+		if (obj != null) {
 			value = obj;
 		}
 		return value;
 	}
 	
 	/**
-	 * Filters out entries which are resolvable from the SciJava Context
+	 * Determines whether an entry is resolvable from the SciJava Context
 	 */
-	private static boolean filterResolvableEntries(Map.Entry<String, ?> entry) {
+	private Boolean isEntryResolvable(Map.Entry<String, ?> entry) {
 		return entry.getValue() != null && !(entry.getValue() instanceof SciJavaPlugin)
 				&& !(entry.getValue() instanceof Context);
 	}
-	
 }
