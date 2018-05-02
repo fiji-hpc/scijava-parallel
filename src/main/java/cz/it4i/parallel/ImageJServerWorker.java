@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.nio.file.Path;
+import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -301,7 +302,7 @@ public class ImageJServerWorker implements ParallelWorker {
 
 	private Map<String, Object> convertMap(Map<String, ?> map, Function<Object, Object> convertor) {
 		return map.entrySet().stream().filter(ImageJServerWorker::filterResolvableEntries)
-				.map(entry -> new P_Entry(entry.getKey(), convertor.apply(entry.getValue())))
+				.map(entry -> new SimpleImmutableEntry<String, Object>(entry.getKey(), convertor.apply(entry.getValue())))
 				.collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
 	}
 
@@ -333,30 +334,4 @@ public class ImageJServerWorker implements ParallelWorker {
 				&& !(entry.getValue() instanceof Context);
 	}
 	
-	private static class P_Entry implements Map.Entry<String, Object> {
-
-		private final String key;
-		private final Object value;
-		
-		public P_Entry(String key, Object value) {
-			this.key = key;
-			this.value = value;
-		}
-
-		@Override
-		public String getKey() {
-			return key;
-		}
-
-		@Override
-		public Object getValue() {
-			return value;
-		}
-
-		@Override
-		public Object setValue(Object value) {
-			throw new UnsupportedOperationException();
-		}
-		
-	}
 }
