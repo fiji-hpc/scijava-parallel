@@ -190,31 +190,6 @@ public class ImageJServerWorker implements ParallelWorker {
 		return unwrapOutputValues(result);
 	}
 
-	public String getCommandByName(String name) {
-
-		HashMap<String, String> commandMap = new HashMap<String, String>();
-
-		String getUrl = "http://" + hostName + ":" + String.valueOf(port) + "/admin/menuNew/";
-		HttpClient httpClient = HttpClientBuilder.create().build();
-		HttpGet get = new HttpGet(getUrl);
-
-		try {
-
-			HttpResponse response = httpClient.execute(get);
-			HttpEntity entity = response.getEntity();
-
-			JSONParser jsonParser = new JSONParser();
-			JSONObject obj = (JSONObject) jsonParser.parse(new InputStreamReader(entity.getContent(), "UTF-8"));
-
-			addCommandsToMap(obj, commandMap);
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		return commandMap.get(name);
-	}
-
 	public Map<String, String> getArgumentsMap(String commandName) {
 
 		Map<String, String> argumentMap = new HashMap<String, String>();
@@ -245,10 +220,6 @@ public class ImageJServerWorker implements ParallelWorker {
 		return argumentMap;
 	}
 
-	public Map<String, String> getCommandArgumentsMap(String commandName) {
-		return getArgumentsMap("command:" + getCommandByName(commandName));
-	}
-
 	// TODO: support another types
 	private String getContentType(String path) {
 		return "image/" + getImageType(path);
@@ -264,33 +235,6 @@ public class ImageJServerWorker implements ParallelWorker {
 		throw new UnsupportedOperationException("Only " + supportedImageTypes + " image files supported");
 	}
 
-	private void addCommandsToMap(JSONObject jsonObj, HashMap<String, String> commandMap) {
-		String command = null;
-		String label = null;
-		for (Object keyObj : jsonObj.keySet()) {
-			String key = (String) keyObj;
-			Object valObj = jsonObj.get(key);
-			if (valObj instanceof JSONObject) {
-				// call printJSON on nested object
-				if (valObj != null)
-					addCommandsToMap((JSONObject) valObj, commandMap);
-			} else {
-				// store key-value pair
-				if (valObj != null) {
-					if (key.contains("Command")) {
-						command = valObj.toString();
-					}
-					if (key.contains("Label")) {
-						label = valObj.toString();
-					}
-				}
-			}
-		}
-		if (command != null && label != null) {
-			commandMap.put(label, command);
-		}
-	}
-
 	private Map<String, Object> wrapInputValues(Map<String, ?> map) {
 		return convertMap(map, this::isEntryResolvable, this::wrapValue);
 	}
@@ -302,8 +246,8 @@ public class ImageJServerWorker implements ParallelWorker {
 	/**
 	 * Converts an input map into an output map
 	 * @param map - an input map
-	 * @param converter - a converter to be applied on each map entry
 	 * @param filter - a filter to be applied on all map entries prior the actual conversion
+	 * @param converter - a converter to be applied on each map entry
 	 * @return a converted map
 	 */
 	private Map<String, Object> convertMap(Map<String, ?> map, Function<Map.Entry<String, ?>, Boolean> filter, Function<Object, Object> converter) {
