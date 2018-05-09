@@ -299,7 +299,6 @@ public class ImageJServerWorker implements ParallelWorker {
 		return convertMap(map, this::isEntryResolvable, this::unwrapValue);
 	}
 
-
 	/**
 	 * Converts an input map into an output map
 	 * @param map - an input map
