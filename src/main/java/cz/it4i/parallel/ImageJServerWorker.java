@@ -1,10 +1,11 @@
 package cz.it4i.parallel;
 
+import static org.mockito.Mockito.doAnswer;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.InputStreamReader;
 import java.nio.file.Path;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Arrays;
@@ -26,9 +27,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
 import org.scijava.Context;
@@ -39,14 +38,12 @@ import com.google.common.base.Function;
 
 import net.imagej.Dataset;
 
-import static org.mockito.Mockito.doAnswer;
-
 public class ImageJServerWorker implements ParallelWorker {
 
 	private final String hostName;
 	private final int port;
-	private Map<Dataset,String> mockedData2id = new HashMap<>();
-	private Map<String, Dataset> id2mockedData = new HashMap<>();
+	private final Map<Dataset,String> mockedData2id = new HashMap<>();
+	private final Map<String, Dataset> id2mockedData = new HashMap<>();
 	
 	private final static Set<String> supportedImageTypes = Collections
 			.unmodifiableSet(new HashSet<>(Arrays.asList("png", "jpg")));
@@ -63,6 +60,8 @@ public class ImageJServerWorker implements ParallelWorker {
 	public int getPort() {
 		return port;
 	}
+	
+	// -- ParallelWorker methods --
 
 	@Override
 	public Dataset importData(Path path) {
@@ -100,6 +99,7 @@ public class ImageJServerWorker implements ParallelWorker {
 		return result;
 	}
 
+	@Override
 	public void exportData(Dataset dataset, Path p) {
 		String filePath = p.toString();
 		String id = mockedData2id.get(dataset);
@@ -130,6 +130,7 @@ public class ImageJServerWorker implements ParallelWorker {
 
 	}
 
+	@Override
 	public void deleteData(Dataset ds) {
 		String id = mockedData2id.get(ds);
 		
@@ -154,6 +155,7 @@ public class ImageJServerWorker implements ParallelWorker {
 	}
 
 	@SuppressWarnings("unchecked")
+	@Override
 	public <T extends Command> Map<String, Object> executeCommand(Class<T> commandType, Map<String, ?> inputs) {
 		Map<String,Object> map = wrapInputValues(inputs);
 		String json = null;
@@ -189,36 +191,8 @@ public class ImageJServerWorker implements ParallelWorker {
 		}
 		return unwrapOutputValues(result);
 	}
-
-	public Map<String, String> getArgumentsMap(String commandName) {
-
-		Map<String, String> argumentMap = new HashMap<String, String>();
-
-		String getUrl = "http://" + hostName + ":" + String.valueOf(port) + "/modules/" + commandName;
-		HttpClient httpClient = HttpClientBuilder.create().build();
-		HttpGet get = new HttpGet(getUrl);
-
-		try {
-
-			HttpResponse response = httpClient.execute(get);
-			HttpEntity entity = response.getEntity();
-
-			JSONParser jsonParser = new JSONParser();
-			JSONObject obj = (JSONObject) jsonParser.parse(new InputStreamReader(entity.getContent(), "UTF-8"));
-
-			JSONArray inputs = (JSONArray) obj.get("inputs");
-			if (inputs != null) {
-				for (int i = 0; i < inputs.size(); i++) {
-					argumentMap.put(((JSONObject) inputs.get(i)).get("name").toString(), null);
-				}
-			}
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		return argumentMap;
-	}
+	
+	// -- Helper methods --
 
 	// TODO: support another types
 	private String getContentType(String path) {
