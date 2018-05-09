@@ -65,37 +65,41 @@ public class ImageJServerWorker implements ParallelWorker {
 
 	@Override
 	public Dataset importData(Path path) {
-		String filePath = path.toAbsolutePath().toString();
-		String name = path.getFileName().toString();
 		
-		String json = null;
-
-		HttpEntity entity = MultipartEntityBuilder.create()
-				.addBinaryBody("file", new File(filePath), ContentType.create(getContentType(filePath)), name).build();
-
-		HttpClient httpClient = HttpClientBuilder.create().build();
+		final String filePath = path.toAbsolutePath().toString();
+		final String fileName = path.getFileName().toString();
+				
+		Dataset result = null;
 
 		try {
-
+			
+			HttpEntity entity = MultipartEntityBuilder.create()
+					.addBinaryBody("file", new File(filePath), ContentType.create(getContentType(filePath)), fileName).build();
+			
 			HttpPost httpPost = new HttpPost("http://" + hostName + ":" + String.valueOf(port) + "/objects/upload");
 			httpPost.setEntity(entity);
+			
+			HttpClient httpClient = HttpClientBuilder.create().build();			
+			
 			HttpResponse response = httpClient.execute(httpPost);
-			json = EntityUtils.toString(response.getEntity());
-
-			// TODO check result code
-
+			
+			// TODO check result code properly
+			
+			String json = EntityUtils.toString(response.getEntity());			
+			String obj = new org.json.JSONObject(json).getString("id");
+			
+			result = Mockito.mock(Dataset.class, (Answer<Dataset>) p -> {
+				throw new UnsupportedOperationException();
+			});
+			doAnswer(p -> "Dataset(mocked)[id = " + obj).when(result).toString();
+			
+			mockedData2id.put(result, obj);
+			id2mockedData.put(obj, result);
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
-		String obj = new org.json.JSONObject(json).getString("id");
-		Dataset result = Mockito.mock(Dataset.class, (Answer<Dataset>) p -> {
-			throw new UnsupportedOperationException();
-		});
-		doAnswer(p -> "Dataset(mocked)[id = " + obj).when(result).toString();
-		
-		mockedData2id.put(result, obj);
-		id2mockedData.put(obj, result);
 		return result;
 	}
 
