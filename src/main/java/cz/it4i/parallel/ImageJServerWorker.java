@@ -18,7 +18,6 @@ import java.util.stream.Collectors;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -42,7 +41,7 @@ public class ImageJServerWorker implements ParallelWorker {
 
 	private final String hostName;
 	private final int port;
-	private final Map<Dataset,String> mockedData2id = new HashMap<>();
+	private final Map<Dataset, String> mockedData2id = new HashMap<>();
 	private final Map<String, Dataset> id2mockedData = new HashMap<>();
 	
 	private final static Set<String> supportedImageTypes = Collections
@@ -72,20 +71,20 @@ public class ImageJServerWorker implements ParallelWorker {
 		Dataset result = null;
 
 		try {
-			
+
+			String postUrl = "http://" + hostName + ":" + String.valueOf(port) + "/objects/upload";
+			HttpPost httpPost = new HttpPost(postUrl);
+
 			HttpEntity entity = MultipartEntityBuilder.create()
-					.addBinaryBody("file", new File(filePath), ContentType.create(getContentType(filePath)), fileName).build();
-			
-			HttpPost httpPost = new HttpPost("http://" + hostName + ":" + String.valueOf(port) + "/objects/upload");
+					.addBinaryBody("file", new File(filePath), ContentType.create(getContentType(filePath)), fileName)
+					.build();
 			httpPost.setEntity(entity);
-			
-			HttpClient httpClient = HttpClientBuilder.create().build();			
-			
-			HttpResponse response = httpClient.execute(httpPost);
-			
+
+			HttpResponse response = HttpClientBuilder.create().build().execute(httpPost);
+
 			// TODO check result code properly
-			
-			String json = EntityUtils.toString(response.getEntity());			
+
+			String json = EntityUtils.toString(response.getEntity());
 			String obj = new org.json.JSONObject(json).getString("id");
 			
 			result = Mockito.mock(Dataset.class, (Answer<Dataset>) p -> {
@@ -105,82 +104,96 @@ public class ImageJServerWorker implements ParallelWorker {
 
 	@Override
 	public void exportData(Dataset dataset, Path p) {
-		String filePath = p.toString();
-		String id = mockedData2id.get(dataset);
-		String getUrl = "http://" + hostName + ":" + String.valueOf(port) + "/objects/" + id + "/" + getImageType(filePath);
-		HttpClient httpClient = HttpClientBuilder.create().build();
-		HttpGet get = new HttpGet(getUrl);
+
+		final String filePath = p.toString();
+		final String objectId = mockedData2id.get(dataset);
 
 		try {
 
-			HttpResponse response = httpClient.execute(get);
-			HttpEntity entity = response.getEntity();
+			String getUrl = "http://" + hostName + ":" + String.valueOf(port) + "/objects/" + objectId + "/"
+					+ getImageType(filePath);
+			HttpGet httpGet = new HttpGet(getUrl);
+
+			HttpEntity entity = HttpClientBuilder.create().build().execute(httpGet).getEntity();
+
 			if (entity != null) {
-				// long len = entity.getContentLength();
-				BufferedInputStream bis = new BufferedInputStream(entity.getContent());
-				BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(new File(filePath)));
-				int inByte;
-				while ((inByte = bis.read()) != -1) {
-					bos.write(inByte);
+
+				BufferedInputStream bis = null;
+				BufferedOutputStream bos = null;
+
+				try {
+
+					bis = new BufferedInputStream(entity.getContent());
+					bos = new BufferedOutputStream(new FileOutputStream(new File(filePath)));
+
+					int inByte;
+					while ((inByte = bis.read()) != -1) {
+						bos.write(inByte);
+					}
+
+				} finally {
+					bis.close();
+					bos.close();
 				}
-				bis.close();
-				bos.close();
-
 			}
-
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
 	}
 
 	@Override
-	public void deleteData(Dataset ds) {
-		String id = mockedData2id.get(ds);
-		
+	public void deleteData(Dataset dataset) {
+
+		final String objectId = mockedData2id.get(dataset);
+
 		@SuppressWarnings("unused")
 		String json = null;
-	
-		String postUrl = "http://" + hostName + ":" + String.valueOf(port) + "/objects/" + id;
-		HttpClient httpClient = HttpClientBuilder.create().build();
-		HttpDelete delete = new HttpDelete(postUrl);
-	
+
 		try {
-	
-			HttpResponse response = httpClient.execute(delete);
+
+			String postUrl = "http://" + hostName + ":" + String.valueOf(port) + "/objects/" + objectId;
+			HttpDelete httpDelete = new HttpDelete(postUrl);
+
+			HttpResponse response = HttpClientBuilder.create().build().execute(httpDelete);
+
+			// TODO check result code properly
+
 			json = EntityUtils.toString(response.getEntity());
-			//TODO check result code
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	
-		mockedData2id.remove(ds);
-		id2mockedData.remove(id);
+
+		mockedData2id.remove(dataset);
+		id2mockedData.remove(objectId);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T extends Command> Map<String, Object> executeCommand(Class<T> commandType, Map<String, ?> inputs) {
-		Map<String,Object> map = wrapInputValues(inputs);
-		String json = null;
 
-		String postUrl = "http://" + hostName + ":" + String.valueOf(port) + "/modules/" + "command:"
-				+ commandType.getCanonicalName();
-		HttpClient httpClient = HttpClientBuilder.create().build();
-		HttpPost post = new HttpPost(postUrl);
+		Map<String, Object> wrappedInputs = wrapInputValues(inputs);
+
+		String json = null;
 
 		try {
 
-			JSONObject reqJson = new JSONObject();
+			String postUrl = "http://" + hostName + ":" + String.valueOf(port) + "/modules/" + "command:"
+					+ commandType.getCanonicalName();
+			HttpPost httpPost = new HttpPost(postUrl);
 
-			for (Map.Entry<String, ?> pair : map.entrySet()) {
-				reqJson.put(pair.getKey(), pair.getValue());
+			JSONObject inputJson = new JSONObject();
+
+			for (Map.Entry<String, ?> pair : wrappedInputs.entrySet()) {
+				inputJson.put(pair.getKey(), pair.getValue());
 			}
 
-			StringEntity postingString = new StringEntity(reqJson.toString());
-			post.setEntity(postingString);
-			post.setHeader("Content-type", "application/json");
-			HttpResponse response = httpClient.execute(post);
+			httpPost.setEntity(new StringEntity(inputJson.toString()));
+			httpPost.setHeader("Content-type", "application/json");
+
+			HttpResponse response = HttpClientBuilder.create().build().execute(httpPost);
+
+			// TODO check result code properly
 
 			json = EntityUtils.toString(response.getEntity());
 
@@ -188,12 +201,15 @@ public class ImageJServerWorker implements ParallelWorker {
 			e.printStackTrace();
 		}
 
-		Map<String,Object> result = new HashMap<>();
+		Map<String, Object> rawOutputs = new HashMap<>();
+
 		org.json.JSONObject jsonObj = new org.json.JSONObject(json);
-		for(String key: jsonObj.keySet()) {
-			result.put(key, jsonObj.get(key));
+
+		for (String key : jsonObj.keySet()) {
+			rawOutputs.put(key, jsonObj.get(key));
 		}
-		return unwrapOutputValues(result);
+
+		return unwrapOutputValues(rawOutputs);
 	}
 	
 	// -- Helper methods --
