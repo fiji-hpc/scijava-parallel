@@ -118,22 +118,12 @@ public class ImageJServerWorker implements ParallelWorker {
 
 			if (entity != null) {
 
-				BufferedInputStream bis = null;
-				BufferedOutputStream bos = null;
-
-				try {
-
-					bis = new BufferedInputStream(entity.getContent());
-					bos = new BufferedOutputStream(new FileOutputStream(new File(filePath)));
-
+				try (BufferedInputStream bis = new BufferedInputStream(entity.getContent());
+						BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(new File(filePath)))) {
 					int inByte;
 					while ((inByte = bis.read()) != -1) {
 						bos.write(inByte);
 					}
-
-				} finally {
-					bis.close();
-					bos.close();
 				}
 			}
 		} catch (Exception e) {
