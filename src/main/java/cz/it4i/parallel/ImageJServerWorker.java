@@ -230,11 +230,11 @@ public class ImageJServerWorker implements ParallelWorker {
 	}
 
 	private Map<String, Object> wrapInputValues(Map<String, ?> map) {
-		return convertMap(map, this::isEntryResolvable, this::wrapValue);
+		return convertMap(map, ImageJServerWorker::isEntryResolvable, this::wrapValue);
 	}
 	
 	private Map<String, Object> unwrapOutputValues(Map<String, Object> map) {
-		return convertMap(map, this::isEntryResolvable, this::unwrapValue);
+		return convertMap(map, ImageJServerWorker::isEntryResolvable, this::unwrapValue);
 	}
 
 	/**
@@ -275,7 +275,7 @@ public class ImageJServerWorker implements ParallelWorker {
 	/**
 	 * Determines whether an entry is resolvable from the SciJava Context
 	 */
-	private Boolean isEntryResolvable(Map.Entry<String, ?> entry) {
+	private static boolean isEntryResolvable(Map.Entry<String, ?> entry) {
 		return entry.getValue() != null && !(entry.getValue() instanceof SciJavaPlugin)
 				&& !(entry.getValue() instanceof Context);
 	}
