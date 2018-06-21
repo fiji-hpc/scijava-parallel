@@ -30,12 +30,29 @@ public class DefaultParallelService extends AbstractSingletonService<Paralleliza
 	private List<ParallelizationParadigmProfile> profiles;
 	
 	// -- ParallelService methods --
-	
-	@Override
-	public List<ParallelizationParadigm> getParadigms() {
-		return getInstances().stream().collect(Collectors.toList());
-	}
 
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T extends ParallelizationParadigm> T getParadigm() {
+		List<ParallelizationParadigmProfile> selectedProfiles = getProfiles().stream()
+				.filter(p -> p.isSelected().equals(true)).collect(Collectors.toList());
+
+		if (selectedProfiles.size() == 1) {
+			Class<T> desiredParadigm = selectedProfiles.get(0).getParadigmClass();
+			
+			List<ParallelizationParadigm> foundParadigms = getInstances().stream()
+					.filter(paradigm -> paradigm.getClass().equals(desiredParadigm))
+					.collect(Collectors.toList());
+			
+			if (foundParadigms.size() == 1) {
+				return (T) foundParadigms.get(0);
+			}
+		}
+		
+		return null;
+	}
+	
+	@Deprecated
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T extends ParallelizationParadigm> T getParadigm(
@@ -49,45 +66,62 @@ public class DefaultParallelService extends AbstractSingletonService<Paralleliza
 		}
 		
 		return null;
-	}	
+	}
 	
 	@Override
-	public void saveProfile(final ParallelizationParadigmProfile profile) {
-		
-		final List<String> serializedProfiles = new LinkedList<>();
-		
+	public List<ParallelizationParadigmProfile> getProfiles() {
+		return profiles;
+	}
+	
+	@Override
+	public void addProfile(final ParallelizationParadigmProfile profile) {
 		profiles.add(profile);
+		saveProfiles();
+	}
+	
+	@Override
+	public void selectProfile(final String name) {
 		profiles.forEach(p -> {
-			serializedProfiles.add(serializeProfile(p));
+			if (p.getName().equals(name)) {
+				p.setSelected(true);
+			} else {
+				p.setSelected(false);
+			}
 		});
-		
-		prefService.put(this.getClass(), "profiles", serializedProfiles);
-		retrieveProfiles();
-		
+		saveProfiles();
+	}
+	
+	@Override
+	public void deleteProfiles() {
+		profiles.clear();
+		saveProfiles();
 	}
 	
 	// -- Service methods --
 
 	@Override
 	public void initialize() {
-
 		retrieveProfiles();
-
 	}
 
 	// -- Helper methods --
 	
 	private void retrieveProfiles() {
-		
 		profiles = new LinkedList<>();
 		prefService.getList(this.getClass(), "profiles").forEach((serializedProfile) -> {
 			profiles.add(deserializeProfile(serializedProfile));
 		});
-		
+	}
+	
+	private void saveProfiles() {
+		final List<String> serializedProfiles = new LinkedList<>();
+		profiles.forEach(p -> {
+			serializedProfiles.add(serializeProfile(p));
+		});
+		prefService.put(this.getClass(), "profiles", serializedProfiles);
 	}
 	
 	private String serializeProfile(final ParallelizationParadigmProfile profile) {
-		
 		try {
 			final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			final ObjectOutputStream oos = new ObjectOutputStream(baos);
