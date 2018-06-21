@@ -32,8 +32,8 @@ public class ParallelizationParadigmProfile implements Serializable {
 	/** Gets the module class described by this {@link ParallelizationParadigm}. */
 	@SuppressWarnings("unchecked")
 	public <T extends ParallelizationParadigm> Class<T> getParadigmClass() {
-		if (ParallelizationParadigm.class.isAssignableFrom(paradigm.getClass())) {
-			return (Class<T>) paradigm;			
+		if (ParallelizationParadigm.class.isAssignableFrom(paradigm)) {
+			return (Class<T>) paradigm;
 		}
 		return null;
 	}
