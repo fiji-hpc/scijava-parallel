@@ -5,6 +5,7 @@ package org.scijava.parallel;
 import java.util.List;
 
 import org.scijava.plugin.SingletonService;
+import org.scijava.prefs.PrefService;
 import org.scijava.service.SciJavaService;
 
 /**
@@ -29,6 +30,13 @@ public interface ParallelService extends SingletonService<ParallelizationParadig
 	 * @return Instance of the desired parallelization paradigm
 	 */
 	<T extends ParallelizationParadigm> T getParadigm(Class<T> desiredParalellizationParadigm);
+	
+	/**
+	 * Saves the given {@link ParallelizationParadigmProfile} using the {@link PrefService}.
+	 */
+	public void saveProfile(final ParallelizationParadigmProfile profile);
+	
+	// -- PTService methods -- 
 	
 	default Class<ParallelizationParadigm> getPluginType() {
 		return ParallelizationParadigm.class;
