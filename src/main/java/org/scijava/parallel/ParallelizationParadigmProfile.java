@@ -1,41 +1,65 @@
+// TODO: Add copyright stuff
+
 package org.scijava.parallel;
 
 import java.io.Serializable;
 
+/**
+ * A ParallelizationParadigmProfile object encapsulates user-specific information
+ * which is used with a given {@link ParallelizationParadigm}. This would typically
+ * include user name, password, host address or port number.
+ * 
+ * @author Petr Bainar
+ */
 public class ParallelizationParadigmProfile implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
-	private final Class<? extends ParallelizationParadigm> paradigm;
+	/** Profile name */
+	private final String profileName;
 	
-	private final String name;
+	/** The {@link ParallelizationParadigm} type to be used in this profile */
+	private final Class<? extends ParallelizationParadigm> paradigmType;
 	
+	/** A flag determining whether this profile has been selected by the user */
 	private Boolean selected;
 	
-	public String getName() {
-		return name;
+	/**
+	 * Returns {@link #profileName}
+	 */
+	String getName() {
+		return profileName;
 	}
 	
-	public Boolean isSelected() {
+	/**
+	 * Gets the {@link ParallelizationParadigm} type which is to be used in this profile
+	 * @return {@link Class<ParallelizationParadigm>}
+	 */
+	@SuppressWarnings("unchecked")
+	<T extends ParallelizationParadigm> Class<T> getParadigmType() {
+		if (ParallelizationParadigm.class.isAssignableFrom(paradigmType)) {
+			return (Class<T>) paradigmType;
+		}
+		return null;
+	}
+	
+	/**
+	 * Returns the {@link #selected} flag
+	 */
+	Boolean isSelected() {
 		return selected;
 	}
 	
-	public void setSelected(Boolean selected) {
+	/**
+	 * Sets the {@link #selected} flag
+	 */
+	void setSelected(Boolean selected) {
 		this.selected = selected;
 	}
 
-	public ParallelizationParadigmProfile(final Class<? extends ParallelizationParadigm> paradigm, String name) {
-		this.paradigm = paradigm;
-		this.name = name;
-	}
-	
-	/** Gets the module class described by this {@link ParallelizationParadigm}. */
-	@SuppressWarnings("unchecked")
-	public <T extends ParallelizationParadigm> Class<T> getParadigmClass() {
-		if (ParallelizationParadigm.class.isAssignableFrom(paradigm)) {
-			return (Class<T>) paradigm;
-		}
-		return null;
+	public ParallelizationParadigmProfile(final Class<? extends ParallelizationParadigm> paradigmType, String profileName) {
+		this.paradigmType = paradigmType;
+		this.profileName = profileName;
 	}
 	
 }

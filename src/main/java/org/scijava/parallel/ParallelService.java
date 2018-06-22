@@ -18,7 +18,7 @@ public interface ParallelService extends SingletonService<ParallelizationParadig
 	// TODO: This API is super-preliminary 
 
 	/**
-	 * Returns an instance of the parallelization paradigm corresponding to the chosen profile, if it is available
+	 * Returns an instance of the parallelization paradigm corresponding to the chosen profile, if available
 	 * @return Instance of the corresponding parallelization paradigm
 	 */
 	public <T extends ParallelizationParadigm> T getParadigm();
@@ -31,7 +31,7 @@ public interface ParallelService extends SingletonService<ParallelizationParadig
 	 */
 	public <T extends ParallelizationParadigm> T getParadigm(final Class<T> chosenParalellizationParadigm);
 	
-	// TODO: This method is meant to be package-specific only, //
+	// TODO: This method is meant to be package-specific only,
 	// profiles should be accessible only from the prospective configuration plugin
 	/**
 	 * Returns all saved parallelization paradigm profiles
@@ -39,14 +39,12 @@ public interface ParallelService extends SingletonService<ParallelizationParadig
 	 */
 	public List<ParallelizationParadigmProfile> getProfiles();
 	
-	// TODO: This method is meant to be package-specific only, //
+	// TODO: This method is meant to be package-specific only,
 	// profiles should be accessible only from the prospective configuration plugin
-	/**
-	 * Saves the given {@link ParallelizationParadigmProfile} using the {@link PrefService}.
-	 */
+	/** Saves the given {@link ParallelizationParadigmProfile} using the {@link PrefService} */
 	public void addProfile(final ParallelizationParadigmProfile profile);
 	
-	// TODO: This method is meant to be package-specific only, //
+	// TODO: This method is meant to be package-specific only,
 	// profiles should be accessible only from the prospective configuration plugin
 	/**
 	 * Selects the given {@link ParallelizationParadigmProfile} 
@@ -54,11 +52,9 @@ public interface ParallelService extends SingletonService<ParallelizationParadig
 	 */
 	public void selectProfile(final String name);
 	
-	// TODO: This method is meant to be package-specific only, //
+	// TODO: This method is meant to be package-specific only,
 	// profiles should be accessible only from the prospective configuration plugin
-	/**
-	 * Removes saved parallelization paradigm profiles
-	 */
+	/** Removes all saved parallelization paradigm profiles  */
 	public void deleteProfiles();
 	
 	// -- PTService methods -- 

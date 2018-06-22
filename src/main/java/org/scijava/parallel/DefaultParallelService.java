@@ -26,8 +26,11 @@ public class DefaultParallelService extends AbstractSingletonService<Paralleliza
 	@Parameter
 	PrefService prefService;
 	
-	// List of parallelization profiles
+	/** List of parallelization profiles */
 	private List<ParallelizationParadigmProfile> profiles;
+	
+	/** A string constant to be used by {@link PrefService} */
+	private final String PROFILES = "profiles";
 	
 	// -- ParallelService methods --
 
@@ -38,7 +41,7 @@ public class DefaultParallelService extends AbstractSingletonService<Paralleliza
 				.filter(p -> p.isSelected().equals(true)).collect(Collectors.toList());
 
 		if (selectedProfiles.size() == 1) {
-			Class<T> desiredParadigm = selectedProfiles.get(0).getParadigmClass();
+			Class<T> desiredParadigm = selectedProfiles.get(0).getParadigmType();
 			
 			List<ParallelizationParadigm> foundParadigms = getInstances().stream()
 					.filter(paradigm -> paradigm.getClass().equals(desiredParadigm))
@@ -106,19 +109,19 @@ public class DefaultParallelService extends AbstractSingletonService<Paralleliza
 
 	// -- Helper methods --
 	
-	private void retrieveProfiles() {
-		profiles = new LinkedList<>();
-		prefService.getList(this.getClass(), "profiles").forEach((serializedProfile) -> {
-			profiles.add(deserializeProfile(serializedProfile));
-		});
-	}
-	
 	private void saveProfiles() {
 		final List<String> serializedProfiles = new LinkedList<>();
 		profiles.forEach(p -> {
 			serializedProfiles.add(serializeProfile(p));
 		});
-		prefService.put(this.getClass(), "profiles", serializedProfiles);
+		prefService.put(this.getClass(), PROFILES, serializedProfiles);
+	}
+	
+	private void retrieveProfiles() {
+		profiles = new LinkedList<>();
+		prefService.getList(this.getClass(), PROFILES).forEach((serializedProfile) -> {
+			profiles.add(deserializeProfile(serializedProfile));
+		});
 	}
 	
 	private String serializeProfile(final ParallelizationParadigmProfile profile) {
