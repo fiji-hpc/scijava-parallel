@@ -21,7 +21,7 @@ public interface ParallelService extends SingletonService<ParallelizationParadig
 	 * Returns an instance of the parallelization paradigm corresponding to the chosen profile, if available
 	 * @return Instance of the corresponding parallelization paradigm
 	 */
-	public <T extends ParallelizationParadigm> T getParadigm();
+	public ParallelizationParadigm getParadigm();
 	
 	@Deprecated
 	/**

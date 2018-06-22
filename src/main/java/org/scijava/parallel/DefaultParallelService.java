@@ -34,21 +34,19 @@ public class DefaultParallelService extends AbstractSingletonService<Paralleliza
 	
 	// -- ParallelService methods --
 
-	@SuppressWarnings("unchecked")
 	@Override
-	public <T extends ParallelizationParadigm> T getParadigm() {
+	public ParallelizationParadigm getParadigm() {
 		List<ParallelizationParadigmProfile> selectedProfiles = getProfiles().stream()
 				.filter(p -> p.isSelected().equals(true)).collect(Collectors.toList());
 
 		if (selectedProfiles.size() == 1) {
-			Class<T> desiredParadigm = selectedProfiles.get(0).getParadigmType();
 			
 			List<ParallelizationParadigm> foundParadigms = getInstances().stream()
-					.filter(paradigm -> paradigm.getClass().equals(desiredParadigm))
+					.filter(paradigm -> paradigm.getClass().equals(selectedProfiles.get(0).getParadigmType()))
 					.collect(Collectors.toList());
 			
 			if (foundParadigms.size() == 1) {
-				return (T) foundParadigms.get(0);
+				return foundParadigms.get(0);
 			}
 		}
 		
