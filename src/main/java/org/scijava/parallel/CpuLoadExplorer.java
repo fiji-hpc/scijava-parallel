@@ -24,15 +24,20 @@ public class CpuLoadExplorer implements Command {
 	@Parameter(type = ItemIO.OUTPUT)
 	private double systemCpuLoad;
 
+	@Parameter(type = ItemIO.OUTPUT)
+	private double systemLoadAverage;
+
 	@Override
 	public void run() {
 
 		RuntimeMXBean runtimeBean = ManagementFactory.getRuntimeMXBean();
+		uptime = runtimeBean.getUptime();
+
 		OperatingSystemMXBean osBean = ManagementFactory.getPlatformMXBean(
 			OperatingSystemMXBean.class);
-		uptime = runtimeBean.getUptime();
 		processCpuLoad = osBean.getProcessCpuLoad();
 		systemCpuLoad = osBean.getSystemCpuLoad();
+		systemLoadAverage = osBean.getSystemLoadAverage();
 
 	}
 
