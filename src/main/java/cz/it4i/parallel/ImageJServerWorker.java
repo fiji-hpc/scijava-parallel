@@ -14,11 +14,13 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import javax.ws.rs.core.Response;
 
@@ -37,6 +39,7 @@ import org.apache.http.entity.mime.content.ContentBody;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
 import org.json.simple.JSONObject;
 import org.scijava.Context;
 import org.scijava.plugin.SciJavaPlugin;
@@ -194,48 +197,62 @@ public class ImageJServerWorker implements ParallelWorker {
 	/**
 	 * @throws RuntimeException if response from the ImageJ server is not successful, or json cannot be parsed properly.
 	 */
-	@SuppressWarnings("unchecked")
 	@Override
 	public Map<String, Object> executeCommand(final String commandTypeName,
 		final Map<String, ?> inputs)
 	{
-
 		final Map<String, ?> wrappedInputs = wrapInputValues(inputs);
+		return unwrapOutputValues(doRequest(commandTypeName, wrappedInputs));
+	}
 
+	@Override
+	public List<Map<String, Object>> executeCommand(final String commandTypeName,
+		final List<Map<String, Object>> inputs)
+	{
+		Map<String, Object> inputForExecution = new HashMap<>();
+		inputForExecution.put("moduleId", commandTypeName);
+		inputForExecution.put("inputs", inputs.stream().map(this::wrapInputValues)
+			.collect(Collectors.toList()));
+		List<Map<String, Object>> output = StreamSupport.stream(
+			((JSONArray) doRequest(
+			"cz.it4i.parallel.plugins.ThreadRunner", inputForExecution).get(
+					"outputs")).spliterator(), false).map(obj -> jsonToMap(
+						(org.json.JSONObject) obj)).collect(Collectors.toList());
+		return output.stream().map(this::unwrapOutputValues).collect(Collectors
+			.toList());
+
+	}
+
+	// -- Helper methods --
+
+	private Map<String, Object> doRequest(final String commandTypeName,
+		final Map<String, ?> wrappedInputs)
+	{
 		try {
-
+	
+			final JSONObject inputJson = toJson(wrappedInputs);
 			final String postUrl = "http://" + hostName + ":" + String.valueOf(port) +
 				"/modules/" + "command:" + commandTypeName;
 			final HttpPost httpPost = new HttpPost(postUrl);
-
-			final JSONObject inputJson = new JSONObject();
-
-			for (final Map.Entry<String, ?> pair : wrappedInputs.entrySet()) {
-				inputJson.put(pair.getKey(), pair.getValue());
-			}
-
-			httpPost.setEntity(new StringEntity(inputJson.toString()));
+			String inputJSONStr;
+			httpPost.setEntity(new StringEntity(inputJSONStr = inputJson.toString()));
 			httpPost.setHeader("Content-type", "application/json");
-
+	
 			final HttpResponse response = HttpClientBuilder.create().build().execute(
 				httpPost);
-
+	
 			int statusCode = response.getStatusLine().getStatusCode();
 			boolean success = Response.Status.fromStatusCode(statusCode).getFamily() == Response.Status.Family.SUCCESSFUL;
 			if ( !success ) {
 				throw new RuntimeException( "Command cannot be executed" + response.getStatusLine() + " " + response.getEntity() );
 			}
-
+	
 			String json = EntityUtils.toString( response.getEntity() );
-
-			final Map<String, Object> rawOutputs = new HashMap<>();
-
 			final org.json.JSONObject jsonObj = new org.json.JSONObject(json);
-
-			jsonObj.keys().forEachRemaining(key -> rawOutputs.put(key, jsonObj.get(
-				key)));
-
-			return unwrapOutputValues(rawOutputs);
+	
+			final Map<String, Object> rawOutputs = jsonToMap(jsonObj);
+	
+			return rawOutputs;
 		}
 		catch ( IOException e )
 		{
@@ -243,7 +260,22 @@ public class ImageJServerWorker implements ParallelWorker {
 		}
 	}
 
-	// -- Helper methods --
+	private Map<String, Object> jsonToMap(final org.json.JSONObject jsonObj) {
+		final Map<String, Object> rawOutputs = new HashMap<>();
+		jsonObj.keys().forEachRemaining(key -> rawOutputs.put(key, jsonObj.get(
+			key)));
+		return rawOutputs;
+	}
+
+	@SuppressWarnings("unchecked")
+	private JSONObject toJson(Map<String, ?> inputs) {
+		JSONObject result = new JSONObject();
+	
+		for (final Map.Entry<String, ?> pair : inputs.entrySet()) {
+			result.put(pair.getKey(), pair.getValue());
+		}
+		return result;
+	}
 
 	private org.json.JSONObject importData(ContentBody contentBody) {
 		return Routines.supplyWithExceptionHandling(() -> {
