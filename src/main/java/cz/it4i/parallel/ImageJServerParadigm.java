@@ -3,10 +3,13 @@ package cz.it4i.parallel;
 
 import static cz.it4i.parallel.Routines.supplyWithExceptionHandling;
 
+import com.google.common.collect.Streams;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -31,6 +34,13 @@ public class ImageJServerParadigm extends SimpleOstravaParadigm {
 	public static class Host {
 		private final String name;
 		private final int nCores;
+
+		public static List<Host> constructListFromNamesAndCores(List<String> names,
+			List<Integer> cores)
+		{
+			return Streams.zip(names.stream(), cores.stream(), Host::new).collect(
+				Collectors.toList());
+		}
 	}
 
 	private int port;

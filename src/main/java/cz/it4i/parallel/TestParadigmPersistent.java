@@ -1,5 +1,6 @@
 package cz.it4i.parallel;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -10,31 +11,35 @@ import org.scijava.command.Command;
 import org.scijava.parallel.ParallelService;
 import org.scijava.parallel.ParallelizationParadigm;
 import org.scijava.parallel.ParallelizationParadigmProfile;
+import org.scijava.parallel.PersistentParallelizationParadigm;
 
 import cz.it4i.parallel.ImageJServerParadigm.Host;
+import cz.it4i.parallel.persistence.PersistentParallelizationParadigmImpl;
 
-public class TestParadigm implements ParallelizationParadigm
+public class TestParadigmPersistent implements
+	PersistentParallelizationParadigm
 {
 
 	private final ServerRunner runner;
-	private final ParallelizationParadigm paradigm;
+	private final PersistentParallelizationParadigm paradigm;
 	private boolean closed = false;
 
-	public TestParadigm(ServerRunner runner, Context context)
+	public TestParadigmPersistent(ServerRunner runner, Context context)
 	{
 		this.paradigm = initParadigm( runner, context );
 		this.runner = runner;
 	}
 
 	public static ParallelizationParadigm localImageJServer( String fiji, Context context ) {
-		return new TestParadigm( new ImageJServerRunner( fiji ), context );
+		return new TestParadigmPersistent( new ImageJServerRunner( fiji ), context );
 	}
 
 	public static ParallelizationParadigm localImageJServer(Context context) {
-		return new TestParadigm(new EmbeddedImageJServerRunner(), context);
+		return new TestParadigmPersistent(new EmbeddedImageJServerRunner(), context);
 	}
 
-	private static ParallelizationParadigm initParadigm( ServerRunner runner, Context context )
+	private static PersistentParallelizationParadigm initParadigm(
+		ServerRunner runner, Context context)
 	{
 		runner.start();
 		int nCores = runner.getNCores();
@@ -44,18 +49,22 @@ public class TestParadigm implements ParallelizationParadigm
 		return configureParadigm( context.service( ParallelService.class ), hosts );
 	}
 
-	private static ParallelizationParadigm configureParadigm(
+	private static PersistentParallelizationParadigm configureParadigm(
 		ParallelService parallelService, List<Host> hosts)
 	{
 		parallelService.deleteProfiles();
 		parallelService.addProfile(new ParallelizationParadigmProfile(
-				ImageJServerParadigm.class, "lonelyBiologist01"));
+			ImageJServerParadigm.class, "lonelyBiologist01"));
 		parallelService.selectProfile("lonelyBiologist01");
 
 		ParallelizationParadigm paradigm = parallelService.getParadigm();
-		((ImageJServerParadigm) paradigm).setHosts(hosts);
+		((ImageJServerParadigm) paradigm).setHosts(hosts.subList(0, 1));
 		paradigm.init();
-		return paradigm;
+		PersistentParallelizationParadigm result =
+			PersistentParallelizationParadigmImpl.addPersistencyToParadigm(paradigm,
+				hosts);
+
+		return result;
 	}
 
 	@Override
@@ -91,6 +100,34 @@ public class TestParadigm implements ParallelizationParadigm
 	{
 		checkClosed();
 		return paradigm.runAllAsync( s, list );
+	}
+
+	@Override
+	public List<CompletableFutureID> getIDs(
+		List<CompletableFuture<Map<String, Object>>> future)
+	{
+		checkClosed();
+		return paradigm.getIDs(future);
+	}
+
+	@Override
+	public List<CompletableFuture<Map<String, Object>>> getByIDs(
+		List<CompletableFutureID> ids)
+	{
+		checkClosed();
+		return paradigm.getByIDs(ids);
+	}
+
+	@Override
+	public void purge(List<CompletableFutureID> ids) {
+		checkClosed();
+		paradigm.purge(ids);
+	}
+
+	@Override
+	public Collection<CompletableFuture<Map<String, Object>>> getAll() {
+		checkClosed();
+		return paradigm.getAll();
 	}
 
 	@Override

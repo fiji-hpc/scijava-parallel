@@ -45,7 +45,7 @@ public class LocalMultithreadedParadigm extends SimpleOstravaParadigm {
 	protected ParameterProcessor constructParameterProcessor(ParallelWorker pw,
 		String command)
 	{
-		return new ParameterProcessor((_1, _2) -> null, command, pw) {
+		return new AbstractParameterProcessor((_1, _2) -> null, command, pw) {
 
 			@Override
 			protected <T> ParallelizationParadigmConverter<T> construcConverter(

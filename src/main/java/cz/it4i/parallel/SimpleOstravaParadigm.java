@@ -4,6 +4,7 @@ package cz.it4i.parallel;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Streams;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -12,14 +13,18 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.function.UnaryOperator;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.scijava.command.CommandService;
 import org.scijava.parallel.ParallelizationParadigm;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.PluginService;
 import org.scijava.thread.ThreadService;
+
+import cz.it4i.common.Collections;
+import cz.it4i.parallel.persistence.RequestBrokerServiceParameterProvider;
 
 public abstract class SimpleOstravaParadigm implements ParallelizationParadigm {
 
@@ -38,9 +43,11 @@ public abstract class SimpleOstravaParadigm implements ParallelizationParadigm {
 
 	private ExecutorService executorService;
 
+	private RequestBrokerServiceParameterProvider requestBrokerServiceParameterProvider;
+
 	// -- SimpleOstravaParadigm methods --
 
-	abstract protected void initWorkerPool();
+	protected abstract void initWorkerPool();
 
 	// -- ParallelizationParadigm methods --
 
@@ -50,6 +57,9 @@ public abstract class SimpleOstravaParadigm implements ParallelizationParadigm {
 		initWorkerPool();
 		executorService = Executors.newFixedThreadPool(workerPool.size(),
 			threadService);
+		requestBrokerServiceParameterProvider =
+			new RequestBrokerServiceParameterProvider(getTypeProvider(),
+				getMappers());
 	}
 
 
@@ -66,8 +76,6 @@ public abstract class SimpleOstravaParadigm implements ParallelizationParadigm {
 				command, inputs)).map(ae -> repackCompletable(ae.result, ae.size))
 			.flatMap(
 					List::stream).collect(Collectors.toList());
-
-
 	}
 
 
@@ -91,11 +99,17 @@ public abstract class SimpleOstravaParadigm implements ParallelizationParadigm {
 	protected ParameterProcessor constructParameterProcessor(ParallelWorker pw,
 		String command)
 	{
-		return new DefaultParameterProcessor(getTypeProvider(), command, pw,
-			getMappers());
+
+		ParameterProcessor result = requestBrokerServiceParameterProvider
+			.constructProvider(command, pw);
+		if (result == null) {
+			result = new DefaultParameterProcessor(getTypeProvider(),
+			command, pw, getMappers());
+		}
+		return result;
 	}
 
-	synchronized private Map<Class<?>, ParallelizationParadigmConverter<?>>
+	private synchronized Map<Class<?>, ParallelizationParadigmConverter<?>>
 		getMappers()
 	{
 		if (mappers == null) {
@@ -108,7 +122,7 @@ public abstract class SimpleOstravaParadigm implements ParallelizationParadigm {
 	private void initMappers() {
 		pluginService.createInstancesOfType(
 			ParallelizationParadigmConverter.class).stream().filter(
-				m -> isParadigmSupportedBy(m)).forEach(m -> mappers.put(m
+				this::isParadigmSupportedBy).forEach(m -> mappers.put(m
 					.getOutputType(), m));
 
 	}
@@ -126,15 +140,11 @@ public abstract class SimpleOstravaParadigm implements ParallelizationParadigm {
 		return false;
 	}
 
-	private static <T> List<T> process(UnaryOperator<T> func, List<T> input) {
-		return input.stream().map(func).collect(Collectors.toList());
-	}
-
 	@SuppressWarnings("unchecked")
 	private static <T> List<CompletableFuture<T>> repackCompletable(
 		CompletableFuture<List<T>> input, int size)
 	{
-		CompletableFuture<Object[]> array = input.thenApply(list -> list.toArray());
+		CompletableFuture<Object[]> array = input.thenApply(List<T>::toArray);
 		List<CompletableFuture<T>> result = new LinkedList<>();
 		for(int i = 0; i < size; i++) {
 			final int index = i;
@@ -156,6 +166,15 @@ public abstract class SimpleOstravaParadigm implements ParallelizationParadigm {
 			size = inputs.size();
 		}
 
+		private List<ParameterProcessor> constructParameterProcessors(
+			ParallelWorker pw,
+			String command, List<Map<String, Object>> inputs)
+		{
+			return IntStream.range(0, inputs.size()).mapToObj(
+				__ -> constructParameterProcessor(pw, command)).collect(Collectors // NOSONAR
+					.toList());
+		}
+
 		private List<Map<String, Object>> executeForInputs(String command,
 			List<Map<String, Object>> inputs)
 		{
@@ -165,18 +184,38 @@ public abstract class SimpleOstravaParadigm implements ParallelizationParadigm {
 			}
 			catch (InterruptedException exc) {
 				Thread.currentThread().interrupt();
-				throw new RuntimeException(exc);
+				throw new RuntimeException(exc); // NOSONAR
 			}
-			try (ParameterProcessor parameterProcessor = constructParameterProcessor(
-				pw, command))
+			List<ParameterProcessor> processors;
+			try (AutoCloseable parameterProcessor = Collections.closeAll(processors = // NOSONAR
+				constructParameterProcessors(pw, command, inputs)))
 			{
 
-				return process(parameterProcessor::processOutput, pw.executeCommand(
-					command, process(parameterProcessor::processInputs, inputs)));
+				inputs = processValues(inputs, processors,
+					ParameterProcessor::processInputs);
+				List<Map<String, Object>> outputs = pw.executeCommand(command, inputs);
+				return processValues(outputs, processors,
+					ParameterProcessor::processOutputs);
+			}
+			catch (RuntimeException e) {
+				// this should be rethrown
+				throw e;
+			}
+			catch (Exception e) {
+				// this should not happen!
+				throw new RuntimeException(e);// NOSONAR
 			}
 			finally {
 				workerPool.addWorker(pw);
 			}
+		}
+
+		private List<Map<String, Object>> processValues(
+			List<Map<String, Object>> values, List<ParameterProcessor> processors,
+			BiFunction<ParameterProcessor, Map<String, Object>, Map<String, Object>> func)
+		{
+			return Streams.zip(values.stream(), processors.stream(), (i, p) -> func
+				.apply(p, i)).collect(Collectors.toList());
 		}
 	}
 }

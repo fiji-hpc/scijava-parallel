@@ -8,7 +8,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class AbstractImageJServerRunner implements AutoCloseable {
+public abstract class AbstractImageJServerRunner implements AutoCloseable, ServerRunner {
 
 	private final static Logger log = LoggerFactory.getLogger(
 		cz.it4i.parallel.AbstractImageJServerRunner.class);
@@ -17,6 +17,7 @@ public abstract class AbstractImageJServerRunner implements AutoCloseable {
 		"-Dimagej.legacy.modernOnlyCommands=true", "--", "--ij2", "--headless",
 		"--server" );
 
+	@Override
 	public void start() {
 
 		try {
@@ -29,8 +30,10 @@ public abstract class AbstractImageJServerRunner implements AutoCloseable {
 		}
 	}
 
+	@Override
 	public abstract List<Integer> getPorts();
 
+	@Override
 	public abstract int getNCores();
 
 	@Override

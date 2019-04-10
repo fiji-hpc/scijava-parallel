@@ -13,25 +13,29 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
+import net.imagej.ImageJ;
 import net.imagej.plugins.commands.imglib.RotateImageXY;
 
-import org.scijava.Context;
 import org.scijava.parallel.ParallelizationParadigm;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import cz.it4i.parallel.AbstractImageJServerRunner;
 import cz.it4i.parallel.TestParadigm;
-import cz.it4i.parallel.TestParadigmPersistent;
+import cz.it4i.parallel.ui.HPCImageJServerRunnerWithUI;
 
-public class RotateFileAsync {
+public class RotateFileAsyncOnHPC {
 
 	private final static Logger log = LoggerFactory.getLogger(
-		RotateFileAsync.class);
+		RotateFileAsyncOnHPC.class);
 
 	public static void main(String[] args) {
-		Context context = new Context();
-		try (ParallelizationParadigm paradigm = TestParadigmPersistent
-			.localImageJServer(context))
+		final ImageJ ij = new ImageJ();
+		ij.ui().showUI();
+		AbstractImageJServerRunner runner = HPCImageJServerRunnerWithUI.gui(ij
+			.context());
+		try (ParallelizationParadigm paradigm = new TestParadigm(runner, ij
+			.context()))
 		{
 			List< Map< String, Object > > parametersList = RotateFile.initParameters();
 			List< CompletableFuture< Map< String, Object > > > results = paradigm.runAllAsync(
@@ -49,7 +53,7 @@ public class RotateFileAsync {
 			(future, angle) -> future.thenAccept(
 				result -> {
 					Path src = (Path) result.get("dataset");
-					Path dst = outputDirectory.resolve("result_" + angle + ".png");
+					Path dst = outputDirectory.resolve("result_" + angle + ".tif");
 					runWithExceptionHandling(() -> Files.move(src, dst, StandardCopyOption.REPLACE_EXISTING));
 					log.info("moved: " + src + " -> " + dst);
 					}))

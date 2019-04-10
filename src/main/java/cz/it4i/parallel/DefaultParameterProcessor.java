@@ -3,7 +3,7 @@ package cz.it4i.parallel;
 
 import java.util.Map;
 
-public class DefaultParameterProcessor extends ParameterProcessor {
+public class DefaultParameterProcessor extends AbstractParameterProcessor {
 
 	private Map<Class<?>, ParallelizationParadigmConverter<?>> converters;
 

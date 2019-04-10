@@ -46,6 +46,9 @@ import org.scijava.plugin.SciJavaPlugin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
 public class ImageJServerWorker implements ParallelWorker {
 
 	private final static Logger log = LoggerFactory.getLogger(
@@ -57,9 +60,7 @@ public class ImageJServerWorker implements ParallelWorker {
 	private final static Set<String> supportedImageTypes = Collections
 		.unmodifiableSet(new HashSet<>(Arrays.asList("png", "jpg")));
 
-	private final Map<org.json.JSONObject, String> importedData2id =
-		new HashMap<>();
-	private final Map<String, org.json.JSONObject> id2importedData =
+	private final Map<String, PRemoteObject> id2importedData =
 		new HashMap<>();
 
 	ImageJServerWorker(final String hostName, final int port) {
@@ -78,7 +79,7 @@ public class ImageJServerWorker implements ParallelWorker {
 	// -- ParallelWorker methods --
 
 	@Override
-	public org.json.JSONObject importData(final Path path) {
+	public Object importData(final Path path) {
 
 		final String filePath = path.toAbsolutePath().toString();
 		final String fileName = path.getFileName().toString();
@@ -86,7 +87,7 @@ public class ImageJServerWorker implements ParallelWorker {
 			getContentType(filePath)), fileName));
 	}
 
-	public org.json.JSONObject importData(final String fileName, long length,
+	public Object importData(final String fileName, long length,
 		Consumer<OutputStream> osConsumer)
 	{
 
@@ -149,7 +150,7 @@ public class ImageJServerWorker implements ParallelWorker {
 		Consumer<InputStream> isConsumer) throws IOException,
 		ClientProtocolException
 	{
-		final String objectId = ((org.json.JSONObject) dataset).getString("id");
+		final String objectId = ((PRemoteObject) dataset).getId();
 		final String getUrl = "http://" + hostName + ":" + String.valueOf(port) +
 			"/objects/" + objectId + "/" + getImageType(filePath);
 		final HttpGet httpGet = new HttpGet(getUrl);
@@ -170,7 +171,7 @@ public class ImageJServerWorker implements ParallelWorker {
 	@Override
 	public void deleteData(final Object dataset) {
 
-		final String objectId = ((org.json.JSONObject) dataset).getString("id");
+		final String objectId = ((PRemoteObject) dataset).getId();
 
 		@SuppressWarnings("unused")
 		String json = null;
@@ -201,24 +202,31 @@ public class ImageJServerWorker implements ParallelWorker {
 	public Map<String, Object> executeCommand(final String commandTypeName,
 		final Map<String, ?> inputs)
 	{
-		final Map<String, ?> wrappedInputs = wrapInputValues(inputs);
-		return unwrapOutputValues(doRequest(commandTypeName, wrappedInputs));
+		final Map<String, ?> wrappedInputs = wrapInputMap(inputs);
+		return unwrapOutputMap(doRequest(commandTypeName, wrappedInputs));
 	}
 
 	@Override
 	public List<Map<String, Object>> executeCommand(final String commandTypeName,
 		final List<Map<String, Object>> inputs)
 	{
+		if (inputs.isEmpty()) {
+			return Collections.emptyList();
+		}
+		else if (inputs.size() == 1) {
+			return Collections.singletonList(executeCommand(commandTypeName, inputs
+				.get(0)));
+		}
+
 		Map<String, Object> inputForExecution = new HashMap<>();
 		inputForExecution.put("moduleId", commandTypeName);
-		inputForExecution.put("inputs", inputs.stream().map(this::wrapInputValues)
+		inputForExecution.put("inputs", inputs.stream().map(this::wrapInputMap)
 			.collect(Collectors.toList()));
-		List<Map<String, Object>> output = StreamSupport.stream(
-			((JSONArray) doRequest(
+		@SuppressWarnings("unchecked")
+		List<Map<String, Object>> output = (List<Map<String, Object>>) doRequest(
 			"cz.it4i.parallel.plugins.ThreadRunner", inputForExecution).get(
-					"outputs")).spliterator(), false).map(obj -> jsonToMap(
-						(org.json.JSONObject) obj)).collect(Collectors.toList());
-		return output.stream().map(this::unwrapOutputValues).collect(Collectors
+				"outputs");
+		return output.stream().map(this::unwrapOutputMap).collect(Collectors
 			.toList());
 
 	}
@@ -234,8 +242,7 @@ public class ImageJServerWorker implements ParallelWorker {
 			final String postUrl = "http://" + hostName + ":" + String.valueOf(port) +
 				"/modules/" + "command:" + commandTypeName;
 			final HttpPost httpPost = new HttpPost(postUrl);
-			String inputJSONStr;
-			httpPost.setEntity(new StringEntity(inputJSONStr = inputJson.toString()));
+			httpPost.setEntity(new StringEntity(inputJson.toString()));
 			httpPost.setHeader("Content-type", "application/json");
 	
 			final HttpResponse response = HttpClientBuilder.create().build().execute(
@@ -262,9 +269,22 @@ public class ImageJServerWorker implements ParallelWorker {
 
 	private Map<String, Object> jsonToMap(final org.json.JSONObject jsonObj) {
 		final Map<String, Object> rawOutputs = new HashMap<>();
-		jsonObj.keys().forEachRemaining(key -> rawOutputs.put(key, jsonObj.get(
-			key)));
+		jsonObj.keys().forEachRemaining(key -> rawOutputs.put(key, restobj2localobj(
+			jsonObj.get(key))));
 		return rawOutputs;
+	}
+
+	private Object restobj2localobj(Object object) {
+		if (object instanceof JSONArray) {
+			JSONArray array = (JSONArray) object;
+			return StreamSupport.stream(array.spliterator(), false).map(
+				this::restobj2localobj).collect(Collectors.toList());
+		}
+		else if (object instanceof org.json.JSONObject) {
+			org.json.JSONObject jsonObject = (org.json.JSONObject) object;
+			return jsonToMap(jsonObject);
+		}
+		return object;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -277,7 +297,7 @@ public class ImageJServerWorker implements ParallelWorker {
 		return result;
 	}
 
-	private org.json.JSONObject importData(ContentBody contentBody) {
+	private PRemoteObject importData(ContentBody contentBody) {
 		return Routines.supplyWithExceptionHandling(() -> {
 
 			final String postUrl = "http://" + hostName + ":" + String.valueOf(port) +
@@ -295,12 +315,14 @@ public class ImageJServerWorker implements ParallelWorker {
 
 			final String json = EntityUtils.toString(response.getEntity());
 			org.json.JSONObject result = new org.json.JSONObject(json);
-			final String objId = result.getString("id");
 
-			importedData2id.put(result, objId);
-			id2importedData.put(objId, result);
-			return result;
+			return indexImported(new PRemoteObject(result));
 		});
+	}
+
+	private PRemoteObject indexImported(PRemoteObject obj) {
+		id2importedData.put(obj.getId(), obj);
+		return obj;
 	}
 
 	// TODO: support another types
@@ -319,43 +341,22 @@ public class ImageJServerWorker implements ParallelWorker {
 			" image files supported");
 	}
 
-	private Map<String, Object> wrapInputValues(final Map<String, ?> map) {
-		return convertMap(map, ImageJServerWorker::isEntryResolvable,
-			this::wrapValue);
+	private Map<String, Object> wrapInputMap(final Map<String, ?> map) {
+		return new PInputOutputValueConvertor(ImageJServerWorker::isEntryResolvable,
+			this::wrapValue).convertMap(map);
 	}
 
-	private Map<String, Object> unwrapOutputValues(
+	private Map<String, Object> unwrapOutputMap(
 		final Map<String, Object> map)
 	{
-		return convertMap(map, ImageJServerWorker::isEntryResolvable,
-			this::unwrapValue);
-	}
-
-	/**
-	 * Converts an input map into an output map
-	 * 
-	 * @param map - an input map
-	 * @param filter - a filter to be applied on all map entries prior the actual
-	 *          conversion
-	 * @param converter - a converter to be applied on each map entry
-	 * @return a converted map
-	 */
-	private Map<String, Object> convertMap(final Map<String, ?> map,
-		final Function<Map.Entry<String, ?>, Boolean> filter,
-		final Function<Object, Object> converter)
-	{
-		return map.entrySet().stream().filter(entry -> filter.apply(entry)).map(
-			entry -> new SimpleImmutableEntry<>(entry.getKey(), converter.apply(entry
-				.getValue()))).collect(Collectors.toMap(e -> e.getKey(), e -> e
-					.getValue()));
+		return new PInputOutputValueConvertor(ImageJServerWorker::isEntryResolvable,
+			this::unwrapValue).convertMap(map);
 	}
 
 	private Object wrapValue(Object value) {
-		if (value instanceof org.json.JSONObject) {
-			final Object id = importedData2id.get(value);
-			if (id != null) {
-				value = id;
-			}
+		if (value instanceof PRemoteObject) {
+			final PRemoteObject obj = (PRemoteObject) value;
+			return obj.getId();
 		}
 		return value;
 	}
@@ -375,5 +376,62 @@ public class ImageJServerWorker implements ParallelWorker {
 		return entry.getValue() != null && !(entry
 			.getValue() instanceof SciJavaPlugin) && !(entry
 				.getValue() instanceof Context);
+	}
+
+	private class PRemoteObject {
+
+		@Getter
+		final String id;
+
+		public PRemoteObject(org.json.JSONObject jsonObj) {
+			id = jsonObj.getString("id");
+		}
+	}
+
+	@AllArgsConstructor
+	private class PInputOutputValueConvertor {
+
+		/**
+		 * a filter to be applied on all map entries prior the actual conversion
+		 */
+		final Function<Map.Entry<String, ?>, Boolean> filter;
+
+		/**
+		 * a conversion applied to all values
+		 */
+		final Function<Object, Object> conversion;
+
+		/**
+		 * Converts an input map into an output map
+		 * 
+		 * @param map - an input map
+		 * @return a converted map
+		 */
+		Map<String, Object> convertMap(final Map<String, ?> map)
+		{
+			return map.entrySet().stream().filter(entry -> filter.apply(entry)).map(
+				entry -> new SimpleImmutableEntry<>(entry.getKey(), convertObject(entry
+					.getValue()))).collect(Collectors.toMap(e -> e.getKey(), e -> e
+						.getValue()));
+		}
+
+		Object convertObject(Object value) {
+			if (value instanceof Map) {
+				@SuppressWarnings({ "unchecked" })
+				Map<String, Object> map = (Map<String, Object>) value;
+				return convertMap(map);
+			}
+			else if (value instanceof List) {
+				@SuppressWarnings("unchecked")
+				List<Object> list = (List<Object>) value;
+				return convertList(list);
+			}
+			return conversion.apply(value);
+		}
+
+		Object convertList(List<Object> list) {
+			return list.stream().map(this::convertObject).collect(Collectors
+				.toList());
+		}
 	}
 }
