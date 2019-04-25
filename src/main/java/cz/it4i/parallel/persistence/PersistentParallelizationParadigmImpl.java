@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.WeakHashMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
@@ -18,8 +17,7 @@ import cz.it4i.parallel.ImageJServerParadigm.Host;
 import cz.it4i.parallel.plugins.RequestBrokerServiceCallCommand;
 import cz.it4i.parallel.plugins.RequestBrokerServiceGetResultCommand;
 import cz.it4i.parallel.plugins.RequestBrokerServiceInitCommand;
-import cz.it4i.parallel.plugins.RequestBrokerServiceGetAllCommand;
-import lombok.AllArgsConstructor;
+import cz.it4i.parallel.plugins.RequestBrokerServicePurgeCommand;
 
 
 
@@ -27,7 +25,10 @@ public class PersistentParallelizationParadigmImpl implements
 	PersistentParallelizationParadigm
 {
 
-	private static final String REQUEST_IDS = "requestIDs";
+	static final String INPUTS = "inputs";
+	static final String MODULE_ID = "moduleId";
+	static final String REQUEST_IDS = "requestIDs";
+	static final String RESULTS = "results";
 
 	enum CompletableFutureIDCases implements CompletableFutureID {
 			UNKNOWN;
@@ -36,12 +37,11 @@ public class PersistentParallelizationParadigmImpl implements
 	private final ParallelizationParadigm paradigm;
 
 
-	private final Map<CompletableFuture<Map<String, Object>>, Object> futures2id =
+	private final Map<CompletableFuture<Map<String, Object>>, InternalCompletableFutureID> futures2id =
 		new HashMap<>();
-	private final Map<Object, CompletableFuture<Map<String, Object>>> id2futures =
+	private final Map<InternalCompletableFutureID, CompletableFuture<Map<String, Object>>> id2futures =
 		new HashMap<>();
-	private final Map<CompletableFuture<Map<String, Object>>, CompletableFutureID> futures2futureID =
-		new WeakHashMap<>();
+
 
 	private List<Host> hosts;
 
@@ -76,15 +76,16 @@ public class PersistentParallelizationParadigmImpl implements
 			throw new IllegalStateException();
 		}
 		Map<String, Object> inputForExecution = new HashMap<>();
-		inputForExecution.put("moduleId", commandTypeName);
-		inputForExecution.put("inputs", inputs);
+		inputForExecution.put(MODULE_ID, commandTypeName);
+		inputForExecution.put(INPUTS, inputs);
 
 		@SuppressWarnings("unchecked")
-		List<Object> result = (List<Object>) paradigm.runAll(
-			RequestBrokerServiceCallCommand.class.getCanonicalName(), Collections
+		List<InternalCompletableFutureID> result = (List<InternalCompletableFutureID>) paradigm
+			.runAll(RequestBrokerServiceCallCommand.class.getCanonicalName(),
+				Collections
 				.singletonList(inputForExecution)).get(0).get(REQUEST_IDS);
 
-		return result.stream().map(this::getFuture4ID).collect(Collectors
+		return result.stream().map(this::getFuture4FutureID).collect(Collectors
 			.toList());
 	}
 
@@ -111,9 +112,9 @@ public class PersistentParallelizationParadigmImpl implements
 		synchronized (this) {
 			ids.stream().forEach(this::removeFutureID);
 		}
-		inputForExecution.put("requestIDs", new LinkedList<>(ids));
+		inputForExecution.put(REQUEST_IDS, new LinkedList<>(ids));
 		try {
-			paradigm.runAllAsync(RequestBrokerServiceGetAllCommand.class
+			paradigm.runAllAsync(RequestBrokerServicePurgeCommand.class
 				.getCanonicalName(), Collections.singletonList(inputForExecution)).get(
 					0).get();
 
@@ -123,17 +124,14 @@ public class PersistentParallelizationParadigmImpl implements
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public Collection<CompletableFuture<Map<String, Object>>> getAll() {
-		try {
-			return (Collection<CompletableFuture<Map<String, Object>>>) paradigm
-				.runAllAsync(RequestBrokerServiceGetAllCommand.class.getCanonicalName(),
-					Collections.emptyList()).get(0).get().get("requestIDs");
-		}
-		catch (InterruptedException | ExecutionException exc) {
-			throw new RuntimeException(exc);
-		}
+
+		throw new UnsupportedOperationException();
+//			return (Collection<CompletableFuture<Map<String, Object>>>) paradigm
+//				.runAllAsync(RequestBrokerServiceGetAllCommand.class.getCanonicalName(),
+//					Collections.emptyList()).get(0).get().get(REQUEST_IDS);
+
 	}
 
 	private PersistentParallelizationParadigmImpl(
@@ -159,78 +157,61 @@ public class PersistentParallelizationParadigmImpl implements
 	}
 
 	@SuppressWarnings("unchecked")
-	private synchronized CompletableFuture<Map<String, Object>> getFuture4ID(
-		Object id)
+	private synchronized CompletableFuture<Map<String, Object>>
+		getFuture4FutureID(CompletableFutureID requestID)
 	{
-		if (id2futures.containsKey(id)) {
-			return id2futures.get(id);
+		if (id2futures.containsKey(requestID)) {
+			return id2futures.get(requestID);
 		}
-		final Map<String, Object> inputForExecution = new HashMap<>();
-		inputForExecution.put("requestIDs", new LinkedList<>(Collections.singleton(
-			id)));
-		CompletableFuture<Map<String, Object>> resultFuture = paradigm.runAllAsync(
-				RequestBrokerServiceGetResultCommand.class.getCanonicalName(),
-			Collections.singletonList(inputForExecution)).get(0).thenApply(
-				result -> ((List<Map<String, Object>>) result.get("results")).get(0));
 
-		id2futures.put(id, resultFuture);
-		futures2id.put(resultFuture, id);
-		return resultFuture;
+		if (requestID == CompletableFutureIDCases.UNKNOWN) {
+			return CompletableFuture.supplyAsync(() -> {
+				throw new IllegalStateException();
+			});
+		}
+		if (requestID instanceof InternalCompletableFutureID) {
+			InternalCompletableFutureID pId = (InternalCompletableFutureID) requestID;
+			final Map<String, Object> inputForExecution = new HashMap<>();
+			inputForExecution.put(REQUEST_IDS, new LinkedList<>(Collections
+				.singleton(pId)));
+			CompletableFuture<Map<String, Object>> resultFuture = paradigm
+				.runAllAsync(RequestBrokerServiceGetResultCommand.class
+					.getCanonicalName(), Collections.singletonList(inputForExecution))
+				.get(0).thenApply(result -> ((List<Map<String, Object>>) result.get(
+					RESULTS)).get(0));
+
+			id2futures.put(pId, resultFuture);
+			futures2id.put(resultFuture, pId);
+			return resultFuture;
+		}
+		throw new IllegalArgumentException("Unsupported type " + requestID);
+
+
 	}
 
 	private synchronized CompletableFutureID getFutureID4Future(
 		CompletableFuture<Map<String, Object>> future)
 	{
-		if (futures2futureID.containsKey(future)) {
-			return futures2futureID.get(future);
-		}
 		if (futures2id.containsKey(future)) {
-			Object id = futures2id.get(future);
-			CompletableFutureID result = new PCompletableFutureID(id);
-			futures2futureID.put(future, result);
-			return result;
+			return futures2id.get(future);
 		}
 		return CompletableFutureIDCases.UNKNOWN;
-	}
-
-	private synchronized CompletableFuture<Map<String, Object>>
-		getFuture4FutureID(CompletableFutureID id)
-	{
-		if (id == CompletableFutureIDCases.UNKNOWN) {
-			return CompletableFuture.supplyAsync(() -> {
-				throw new IllegalStateException();
-			});
-		}
-		if (id instanceof PCompletableFutureID) {
-			PCompletableFutureID pId = (PCompletableFutureID) id;
-			return getFuture4ID(pId.id);
-		}
-		throw new IllegalArgumentException("Unsupported type " + id);
 	}
 
 	private void removeFutureID(CompletableFutureID futureID) {
 		if (futureID == CompletableFutureIDCases.UNKNOWN) {
 			return;
 		}
-		if (futureID instanceof PCompletableFutureID) {
-			PCompletableFutureID pId = (PCompletableFutureID) futureID;
-			if (id2futures.containsKey(pId.id)) {
-				CompletableFuture<Map<String, Object>> future = id2futures.get(pId.id);
-				id2futures.remove(pId.id);
+		if (futureID instanceof InternalCompletableFutureID) {
+			InternalCompletableFutureID pId = (InternalCompletableFutureID) futureID;
+			if (id2futures.containsKey(pId)) {
+				CompletableFuture<Map<String, Object>> future = id2futures.get(pId);
+				id2futures.remove(pId);
 				futures2id.remove(future);
-				if (futures2futureID.containsKey(future)) {
-					futures2futureID.remove(future);
-				}
 			}
 		}
-		throw new IllegalArgumentException("Unsupported type " + futureID);
+		else {
+			throw new IllegalArgumentException("Unsupported type " + futureID);
+		}
 	}
-
-	@AllArgsConstructor
-	private class PCompletableFutureID implements CompletableFutureID {
-
-		final Object id;
-	}
-
-
 }

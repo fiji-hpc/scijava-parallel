@@ -26,7 +26,6 @@ import javax.ws.rs.core.Response;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -43,22 +42,20 @@ import org.json.JSONArray;
 import org.json.simple.JSONObject;
 import org.scijava.Context;
 import org.scijava.plugin.SciJavaPlugin;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class ImageJServerWorker implements ParallelWorker {
 
-	private final static Logger log = LoggerFactory.getLogger(
-		cz.it4i.parallel.ImageJServerWorker.class);
-
+	private static final String HTTP_PROTOCOL = "http://";
 	private final String hostName;
 	private final int port;
 
-	private final static Set<String> supportedImageTypes = Collections
-		.unmodifiableSet(new HashSet<>(Arrays.asList("png", "jpg")));
+	private static final Set<String> supportedImageTypes = Collections
+		.unmodifiableSet(new HashSet<>(Arrays.asList("png", "jpg", "tif")));
 
 	private final Map<String, PRemoteObject> id2importedData =
 		new HashMap<>();
@@ -125,19 +122,16 @@ public class ImageJServerWorker implements ParallelWorker {
 		try (OutputStream os = new BufferedOutputStream(new FileOutputStream(
 			new File(filePath))))
 		{
-			exportData(dataset, fileName, new Consumer<InputStream>() {
+			exportData(dataset, fileName, t -> {
 
-				@Override
-				public void accept(InputStream t) {
-					int inByte;
-					try {
-						while ((inByte = t.read()) != -1) {
-							os.write(inByte);
-						}
+				int inByte;
+				try {
+					while ((inByte = t.read()) != -1) {
+						os.write(inByte);
 					}
-					catch (IOException exc) {
-						log.error("", exc);
-					}
+				}
+				catch (IOException exc) {
+					log.error("", exc);
 				}
 			});
 		}
@@ -146,52 +140,19 @@ public class ImageJServerWorker implements ParallelWorker {
 		}
 	}
 
-	public void exportData(final Object dataset, final String filePath,
-		Consumer<InputStream> isConsumer) throws IOException,
-		ClientProtocolException
-	{
-		final String objectId = ((PRemoteObject) dataset).getId();
-		final String getUrl = "http://" + hostName + ":" + String.valueOf(port) +
-			"/objects/" + objectId + "/" + getImageType(filePath);
-		final HttpGet httpGet = new HttpGet(getUrl);
-
-		final HttpEntity entity = HttpClientBuilder.create().build().execute(
-			httpGet).getEntity();
-
-		if (entity != null) {
-
-			try (BufferedInputStream bis = new BufferedInputStream(entity
-				.getContent()))
-			{
-				isConsumer.accept(bis);
-			}
-		}
-	}
-
 	@Override
 	public void deleteData(final Object dataset) {
 
-		final String objectId = ((PRemoteObject) dataset).getId();
-
-		@SuppressWarnings("unused")
-		String json = null;
+		final String objectId = getObjectId(dataset);
 
 		try {
-
-			final String postUrl = "http://" + hostName + ":" + String.valueOf(port) +
+			final String postUrl = HTTP_PROTOCOL + hostName + ":" + port +
 				"/objects/" + objectId;
 			final HttpDelete httpDelete = new HttpDelete(postUrl);
-
-			final HttpResponse response = HttpClientBuilder.create().build().execute(
-				httpDelete);
-
-			// TODO check result code properly
-
-			json = EntityUtils.toString(response.getEntity());
-
+			HttpClientBuilder.create().build().execute(httpDelete);
 		}
 		catch (final Exception e) {
-			e.printStackTrace();
+			throw new SciJavaParallelRuntimeException(e);
 		}
 	}
 
@@ -239,7 +200,7 @@ public class ImageJServerWorker implements ParallelWorker {
 		try {
 	
 			final JSONObject inputJson = toJson(wrappedInputs);
-			final String postUrl = "http://" + hostName + ":" + String.valueOf(port) +
+			final String postUrl = HTTP_PROTOCOL + hostName + ":" + port +
 				"/modules/" + "command:" + commandTypeName;
 			final HttpPost httpPost = new HttpPost(postUrl);
 			httpPost.setEntity(new StringEntity(inputJson.toString()));
@@ -251,20 +212,46 @@ public class ImageJServerWorker implements ParallelWorker {
 			int statusCode = response.getStatusLine().getStatusCode();
 			boolean success = Response.Status.fromStatusCode(statusCode).getFamily() == Response.Status.Family.SUCCESSFUL;
 			if ( !success ) {
-				throw new RuntimeException( "Command cannot be executed" + response.getStatusLine() + " " + response.getEntity() );
+				throw new SciJavaParallelRuntimeException("Command cannot be executed" +
+					response.getStatusLine() + " " + response.getEntity());
 			}
 	
 			String json = EntityUtils.toString( response.getEntity() );
 			final org.json.JSONObject jsonObj = new org.json.JSONObject(json);
 	
-			final Map<String, Object> rawOutputs = jsonToMap(jsonObj);
-	
-			return rawOutputs;
+			return jsonToMap(jsonObj);
 		}
 		catch ( IOException e )
 		{
-			throw new RuntimeException( e );
+			throw new SciJavaParallelRuntimeException(e);
 		}
+	}
+
+	private void exportData(final Object dataset, final String filePath,
+		Consumer<InputStream> isConsumer) throws IOException
+	{
+
+		final String objectId = getObjectId(dataset);
+		final String getUrl = HTTP_PROTOCOL + hostName + ":" + port +
+			"/objects/" + objectId + "/" + getImageType(filePath);
+		final HttpGet httpGet = new HttpGet(getUrl);
+	
+		final HttpEntity entity = HttpClientBuilder.create().build().execute(
+			httpGet).getEntity();
+		if (entity != null) {
+			try (BufferedInputStream bis = new BufferedInputStream(entity
+				.getContent()))
+			{
+				isConsumer.accept(bis);
+			}
+		}
+	}
+
+	private String getObjectId(final Object dataset) {
+		if (dataset instanceof String) {
+			return (String) dataset;
+		}
+		return ((PRemoteObject) dataset).getId();
 	}
 
 	private Map<String, Object> jsonToMap(final org.json.JSONObject jsonObj) {
@@ -300,7 +287,7 @@ public class ImageJServerWorker implements ParallelWorker {
 	private PRemoteObject importData(ContentBody contentBody) {
 		return Routines.supplyWithExceptionHandling(() -> {
 
-			final String postUrl = "http://" + hostName + ":" + String.valueOf(port) +
+			final String postUrl = HTTP_PROTOCOL + hostName + ":" + port +
 				"/objects/upload";
 			final HttpPost httpPost = new HttpPost(postUrl);
 
@@ -311,11 +298,8 @@ public class ImageJServerWorker implements ParallelWorker {
 			final HttpResponse response = HttpClientBuilder.create().build().execute(
 				httpPost);
 
-			// TODO check result code properly
-
 			final String json = EntityUtils.toString(response.getEntity());
 			org.json.JSONObject result = new org.json.JSONObject(json);
-
 			return indexImported(new PRemoteObject(result));
 		});
 	}
@@ -386,6 +370,7 @@ public class ImageJServerWorker implements ParallelWorker {
 		public PRemoteObject(org.json.JSONObject jsonObj) {
 			id = jsonObj.getString("id");
 		}
+
 	}
 
 	@AllArgsConstructor
@@ -409,10 +394,11 @@ public class ImageJServerWorker implements ParallelWorker {
 		 */
 		Map<String, Object> convertMap(final Map<String, ?> map)
 		{
-			return map.entrySet().stream().filter(entry -> filter.apply(entry)).map(
+			return map.entrySet().stream().filter(filter::apply).map(
 				entry -> new SimpleImmutableEntry<>(entry.getKey(), convertObject(entry
-					.getValue()))).collect(Collectors.toMap(e -> e.getKey(), e -> e
-						.getValue()));
+					.getValue()))).collect(Collectors.toMap(
+						SimpleImmutableEntry<String, Object>::getKey,
+						SimpleImmutableEntry<String, Object>::getValue));
 		}
 
 		Object convertObject(Object value) {

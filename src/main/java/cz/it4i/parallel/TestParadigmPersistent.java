@@ -15,6 +15,7 @@ import org.scijava.parallel.PersistentParallelizationParadigm;
 
 import cz.it4i.parallel.ImageJServerParadigm.Host;
 import cz.it4i.parallel.persistence.PersistentParallelizationParadigmImpl;
+import cz.it4i.parallel.ui.HPCImageJServerRunnerWithUI;
 
 public class TestParadigmPersistent implements
 	PersistentParallelizationParadigm
@@ -24,18 +25,42 @@ public class TestParadigmPersistent implements
 	private final PersistentParallelizationParadigm paradigm;
 	private boolean closed = false;
 
-	public TestParadigmPersistent(ServerRunner runner, Context context)
-	{
-		this.paradigm = initParadigm( runner, context );
-		this.runner = runner;
-	}
-
 	public static ParallelizationParadigm localImageJServer( String fiji, Context context ) {
 		return new TestParadigmPersistent( new ImageJServerRunner( fiji ), context );
 	}
 
 	public static ParallelizationParadigm localImageJServer(Context context) {
 		return new TestParadigmPersistent(new EmbeddedImageJServerRunner(), context);
+	}
+
+	public static PersistentParallelizationParadigm runningImageJServer(
+		Context context, HPCImageJServerRunnerWithUI runner,
+		boolean stopImageJServerOnClose)
+	{
+		return new TestParadigmPersistent(new PNonClosingServerRunner(runner,
+			stopImageJServerOnClose), context);
+	}
+
+	private static class PNonClosingServerRunner extends TestServerRunner {
+
+		final boolean started;
+
+		public PNonClosingServerRunner(ServerRunner serverRunner, boolean started) {
+			super(serverRunner);
+			this.started = started;
+		}
+
+		@Override
+		public void start() {
+			if (!started) {
+				super.start();
+			}
+		}
+
+		@Override
+		public void close() {
+			// do nothing
+		}
 	}
 
 	private static PersistentParallelizationParadigm initParadigm(
@@ -60,11 +85,14 @@ public class TestParadigmPersistent implements
 		ParallelizationParadigm paradigm = parallelService.getParadigm();
 		((ImageJServerParadigm) paradigm).setHosts(hosts.subList(0, 1));
 		paradigm.init();
-		PersistentParallelizationParadigm result =
-			PersistentParallelizationParadigmImpl.addPersistencyToParadigm(paradigm,
-				hosts);
+		return PersistentParallelizationParadigmImpl.addPersistencyToParadigm(
+			paradigm, hosts);
+	}
 
-		return result;
+	public TestParadigmPersistent(ServerRunner runner, Context context)
+	{
+		this.paradigm = initParadigm( runner, context );
+		this.runner = runner;
 	}
 
 	@Override
@@ -141,7 +169,8 @@ public class TestParadigmPersistent implements
 	private void checkClosed()
 	{
 		if(closed)
-			throw new RuntimeException( "ParallelizationParadigm is used after it has been closed." );
+			throw new SciJavaParallelRuntimeException(
+				"ParallelizationParadigm is used after it has been closed.");
 	}
 
 }

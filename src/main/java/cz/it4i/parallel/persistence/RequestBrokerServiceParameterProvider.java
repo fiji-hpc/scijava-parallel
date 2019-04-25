@@ -1,38 +1,94 @@
 package cz.it4i.parallel.persistence;
 
+import static cz.it4i.parallel.persistence.PersistentParallelizationParadigmImpl.INPUTS;
+import static cz.it4i.parallel.persistence.PersistentParallelizationParadigmImpl.MODULE_ID;
+import static cz.it4i.parallel.persistence.PersistentParallelizationParadigmImpl.REQUEST_IDS;
+import static cz.it4i.parallel.persistence.PersistentParallelizationParadigmImpl.RESULTS;
+
 import com.google.common.collect.Streams;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.WeakHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import org.scijava.plugin.Parameter;
+import org.scijava.plugin.Plugin;
+import org.scijava.service.AbstractService;
+import org.scijava.service.SciJavaService;
+import org.scijava.service.Service;
+
 import cz.it4i.parallel.DefaultParameterProcessor;
-import cz.it4i.parallel.ParallelWorker;
 import cz.it4i.parallel.ParallelizationParadigmConverter;
 import cz.it4i.parallel.ParameterProcessor;
 import cz.it4i.parallel.ParameterTypeProvider;
+import cz.it4i.parallel.RemoteDataHandler;
 import cz.it4i.parallel.plugins.RequestBrokerServiceCallCommand;
 import cz.it4i.parallel.plugins.RequestBrokerServiceGetResultCommand;
+import cz.it4i.parallel.plugins.RequestBrokerServicePurgeCommand;
 import lombok.RequiredArgsConstructor;
 
 
 public class RequestBrokerServiceParameterProvider
 {
 
+	public interface RequestID2ProcessorHolder extends SciJavaService {
+	
+		public ParameterProcessor index(Object obj,
+			ParameterProcessor parameterProcessor);
+	
+		public ParameterProcessor search(Object obj);
+	}
+
+	@Plugin(type = Service.class)
+	public static class DefaultRequestID2ProcessorHolder extends AbstractService
+		implements RequestID2ProcessorHolder
+	{
+
+		private final Map<Object, ParameterProcessor> requestID2processor =
+			Collections.synchronizedMap(new WeakHashMap<>());
+
+		@Override
+		public ParameterProcessor index(Object obj,
+			ParameterProcessor parameterProcessor)
+		{
+			return requestID2processor.put(obj, parameterProcessor);
+		}
+
+		@Override
+		public ParameterProcessor search(Object obj) {
+			return requestID2processor.get(obj);
+		}
+	}
+
 	private final ParameterTypeProvider typeProvider;
 
 
 	private final Map<Class<?>, ParallelizationParadigmConverter<?>> converters;
 
-	private final Map<Object, ParameterProcessor> requestID2processor =
-		Collections.synchronizedMap(new HashMap<>());
+
+	@Parameter
+	private RequestID2ProcessorHolder requestHolder;
+
+	private RemoteDataHandler defaultWorker;
+
+	public RequestBrokerServiceParameterProvider(
+		ParameterTypeProvider typeProvider,
+		Map<Class<?>, ParallelizationParadigmConverter<?>> mappers,
+		RemoteDataHandler defaultWorker)
+	{
+		this.typeProvider = typeProvider;
+		this.converters = mappers;
+		this.defaultWorker = defaultWorker;
+	}
 
 	public ParameterProcessor constructProvider(String command,
-		ParallelWorker pw)
+		RemoteDataHandler pw)
 	{
 		if (command.equals(
 			RequestBrokerServiceCallCommand.class.getCanonicalName()))
@@ -44,32 +100,32 @@ public class RequestBrokerServiceParameterProvider
 		{
 			return new PGetResultProcessor();
 		}
+		else if (command.equals(RequestBrokerServicePurgeCommand.class
+			.getCanonicalName()))
+		{
+			return new PPurgeProcessor();
+		}
 		return null;
-	}
-
-	public RequestBrokerServiceParameterProvider(
-		ParameterTypeProvider typeProvider,
-		Map<Class<?>, ParallelizationParadigmConverter<?>> mappers)
-	{
-		this.typeProvider = typeProvider;
-		this.converters = mappers;
 	}
 
 	@RequiredArgsConstructor
 	private class PCallCommandProcessor implements ParameterProcessor {
 	
-		private final ParallelWorker worker;
+		private final RemoteDataHandler worker;
 		private List<DefaultParameterProcessor> processors;
+		private String commandName;
 	
 		@Override
 		public Map<String, Object> processInputs(final Map<String, Object> inputs) {
 	
+			commandName = inputs.get(MODULE_ID)
+				.toString();
 			@SuppressWarnings({ "unchecked" })
 			List<Map<String, Object>> processing = (List<Map<String, Object>>) inputs
-				.get("inputs");
+				.get(INPUTS);
 			processors = IntStream.range(0, processing
 				.size()).mapToObj(__ -> new DefaultParameterProcessor(typeProvider,
-					inputs.get("moduleId").toString(), worker, converters)).collect(
+					commandName, worker, converters)).collect(
 						Collectors.toList());
 	
 			List<Map<String, Object>> processed = Streams.zip(processing.stream(),
@@ -77,56 +133,98 @@ public class RequestBrokerServiceParameterProvider
 					input))
 				.collect(Collectors.toList());
 			Map<String, Object> result = new HashMap<>(inputs);
-			result.put("inputs", processed);
+			result.put(INPUTS, processed);
 			return result;
 		}
 	
 		@SuppressWarnings("unchecked")
 		@Override
-		public Map<String, Object> processOutputs(Map<String, Object> inputs) {
-			Streams.zip(((List<Object>) inputs.get("requestIDs")).stream(), processors
-				.stream(), requestID2processor::put)
+		public Map<String, Object> processOutputs(Map<String, Object> outputs) {
+			List<Serializable> ids = (List<Serializable>) outputs.get(REQUEST_IDS);
+			Streams.zip(ids.stream(), processors
+				.stream(), requestHolder::index)
 				.count();
-			return inputs;
+			outputs.put(REQUEST_IDS, ids.stream().map(id -> new InternalCompletableFutureID(
+				commandName, id)).collect(Collectors.toList()));
+			return outputs;
 		}
 	
 		@Override
 		public void close() {
-			// TODO Auto-generated method stub
-	
+			// do nothing
 		}
 	}
 
 	private class PGetResultProcessor implements ParameterProcessor {
 	
-		private List<Object> requestIDs;
+		private List<InternalCompletableFutureID> requestIDs;
 
 		@SuppressWarnings("unchecked")
 		@Override
 		public Map<String, Object> processInputs(Map<String, Object> inputs) {
-			requestIDs = (List<Object>) inputs.get("requestIDs");
+			requestIDs = (List<InternalCompletableFutureID>) inputs.get(REQUEST_IDS);
+			inputs.put(REQUEST_IDS, requestIDs.stream().map(pId -> pId.id).collect(
+				Collectors.toList()));
 			return inputs;
 		}
 	
 		@Override
 		public Map<String, Object> processOutputs(Map<String, Object> outputs) {
 			Stream<ParameterProcessor> processors = requestIDs.stream().map(
-				requestID2processor::get);
+				this::getParameterProcessor);
 			@SuppressWarnings("unchecked")
 			List<Map<String, Object>> results = (List<Map<String, Object>>) outputs
-				.get("results");
+				.get(RESULTS);
 			outputs = new HashMap<>(outputs);
-
-			results = Streams.zip(processors, results.stream(), (proc, output) -> proc
-				.processOutputs(output)).collect(Collectors.toList());
-			outputs.put("results", results);
+			results = Streams.zip(processors, results.stream(), this::processOutput)
+				.collect(Collectors.toList());
+			outputs.put(RESULTS, results);
 			return outputs;
 		}
 	
+		private ParameterProcessor getParameterProcessor(InternalCompletableFutureID id) {
+			ParameterProcessor result = requestHolder.search(id.id);
+			if (result == null) {
+					result = new DefaultParameterProcessor(typeProvider,
+					id.getCommandName(), defaultWorker,
+						converters);
+			}
+			return result;
+		}
+
+		private Map<String, Object> processOutput(ParameterProcessor proc,
+			Map<String, Object> output)
+		{
+			return proc.processOutputs(output);
+		}
+
 		@Override
 		public void close() {
-
+			// do nothing
 		}
 	
+	}
+
+	private class PPurgeProcessor implements ParameterProcessor {
+
+		@Override
+		public Map<String, Object> processInputs(final Map<String, Object> inputs) {
+			@SuppressWarnings("unchecked")
+			List<InternalCompletableFutureID> ids = (List<InternalCompletableFutureID>) inputs.get(
+				REQUEST_IDS);
+			inputs.put(REQUEST_IDS, ids.stream().map(pId -> pId.id).collect(Collectors
+				.toList()));
+			return inputs;
+		}
+
+		@Override
+		public Map<String, Object> processOutputs(Map<String, Object> outputs) {
+			return outputs;
+		}
+
+		@Override
+		public void close() {
+			// do nothing
+		}
 	}
 }

@@ -2,20 +2,13 @@
 package cz.it4i.parallel;
 
 import java.io.Closeable;
-import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.scijava.command.Command;
 
-public interface ParallelWorker extends Closeable {
-
-	public Object importData(Path filePath);
-
-	public void exportData(Object data, Path filePath);
-
-	public void deleteData(Object ds);
+public interface ParallelWorker extends Closeable, RemoteDataHandler {
 
 	default Map<String, Object> executeCommand(
 		Class<? extends Command> commandType, Map<String, ?> map)

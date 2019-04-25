@@ -16,10 +16,10 @@ public abstract class AbstractParameterProcessor implements ParameterProcessor {
 
 	private ParameterTypeProvider typeProvider;
 
-	private ParallelWorker worker;
+	private RemoteDataHandler worker;
 
 	public AbstractParameterProcessor(ParameterTypeProvider typeProvider,
-		String commandName, ParallelWorker worker)
+		String commandName, RemoteDataHandler worker)
 	{
 		this.commandName = commandName;
 		this.typeProvider = typeProvider;
@@ -60,7 +60,7 @@ public abstract class AbstractParameterProcessor implements ParameterProcessor {
 	}
 
 	protected abstract <T> ParallelizationParadigmConverter<T> construcConverter(
-		Class<T> expectedType, ParallelWorker servingWorker);
+		Class<T> expectedType, RemoteDataHandler servingWorker);
 
 	private String getParameterTypeName(String parameter) {
 		return typeProvider.provideParameterTypeName(commandName, parameter);

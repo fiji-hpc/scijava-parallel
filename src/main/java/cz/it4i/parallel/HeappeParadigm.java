@@ -212,7 +212,7 @@ public class HeappeParadigm extends SimpleOstravaParadigm {
 	}
 
 	@Override
-	protected ParameterProcessor constructParameterProcessor(ParallelWorker pw,
+	protected ParameterProcessor constructParameterProcessor(RemoteDataHandler pw,
 		String command)
 	{
 		return null;

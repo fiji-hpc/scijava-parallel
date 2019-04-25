@@ -4,6 +4,8 @@ package cz.it4i.parallel;
 import static cz.it4i.parallel.Routines.castTo;
 import static cz.it4i.parallel.Routines.getSuffix;
 
+import io.scif.services.DatasetIOService;
+
 import java.io.Closeable;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -14,7 +16,6 @@ import java.util.HashSet;
 
 import net.imagej.Dataset;
 
-import org.scijava.io.IOService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
@@ -23,16 +24,18 @@ public class DatasetImageJServerConverter extends
 	AbstractParallelizationParadigmConverter<Dataset> implements Closeable
 {
 
+	private static final String NAME_FOR_EXPORT = "export";
+
+	private static final String PREFIX_OF_TEMPDIR_FOR_EXPORT = "scijava-parallel";
+
+	private static final String DEFAULT_SUFFIX = ".tif";
 	@Parameter
-	private IOService ioService;
+	private DatasetIOService ioService;
 
-	private ParallelWorker parallelWorker;
-
-	private String suffixOfImportedFile;
+	private RemoteDataHandler parallelWorker;
 
 	private Dataset workingDataSet;
-
-	private Path tempFileForWorkingDataSet;
+	private Object workingDataSetID;
 
 	public DatasetImageJServerConverter() {
 		super(Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
@@ -41,7 +44,7 @@ public class DatasetImageJServerConverter extends
 
 	@Override
 	public ParallelizationParadigmConverter<Dataset> cloneForWorker(
-		ParallelWorker worker)
+		RemoteDataHandler worker)
 	{
 		// Remark: better use ThreadLocal in this class, than
 		// explicitly calling cloneForWorker.
@@ -62,28 +65,28 @@ public class DatasetImageJServerConverter extends
 	
 	@Override
 	public void close() throws IOException {
-		if (null != tempFileForWorkingDataSet) {
-			Files.deleteIfExists(tempFileForWorkingDataSet);
-			tempFileForWorkingDataSet = null;
-		}
+		// ignore this
 	}
 
 	private Object convert2Paradigm(Object input) {
 		if (input instanceof Path) {
-			Path path = (Path) input;
-			String filename = path.getFileName().toString();
-			suffixOfImportedFile = getSuffix(filename);
-			return parallelWorker.importData(path);
+			throw new UnsupportedOperationException(
+				"Using path instead of Dataset is not supported.");
 		}
 		else if (input instanceof Dataset) {
 			workingDataSet = (Dataset) input;
-			String workingSuffix = getSuffix(workingDataSet.getName());
-			tempFileForWorkingDataSet = Routines.supplyWithExceptionHandling(
-				() -> Files.createTempFile(Thread.currentThread().toString(),
-					workingSuffix));
-			Routines.runWithExceptionHandling(() -> ioService.save(input,
-				tempFileForWorkingDataSet.toString()));
-			return parallelWorker.importData(tempFileForWorkingDataSet);
+			Path tempFileForWorkingDataSet = Routines.getTempFileForSuffix(getSuffix(
+				workingDataSet.getName()));
+			try {
+				Routines.runWithExceptionHandling(() -> ioService.save((Dataset) input,
+					tempFileForWorkingDataSet.toString()));
+				workingDataSetID = parallelWorker.importData(tempFileForWorkingDataSet);
+				return workingDataSetID;
+			}
+			finally {
+				Routines.runWithExceptionHandling(() -> Files.deleteIfExists(
+					tempFileForWorkingDataSet));
+			}
 		}
 		throw new IllegalArgumentException("cannot convert from " + input
 			.getClass());
@@ -93,25 +96,34 @@ public class DatasetImageJServerConverter extends
 		// Remark: The download shouldn't depend on how the upload happend before.
 		// This connection between upload and download is artificial, and
 		// makes the download rather unstable.
-		if (suffixOfImportedFile != null) {
-			Path result = Routines.supplyWithExceptionHandling(() -> Files
-				.createTempFile("", suffixOfImportedFile));
-			parallelWorker.exportData(input, result);
-			parallelWorker.deleteData(input);
-			return result;
-		}
-		else if (workingDataSet != null && tempFileForWorkingDataSet != null) {
+		final Path tempFileForWorkingDataSet = Routines.supplyWithExceptionHandling(
+			() -> Files.createTempDirectory(PREFIX_OF_TEMPDIR_FOR_EXPORT).resolve(
+				NAME_FOR_EXPORT + getSuffixForExport()));
+		try {
 			parallelWorker.exportData(input, tempFileForWorkingDataSet);
 			parallelWorker.deleteData(input);
-			Dataset tempDataset = (Dataset) Routines.supplyWithExceptionHandling(
-				() -> ioService.open(tempFileForWorkingDataSet.toString()));
-			tempDataset.copyInto(workingDataSet);
-			Routines.runWithExceptionHandling(() -> Files.delete(
-				tempFileForWorkingDataSet));
-			tempFileForWorkingDataSet = null;
-			return workingDataSet;
+					Dataset tempDataset = Routines.supplyWithExceptionHandling(() -> ioService.open(
+				tempFileForWorkingDataSet.toString()));
+			if (workingDataSet != null && input.equals(workingDataSetID)) {
+				tempDataset.copyInto(workingDataSet);
+				return workingDataSet;
+			}
+			return tempDataset;
+
 		}
-		throw new IllegalArgumentException("bad arguments");
+		finally {
+			Routines.runWithExceptionSuppress(() -> Files.deleteIfExists(
+				tempFileForWorkingDataSet));
+			Routines.runWithExceptionSuppress(() -> Files.deleteIfExists(
+				tempFileForWorkingDataSet.getParent()));
+		}
+	}
+
+	private String getSuffixForExport() {
+		if (workingDataSet != null) {
+			return getSuffix(workingDataSet.getName());
+		}
+		return DEFAULT_SUFFIX;
 	}
 
 }

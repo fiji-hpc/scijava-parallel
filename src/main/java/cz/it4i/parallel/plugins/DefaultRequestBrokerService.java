@@ -53,22 +53,29 @@ public class DefaultRequestBrokerService extends AbstractService implements
 	@Parameter
 	private ParallelService parallelService;
 
+	private boolean paradigmInitialized;
+
 	private Map<Object, CompletableFuture<Map<String, Object>>> holdedRequests =
 		Collections.synchronizedMap(new HashMap<>());
 
 	@Override
-	public void initParallelizationParadigm(List<String> hostNames,
+	public synchronized void initParallelizationParadigm(List<String> hostNames,
 		List<Integer> ncores)
 	{
-		parallelService.deleteProfiles();
-		parallelService.addProfile(new ParallelizationParadigmProfile(
-			ImageJServerParadigm.class, IMAGEJ_SERVER_PARADIGM));
-		parallelService.selectProfile(IMAGEJ_SERVER_PARADIGM);
-
-		ParallelizationParadigm paradigm = parallelService.getParadigm();
-		((ImageJServerParadigm) paradigm).setHosts(Host
-			.constructListFromNamesAndCores(hostNames, ncores));
-		paradigm.init();
+		if (!paradigmInitialized) {
+			parallelService.deleteProfiles();
+			parallelService.addProfile(new ParallelizationParadigmProfile(
+				ImageJServerParadigm.class, IMAGEJ_SERVER_PARADIGM));
+			parallelService.selectProfile(IMAGEJ_SERVER_PARADIGM);
+			ParallelizationParadigm paradigm = parallelService.getParadigm();
+			((ImageJServerParadigm) paradigm).setHosts(Host
+				.constructListFromNamesAndCores(hostNames, ncores));
+			paradigm.init();
+			paradigmInitialized = true;
+		}
+		else {
+			log.info("Parallelization paradigm already initialized");
+		}
 	}
 
 	@Override

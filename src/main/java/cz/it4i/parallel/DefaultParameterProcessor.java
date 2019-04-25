@@ -8,7 +8,7 @@ public class DefaultParameterProcessor extends AbstractParameterProcessor {
 	private Map<Class<?>, ParallelizationParadigmConverter<?>> converters;
 
 	public DefaultParameterProcessor(ParameterTypeProvider typeProvider,
-		String commandName, ParallelWorker servingWorker,
+		String commandName, RemoteDataHandler servingWorker,
 		Map<Class<?>, ParallelizationParadigmConverter<?>> converters)
 	{
 		super(typeProvider, commandName, servingWorker);
@@ -18,7 +18,7 @@ public class DefaultParameterProcessor extends AbstractParameterProcessor {
 	@Override
 	protected <T> ParallelizationParadigmConverter<T> construcConverter(
 		Class<T> expectedType,
-		ParallelWorker servingWorker)
+		RemoteDataHandler servingWorker)
 	{
 		@SuppressWarnings("unchecked")
 		ParallelizationParadigmConverter<T> result =

@@ -17,6 +17,7 @@ import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import org.scijava.Context;
 import org.scijava.command.CommandService;
 import org.scijava.parallel.ParallelizationParadigm;
 import org.scijava.plugin.Parameter;
@@ -25,7 +26,9 @@ import org.scijava.thread.ThreadService;
 
 import cz.it4i.common.Collections;
 import cz.it4i.parallel.persistence.RequestBrokerServiceParameterProvider;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public abstract class SimpleOstravaParadigm implements ParallelizationParadigm {
 
 	protected WorkerPool workerPool;
@@ -38,6 +41,9 @@ public abstract class SimpleOstravaParadigm implements ParallelizationParadigm {
 
 	@Parameter
 	private PluginService pluginService;
+
+	@Parameter
+	private Context context;
 
 	private Map<Class<?>, ParallelizationParadigmConverter<?>> mappers;
 
@@ -59,28 +65,26 @@ public abstract class SimpleOstravaParadigm implements ParallelizationParadigm {
 			threadService);
 		requestBrokerServiceParameterProvider =
 			new RequestBrokerServiceParameterProvider(getTypeProvider(),
-				getMappers());
+				getMappers(), constructDefaultWorker());
+		context.inject(requestBrokerServiceParameterProvider);
 	}
-
 
 	@Override
 	public List<CompletableFuture<Map<String, Object>>> runAllAsync(
 		String command, List<Map<String, Object>> listOfparameters)
 	{
-
+		if (listOfparameters.isEmpty()) {
+			return java.util.Collections.emptyList();
+		}
+		log.debug("runAllAsync - params.size = {}", listOfparameters.size());
 		List<List<Map<String, Object>>> chunkedParameters = chunkParameters(
 			listOfparameters);
 
 		return chunkedParameters.parallelStream().map(
-			inputs -> new AsynchronousExecution(
-				command, inputs)).map(ae -> repackCompletable(ae.result, ae.size))
-			.flatMap(
-					List::stream).collect(Collectors.toList());
+			inputs -> new AsynchronousExecution(command, inputs)).map(
+				ae -> repackCompletable(ae.result, ae.size)).flatMap(List::stream)
+			.collect(Collectors.toList());
 	}
-
-
-
-
 
 	protected List<List<Map<String, Object>>> chunkParameters(
 		List<Map<String, Object>> listOfparameters) {
@@ -96,7 +100,7 @@ public abstract class SimpleOstravaParadigm implements ParallelizationParadigm {
 
 	protected abstract ParameterTypeProvider getTypeProvider();
 
-	protected ParameterProcessor constructParameterProcessor(ParallelWorker pw,
+	protected ParameterProcessor constructParameterProcessor(RemoteDataHandler pw,
 		String command)
 	{
 
@@ -107,6 +111,16 @@ public abstract class SimpleOstravaParadigm implements ParallelizationParadigm {
 			command, pw, getMappers());
 		}
 		return result;
+	}
+
+	private RemoteDataHandler constructDefaultWorker() {
+		if (workerPool.size() != 1) {
+			return null;
+		}
+		ParallelWorker pw = Routines.supplyWithExceptionHandling(() -> workerPool
+			.takeFreeWorker());
+		workerPool.addWorker(pw);
+		return pw;
 	}
 
 	private synchronized Map<Class<?>, ParallelizationParadigmConverter<?>>
@@ -167,7 +181,7 @@ public abstract class SimpleOstravaParadigm implements ParallelizationParadigm {
 		}
 
 		private List<ParameterProcessor> constructParameterProcessors(
-			ParallelWorker pw,
+			RemoteDataHandler pw,
 			String command, List<Map<String, Object>> inputs)
 		{
 			return IntStream.range(0, inputs.size()).mapToObj(

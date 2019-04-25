@@ -1,6 +1,9 @@
 
 package cz.it4i.parallel;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 public class Routines {
 
 	public interface RunnableWithException {
@@ -19,7 +22,16 @@ public class Routines {
 			runnable.run();
 		}
 		catch (Exception exc) {
-			throw new RuntimeException(exc);
+			throw new SciJavaParallelRuntimeException(unwrapException(exc));
+		}
+	}
+
+	public static void runWithExceptionSuppress(RunnableWithException run) {
+		try {
+			run.run();
+		}
+		catch (Exception e) {
+			// ignore this
 		}
 	}
 
@@ -30,7 +42,7 @@ public class Routines {
 			return supplier.supply();
 		}
 		catch (Exception exc) {
-			throw new RuntimeException(exc);
+			throw new SciJavaParallelRuntimeException(unwrapException(exc));
 		}
 	}
 
@@ -42,5 +54,17 @@ public class Routines {
 		@SuppressWarnings("unchecked")
 		T result = (T) src;
 		return result;
+	}
+
+	public static Path getTempFileForSuffix(String workingSuffix) {
+		return Routines.supplyWithExceptionHandling(() -> Files.createTempFile(
+			Thread.currentThread().toString(), workingSuffix));
+	}
+
+	public static Throwable unwrapException(Throwable exc) {
+		if (exc.getCause() == null) {
+			return exc;
+		}
+		return unwrapException(exc.getCause());
 	}
 }

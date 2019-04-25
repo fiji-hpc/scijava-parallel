@@ -53,7 +53,7 @@ public class DatasetSerializationBug
 	{
 		Map<String, Object> parameters = new HashMap<>();
 		Dataset dataset = datasetService.create( ArrayImgs.unsignedBytes( 10, 10 ));
-		dataset.setName( "dummy1.png" );
+		dataset.setName(name);
 		parameters.put("image", dataset);
 		return parameters;
 	}

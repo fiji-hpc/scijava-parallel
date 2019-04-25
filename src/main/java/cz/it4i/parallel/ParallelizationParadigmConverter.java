@@ -15,7 +15,7 @@ public interface ParallelizationParadigmConverter<O> extends SciJavaPlugin
 
 	Set<Class<? extends ParallelizationParadigm>> getSupportedParadigms();
 
-	ParallelizationParadigmConverter<O> cloneForWorker(ParallelWorker worker);
+	ParallelizationParadigmConverter<O> cloneForWorker(RemoteDataHandler worker);
 
 
 }

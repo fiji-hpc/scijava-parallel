@@ -5,14 +5,16 @@ import static cz.it4i.parallel.Routines.runWithExceptionHandling;
 
 import com.google.common.collect.Streams;
 
-import java.nio.file.Files;
+import io.scif.services.DatasetIOService;
+
+import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
+import net.imagej.Dataset;
 import net.imagej.plugins.commands.imglib.RotateImageXY;
 
 import org.scijava.Context;
@@ -20,20 +22,22 @@ import org.scijava.parallel.ParallelizationParadigm;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import cz.it4i.parallel.TestParadigm;
 import cz.it4i.parallel.TestParadigmPersistent;
 
 public class RotateFileAsync {
 
 	private final static Logger log = LoggerFactory.getLogger(
 		RotateFileAsync.class);
+	private static DatasetIOService ioService;
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		Context context = new Context();
+		ioService = context.service(DatasetIOService.class);
 		try (ParallelizationParadigm paradigm = TestParadigmPersistent
 			.localImageJServer(context))
 		{
-			List< Map< String, Object > > parametersList = RotateFile.initParameters();
+			List<Map<String, Object>> parametersList = RotateFile.initParameters(
+				ioService);
 			List< CompletableFuture< Map< String, Object > > > results = paradigm.runAllAsync(
 					RotateImageXY.class, parametersList );
 			asyncSaveOutputs( parametersList, results );
@@ -48,10 +52,9 @@ public class RotateFileAsync {
 			inputParams -> (Double) inputParams.get("angle")),
 			(future, angle) -> future.thenAccept(
 				result -> {
-					Path src = (Path) result.get("dataset");
 					Path dst = outputDirectory.resolve("result_" + angle + ".png");
-					runWithExceptionHandling(() -> Files.move(src, dst, StandardCopyOption.REPLACE_EXISTING));
-					log.info("moved: " + src + " -> " + dst);
+					runWithExceptionHandling(() -> ioService.save((Dataset) result.get(
+							"dataset"), dst.toString()));
 					}))
 		.forEach(future -> waitForFuture(future));
 		// @formatter:on

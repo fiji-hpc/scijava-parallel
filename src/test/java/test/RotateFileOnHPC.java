@@ -1,6 +1,8 @@
 
 package test;
 
+import java.io.IOException;
+
 import net.imagej.ImageJ;
 
 import org.scijava.parallel.ParallelizationParadigm;
@@ -11,7 +13,7 @@ import cz.it4i.parallel.ui.HPCImageJServerRunnerWithUI;
 
 public class RotateFileOnHPC {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		final ImageJ ij = new ImageJ();
 		ij.ui().showUI();
 
