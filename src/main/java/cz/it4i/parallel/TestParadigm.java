@@ -26,6 +26,13 @@ public class TestParadigm implements ParallelizationParadigm
 		this.runner = runner;
 	}
 
+	TestParadigm(ServerRunner runner, ParallelizationParadigm paradigm)
+	{
+		super();
+		this.runner = runner;
+		this.paradigm = paradigm;
+	}
+
 	public static ParallelizationParadigm localImageJServer( String fiji, Context context ) {
 		return new TestParadigm( new ImageJServerRunner( fiji ), context );
 	}
@@ -98,7 +105,11 @@ public class TestParadigm implements ParallelizationParadigm
 		runner.close();
 	}
 
-	private void checkClosed()
+	ParallelizationParadigm getParadigm() {
+		return paradigm;
+	}
+
+	void checkClosed()
 	{
 		if(closed)
 			throw new RuntimeException( "ParallelizationParadigm is used after it has been closed." );

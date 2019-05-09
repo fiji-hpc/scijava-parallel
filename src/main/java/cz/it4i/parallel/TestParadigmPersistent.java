@@ -7,7 +7,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import org.scijava.Context;
-import org.scijava.command.Command;
 import org.scijava.parallel.ParallelService;
 import org.scijava.parallel.ParallelizationParadigm;
 import org.scijava.parallel.ParallelizationParadigmProfile;
@@ -17,13 +16,10 @@ import cz.it4i.parallel.ImageJServerParadigm.Host;
 import cz.it4i.parallel.persistence.PersistentParallelizationParadigmImpl;
 import cz.it4i.parallel.ui.HPCImageJServerRunnerWithUI;
 
-public class TestParadigmPersistent implements
+public class TestParadigmPersistent extends TestParadigm implements
 	PersistentParallelizationParadigm
 {
 
-	private final ServerRunner runner;
-	private final PersistentParallelizationParadigm paradigm;
-	private boolean closed = false;
 
 	public static ParallelizationParadigm localImageJServer( String fiji, Context context ) {
 		return new TestParadigmPersistent( new ImageJServerRunner( fiji ), context );
@@ -36,6 +32,13 @@ public class TestParadigmPersistent implements
 		return new TestParadigmPersistent(new PNonClosingServerRunner(runner,
 			stopImageJServerOnClose), context);
 	}
+
+	public TestParadigmPersistent(ServerRunner runner, Context context)
+	{
+		super(runner, initParadigm(runner, context));
+	}
+	
+	
 
 	private static class PNonClosingServerRunner extends TestServerRunner {
 
@@ -85,53 +88,12 @@ public class TestParadigmPersistent implements
 			paradigm, hosts);
 	}
 
-	public TestParadigmPersistent(ServerRunner runner, Context context)
-	{
-		this.paradigm = initParadigm( runner, context );
-		this.runner = runner;
-	}
-
-	@Override
-	public void init()
-	{
-		checkClosed();
-		paradigm.init();
-	}
-
-	@Override
-	public List< Map< String, Object > > runAll( Class< ? extends Command > commandClazz, List< Map< String, Object > > parameters )
-	{
-		checkClosed();
-		return paradigm.runAll( commandClazz, parameters );
-	}
-
-	@Override
-	public List< CompletableFuture< Map< String, Object > > > runAllAsync( Class< ? extends Command > commandClazz, List< Map< String, Object > > parameters )
-	{
-		checkClosed();
-		return paradigm.runAllAsync( commandClazz, parameters );
-	}
-
-	@Override
-	public List< Map< String, Object > > runAll( String s, List< Map< String, Object > > list )
-	{
-		checkClosed();
-		return paradigm.runAll( s, list );
-	}
-
-	@Override
-	public List< CompletableFuture< Map< String, Object > > > runAllAsync( String s, List< Map< String, Object > > list )
-	{
-		checkClosed();
-		return paradigm.runAllAsync( s, list );
-	}
-
 	@Override
 	public List<CompletableFutureID> getIDs(
 		List<CompletableFuture<Map<String, Object>>> future)
 	{
 		checkClosed();
-		return paradigm.getIDs(future);
+		return getPersistentParadigm().getIDs(future);
 	}
 
 	@Override
@@ -139,34 +101,25 @@ public class TestParadigmPersistent implements
 		List<CompletableFutureID> ids)
 	{
 		checkClosed();
-		return paradigm.getByIDs(ids);
+		return getPersistentParadigm().getByIDs(ids);
 	}
 
 	@Override
 	public void purge(List<CompletableFutureID> ids) {
 		checkClosed();
-		paradigm.purge(ids);
+		getPersistentParadigm().purge(ids);
 	}
+
+
 
 	@Override
 	public Collection<CompletableFuture<Map<String, Object>>> getAll() {
 		checkClosed();
-		return paradigm.getAll();
+		return getPersistentParadigm().getAll();
 	}
 
-	@Override
-	public void close()
-	{
-		closed = true;
-		paradigm.close();
-		runner.close();
-	}
-
-	private void checkClosed()
-	{
-		if(closed)
-			throw new SciJavaParallelRuntimeException(
-				"ParallelizationParadigm is used after it has been closed.");
+	private PersistentParallelizationParadigm getPersistentParadigm() {
+		return (PersistentParallelizationParadigm) getParadigm();
 	}
 
 }
