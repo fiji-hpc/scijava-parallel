@@ -77,6 +77,8 @@ public class RequestBrokerServiceParameterProvider
 
 	private RemoteDataHandler defaultWorker;
 
+	private RemoteDataManager remoteDataManager;
+
 	public RequestBrokerServiceParameterProvider(
 		ParameterTypeProvider typeProvider,
 		Map<Class<?>, ParallelizationParadigmConverter<?>> mappers,
@@ -85,6 +87,7 @@ public class RequestBrokerServiceParameterProvider
 		this.typeProvider = typeProvider;
 		this.converters = mappers;
 		this.defaultWorker = defaultWorker;
+		this.remoteDataManager = new RemoteDataManager();
 	}
 
 	public ParameterProcessor constructProvider(String command,
@@ -108,11 +111,20 @@ public class RequestBrokerServiceParameterProvider
 		return null;
 	}
 
+	private Serializable setIDForRemoteDataHandler(RemoteDataHandler handler,
+		Serializable id)
+	{
+		remoteDataManager.setID(handler, id);
+		return id;
+	}
+
 	@RequiredArgsConstructor
 	private class PCallCommandProcessor implements ParameterProcessor {
 	
 		private final RemoteDataHandler worker;
 		private List<DefaultParameterProcessor> processors;
+
+		private List<RemoteDataHandler> workers;
 		private String commandName;
 	
 		@Override
@@ -123,10 +135,12 @@ public class RequestBrokerServiceParameterProvider
 			@SuppressWarnings({ "unchecked" })
 			List<Map<String, Object>> processing = (List<Map<String, Object>>) inputs
 				.get(INPUTS);
-			processors = IntStream.range(0, processing
-				.size()).mapToObj(__ -> new DefaultParameterProcessor(typeProvider,
-					commandName, worker, converters)).collect(
-						Collectors.toList());
+			workers = IntStream.range(0, processing.size()).mapToObj(
+				x -> remoteDataManager.createProxyDataHandler(worker)).collect(
+					Collectors.toList());
+
+			processors = workers.stream().map(w -> new DefaultParameterProcessor(
+				typeProvider, commandName, w, converters)).collect(Collectors.toList());
 	
 			List<Map<String, Object>> processed = Streams.zip(processing.stream(),
 				processors.stream(), (input, processor) -> processor.processInputs(
@@ -141,11 +155,12 @@ public class RequestBrokerServiceParameterProvider
 		@Override
 		public Map<String, Object> processOutputs(Map<String, Object> outputs) {
 			List<Serializable> ids = (List<Serializable>) outputs.get(REQUEST_IDS);
-			Streams.zip(ids.stream(), processors
-				.stream(), requestHolder::index)
-				.count();
-			outputs.put(REQUEST_IDS, ids.stream().map(id -> new InternalCompletableFutureID(
-				commandName, id)).collect(Collectors.toList()));
+			Streams.zip(Streams.zip(workers.stream(), ids.stream(),
+				RequestBrokerServiceParameterProvider.this::setIDForRemoteDataHandler),
+				processors.stream(), requestHolder::index).count();
+			outputs.put(REQUEST_IDS, ids.stream().map(
+				id -> new InternalCompletableFutureID(commandName, id)).collect(
+					Collectors.toList()));
 			return outputs;
 		}
 	
@@ -186,7 +201,8 @@ public class RequestBrokerServiceParameterProvider
 			ParameterProcessor result = requestHolder.search(id.id);
 			if (result == null) {
 					result = new DefaultParameterProcessor(typeProvider,
-					id.getCommandName(), defaultWorker,
+					id.getCommandName(), remoteDataManager.createProxyDataHandler(
+						defaultWorker, id.id),
 						converters);
 			}
 			return result;
@@ -212,7 +228,9 @@ public class RequestBrokerServiceParameterProvider
 			@SuppressWarnings("unchecked")
 			List<InternalCompletableFutureID> ids = (List<InternalCompletableFutureID>) inputs.get(
 				REQUEST_IDS);
-			inputs.put(REQUEST_IDS, ids.stream().map(pId -> pId.id).collect(Collectors
+			inputs.put(REQUEST_IDS, ids.stream().map(pId -> pId.id).map(
+				this::purgeObjects)
+				.collect(Collectors
 				.toList()));
 			return inputs;
 		}
@@ -225,6 +243,11 @@ public class RequestBrokerServiceParameterProvider
 		@Override
 		public void close() {
 			// do nothing
+		}
+
+		Serializable purgeObjects(Serializable id) {
+			remoteDataManager.purged(id);
+			return id;
 		}
 	}
 }

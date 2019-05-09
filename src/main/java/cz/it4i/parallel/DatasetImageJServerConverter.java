@@ -102,8 +102,11 @@ public class DatasetImageJServerConverter extends
 		try {
 			parallelWorker.exportData(input, tempFileForWorkingDataSet);
 			parallelWorker.deleteData(input);
-					Dataset tempDataset = Routines.supplyWithExceptionHandling(() -> ioService.open(
-				tempFileForWorkingDataSet.toString()));
+			if (workingDataSetID != null && !input.equals(workingDataSetID)) {
+				parallelWorker.deleteData(workingDataSetID);
+			}
+			Dataset tempDataset = Routines.supplyWithExceptionHandling(() -> ioService
+				.open(tempFileForWorkingDataSet.toString()));
 			if (workingDataSet != null && input.equals(workingDataSetID)) {
 				tempDataset.copyInto(workingDataSet);
 				return workingDataSet;
