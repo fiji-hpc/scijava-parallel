@@ -20,7 +20,7 @@ public class AddDoubles
 	{
 		Context context = new Context();
 		try (ParallelizationParadigm paradigm = TestParadigmPersistent
-			.localImageJServer(context))
+			.localImageJServer(Config.getFijiExecutable(), context))
 		{
 
 			List<Map<String, Object>> inputs = new LinkedList<>();

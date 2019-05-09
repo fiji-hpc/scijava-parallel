@@ -29,10 +29,6 @@ public class TestParadigmPersistent implements
 		return new TestParadigmPersistent( new ImageJServerRunner( fiji ), context );
 	}
 
-	public static ParallelizationParadigm localImageJServer(Context context) {
-		return new TestParadigmPersistent(new EmbeddedImageJServerRunner(), context);
-	}
-
 	public static PersistentParallelizationParadigm runningImageJServer(
 		Context context, HPCImageJServerRunnerWithUI runner,
 		boolean stopImageJServerOnClose)

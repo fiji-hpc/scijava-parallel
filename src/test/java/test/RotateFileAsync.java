@@ -34,7 +34,7 @@ public class RotateFileAsync {
 		Context context = new Context();
 		ioService = context.service(DatasetIOService.class);
 		try (ParallelizationParadigm paradigm = TestParadigmPersistent
-			.localImageJServer(context))
+			.localImageJServer(Config.getFijiExecutable(), context))
 		{
 			List<Map<String, Object>> parametersList = RotateFile.initParameters(
 				ioService);
