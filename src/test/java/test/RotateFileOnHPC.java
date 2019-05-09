@@ -8,8 +8,8 @@ import net.imagej.ImageJ;
 import org.scijava.parallel.ParallelizationParadigm;
 
 import cz.it4i.parallel.AbstractImageJServerRunner;
-import cz.it4i.parallel.TestParadigm;
 import cz.it4i.parallel.ui.HPCImageJServerRunnerWithUI;
+import cz.it4i.parallel.utils.TestParadigm;
 
 public class RotateFileOnHPC {
 

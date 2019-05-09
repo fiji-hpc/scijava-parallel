@@ -12,7 +12,7 @@ import org.scijava.Context;
 import org.scijava.parallel.ParallelizationParadigm;
 
 import bdv.util.BdvFunctions;
-import cz.it4i.parallel.TestParadigm;
+import cz.it4i.parallel.utils.TestParadigm;
 
 public class SimpleExampleInDiskCachedCellImg
 {

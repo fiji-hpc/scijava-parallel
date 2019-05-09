@@ -7,8 +7,9 @@ import java.util.List;
 import java.util.Map;
 
 import cz.it4i.parallel.HPCImageJServerRunner;
-import cz.it4i.parallel.TestParadigm;
 import cz.it4i.parallel.ui.HPCImageJServerRunnerWithUI;
+import cz.it4i.parallel.utils.TestParadigm;
+
 import net.imagej.ImageJ;
 
 import org.scijava.Context;

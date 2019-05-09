@@ -13,7 +13,7 @@ import org.scijava.command.Command;
 import org.scijava.parallel.ParallelizationParadigm;
 import org.scijava.plugin.Plugin;
 
-import cz.it4i.parallel.TestParadigm;
+import cz.it4i.parallel.utils.TestParadigm;
 
 @Plugin(type = Command.class, headless = true)
 public class TestingCommandWithInterval

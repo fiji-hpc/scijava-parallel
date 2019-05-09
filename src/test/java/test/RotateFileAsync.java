@@ -22,7 +22,7 @@ import org.scijava.parallel.ParallelizationParadigm;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import cz.it4i.parallel.TestParadigmPersistent;
+import cz.it4i.parallel.utils.TestParadigmPersistent;
 
 public class RotateFileAsync {
 

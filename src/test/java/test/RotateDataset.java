@@ -11,13 +11,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import cz.it4i.parallel.TestParadigm;
 import io.scif.services.DatasetIOService;
 import net.imagej.Dataset;
 import net.imagej.plugins.commands.imglib.RotateImageXY;
 
 import org.scijava.Context;
 import org.scijava.parallel.ParallelizationParadigm;
+
+import cz.it4i.parallel.utils.TestParadigm;
 
 public class RotateDataset {
 

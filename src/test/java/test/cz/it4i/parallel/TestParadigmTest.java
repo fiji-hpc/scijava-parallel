@@ -1,10 +1,11 @@
 package test.cz.it4i.parallel;
 
-import cz.it4i.parallel.TestParadigm;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.scijava.Context;
 import org.scijava.parallel.ParallelizationParadigm;
+
+import cz.it4i.parallel.utils.TestParadigm;
 import test.Config;
 
 import java.util.Collections;

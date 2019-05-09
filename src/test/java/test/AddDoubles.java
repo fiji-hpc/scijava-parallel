@@ -11,7 +11,7 @@ import net.imagej.ops.math.PrimitiveMath;
 import org.scijava.Context;
 import org.scijava.parallel.ParallelizationParadigm;
 
-import cz.it4i.parallel.TestParadigmPersistent;
+import cz.it4i.parallel.utils.TestParadigmPersistent;
 
 public class AddDoubles
 {
