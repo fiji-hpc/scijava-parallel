@@ -17,8 +17,11 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
+import org.scijava.Context;
 import org.scijava.parallel.ParallelizationParadigm;
+import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
+import org.scijava.plugin.PluginService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,11 +46,19 @@ public class ImageJServerParadigm extends SimpleOstravaParadigm {
 		}
 	}
 
+	@Parameter
+	private Context context;
+
 	private int port;
+
+	@Parameter
+	private PluginService pluginService;
 
 	private final Collection<String> hosts = new LinkedList<>();
 
 	private ParameterTypeProvider typeProvider = new P_ParameterTypeProvider();
+
+	private Map<Class<?>, ParallelizationParadigmConverter<?>> mappers;
 
 	// -- ImageJServerParadigm methods --
 
@@ -79,12 +90,37 @@ public class ImageJServerParadigm extends SimpleOstravaParadigm {
 			port = Integer.parseInt(tokensOfHost[1]);
 			host = tokensOfHost[0];
 		}
-		return new ImageJServerWorker(host, port);
+		
+		return new ImageJServerWorker(host, port, context, typeProvider,
+			getMappers());
 	}
 
-	@Override
-	protected ParameterTypeProvider getTypeProvider() {
-		return typeProvider;
+	private synchronized Map<Class<?>, ParallelizationParadigmConverter<?>>
+		getMappers()
+	{
+		if (mappers == null) {
+			mappers = new HashMap<>();
+			initMappers();
+		}
+		return mappers;
+	}
+
+	private void initMappers() {
+		pluginService.createInstancesOfType(ParallelizationParadigmConverter.class)
+			.stream().filter(this::isParadigmSupportedBy).forEach(m -> mappers.put(m
+				.getOutputType(), m));
+
+	}
+
+	private boolean isParadigmSupportedBy(ParallelizationParadigmConverter<?> m) {
+		for (Class<? extends ParallelizationParadigm> clazz : m
+			.getSupportedParadigms())
+		{
+			if (clazz.isAssignableFrom(this.getClass())) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private class P_ParameterTypeProvider implements ParameterTypeProvider {

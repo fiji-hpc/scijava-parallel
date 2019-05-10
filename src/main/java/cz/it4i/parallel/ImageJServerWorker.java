@@ -1,14 +1,12 @@
 
 package cz.it4i.parallel;
 
+import com.google.common.collect.Streams;
+
 import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.file.Path;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Arrays;
 import java.util.Collections;
@@ -17,9 +15,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
 
 import javax.ws.rs.core.Response;
@@ -35,7 +36,6 @@ import org.apache.http.entity.mime.MIME;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.AbstractContentBody;
 import org.apache.http.entity.mime.content.ContentBody;
-import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
@@ -43,11 +43,10 @@ import org.json.simple.JSONObject;
 import org.scijava.Context;
 import org.scijava.plugin.SciJavaPlugin;
 
+import cz.it4i.parallel.persistence.RequestBrokerServiceParameterProvider;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 public class ImageJServerWorker implements ParallelWorker {
 
 	private static final String HTTP_PROTOCOL = "http://";
@@ -55,14 +54,31 @@ public class ImageJServerWorker implements ParallelWorker {
 	private final int port;
 
 	private static final Set<String> supportedImageTypes = Collections
-		.unmodifiableSet(new HashSet<>(Arrays.asList("png", "jpg", "tif")));
+		.unmodifiableSet(new HashSet<>(Arrays.asList("png", "jpg", "tif",
+			"raw")));
 
 	private final Map<String, PRemoteObject> id2importedData =
 		new HashMap<>();
+	private RequestBrokerServiceParameterProvider requestBrokerServiceParameterProvider;
+	private PRemoteDataHandler remoteDataHandler;
+	private Map<Class<?>, ParallelizationParadigmConverter<?>> mappers;
+	private ParameterTypeProvider typeProvider;
+	private PExecutor executer;
 
-	ImageJServerWorker(final String hostName, final int port) {
+	ImageJServerWorker(final String hostName, final int port, Context context,
+		ParameterTypeProvider typeProvider,
+		Map<Class<?>, ParallelizationParadigmConverter<?>> mappers)
+	{
 		this.hostName = hostName;
 		this.port = port;
+		this.typeProvider = typeProvider;
+		this.mappers = mappers;
+		this.remoteDataHandler = new PRemoteDataHandler();
+		this.requestBrokerServiceParameterProvider =
+			new RequestBrokerServiceParameterProvider(typeProvider, mappers,
+				remoteDataHandler);
+		context.inject(requestBrokerServiceParameterProvider);
+		this.executer = new PExecutor();
 	}
 
 	public String getHostName() {
@@ -73,100 +89,20 @@ public class ImageJServerWorker implements ParallelWorker {
 		return port;
 	}
 
-	// -- ParallelWorker methods --
-
-	@Override
-	public Object importData(final Path path) {
-
-		final String filePath = path.toAbsolutePath().toString();
-		final String fileName = path.getFileName().toString();
-		return importData(new FileBody(new File(filePath), ContentType.create(
-			getContentType(filePath)), fileName));
-	}
-
-	public Object importData(final String fileName, long length,
-		Consumer<OutputStream> osConsumer)
-	{
-
-		return importData(new AbstractContentBody(ContentType.create(getContentType(
-			fileName)))
-		{
-
-			@Override
-			public String getTransferEncoding() {
-				return MIME.ENC_BINARY;
-			}
-
-			@Override
-			public long getContentLength() {
-				return length;
-			}
-
-			@Override
-			public void writeTo(OutputStream out) throws IOException {
-				osConsumer.accept(out);
-			}
-
-			@Override
-			public String getFilename() {
-				return fileName;
-			}
-		});
-	}
-
-	@Override
-	public void exportData(final Object dataset, final Path p) {
-
-		final String filePath = p.toString();
-		final String fileName = p.getFileName().toString();
-		try (OutputStream os = new BufferedOutputStream(new FileOutputStream(
-			new File(filePath))))
-		{
-			exportData(dataset, fileName, t -> {
-
-				int inByte;
-				try {
-					while ((inByte = t.read()) != -1) {
-						os.write(inByte);
-					}
-				}
-				catch (IOException exc) {
-					log.error("", exc);
-				}
-			});
-		}
-		catch (final Exception e) {
-			log.error("", e);
-		}
-	}
-
-	@Override
-	public void deleteData(final Object dataset) {
-
-		final String objectId = getObjectId(dataset);
-
-		try {
-			final String postUrl = HTTP_PROTOCOL + hostName + ":" + port +
-				"/objects/" + objectId;
-			final HttpDelete httpDelete = new HttpDelete(postUrl);
-			HttpClientBuilder.create().build().execute(httpDelete);
-		}
-		catch (final Exception e) {
-			throw new SciJavaParallelRuntimeException(e);
-		}
-	}
-
+	
 	/**
 	 * @throws RuntimeException if response from the ImageJ server is not successful, or json cannot be parsed properly.
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	public Map<String, Object> executeCommand(final String commandTypeName,
 		final Map<String, ?> inputs)
 	{
-		final Map<String, ?> wrappedInputs = wrapInputMap(inputs);
-		return unwrapOutputMap(doRequest(commandTypeName, wrappedInputs));
+		return executer.execute(commandTypeName, Collections.singletonList(
+			(Map<String, Object>) inputs), in -> Collections.singletonList(
+				executeSingle(commandTypeName, in.get(0)))).get(0);
 	}
-
+	
 	@Override
 	public List<Map<String, Object>> executeCommand(final String commandTypeName,
 		final List<Map<String, Object>> inputs)
@@ -178,21 +114,12 @@ public class ImageJServerWorker implements ParallelWorker {
 			return Collections.singletonList(executeCommand(commandTypeName, inputs
 				.get(0)));
 		}
-
-		Map<String, Object> inputForExecution = new HashMap<>();
-		inputForExecution.put("moduleId", commandTypeName);
-		inputForExecution.put("inputs", inputs.stream().map(this::wrapInputMap)
-			.collect(Collectors.toList()));
-		@SuppressWarnings("unchecked")
-		List<Map<String, Object>> output = (List<Map<String, Object>>) doRequest(
-			"cz.it4i.parallel.plugins.ThreadRunner", inputForExecution).get(
-				"outputs");
-		return output.stream().map(this::unwrapOutputMap).collect(Collectors
-			.toList());
-
+		return executer.execute(commandTypeName, inputs, in -> executeMultiple(
+			commandTypeName, in));
 	}
 
 	// -- Helper methods --
+
 
 	private Map<String, Object> doRequest(final String commandTypeName,
 		final Map<String, ?> wrappedInputs)
@@ -227,24 +154,26 @@ public class ImageJServerWorker implements ParallelWorker {
 		}
 	}
 
-	private void exportData(final Object dataset, final String filePath,
-		Consumer<InputStream> isConsumer) throws IOException
+	private List<Map<String, Object>> executeMultiple(
+		final String commandTypeName, final List<Map<String, Object>> inputs)
 	{
+		Map<String, Object> inputForExecution = new HashMap<>();
+		inputForExecution.put("moduleId", commandTypeName);
+		inputForExecution.put("inputs", inputs.stream().map(this::wrapInputMap)
+			.collect(Collectors.toList()));
+		@SuppressWarnings("unchecked")
+		List<Map<String, Object>> output = (List<Map<String, Object>>) doRequest(
+			"cz.it4i.parallel.plugins.ThreadRunner", inputForExecution).get(
+				"outputs");
+		return output.stream().map(this::unwrapOutputMap).collect(Collectors
+			.toList());
+	}
 
-		final String objectId = getObjectId(dataset);
-		final String getUrl = HTTP_PROTOCOL + hostName + ":" + port +
-			"/objects/" + objectId + "/" + getImageType(filePath);
-		final HttpGet httpGet = new HttpGet(getUrl);
-	
-		final HttpEntity entity = HttpClientBuilder.create().build().execute(
-			httpGet).getEntity();
-		if (entity != null) {
-			try (BufferedInputStream bis = new BufferedInputStream(entity
-				.getContent()))
-			{
-				isConsumer.accept(bis);
-			}
-		}
+	private Map<String, Object> executeSingle(final String commandTypeName,
+		final Map<String, ?> inputs)
+	{
+		final Map<String, ?> wrappedInputs = wrapInputMap(inputs);
+		return unwrapOutputMap(doRequest(commandTypeName, wrappedInputs));
 	}
 
 	private String getObjectId(final Object dataset) {
@@ -284,25 +213,7 @@ public class ImageJServerWorker implements ParallelWorker {
 		return result;
 	}
 
-	private PRemoteObject importData(ContentBody contentBody) {
-		return Routines.supplyWithExceptionHandling(() -> {
 
-			final String postUrl = HTTP_PROTOCOL + hostName + ":" + port +
-				"/objects/upload";
-			final HttpPost httpPost = new HttpPost(postUrl);
-
-			final HttpEntity entity = MultipartEntityBuilder.create().addPart("file",
-				contentBody).build();
-			httpPost.setEntity(entity);
-
-			final HttpResponse response = HttpClientBuilder.create().build().execute(
-				httpPost);
-
-			final String json = EntityUtils.toString(response.getEntity());
-			org.json.JSONObject result = new org.json.JSONObject(json);
-			return indexImported(new PRemoteObject(result));
-		});
-	}
 
 	private PRemoteObject indexImported(PRemoteObject obj) {
 		id2importedData.put(obj.getId(), obj);
@@ -360,6 +271,159 @@ public class ImageJServerWorker implements ParallelWorker {
 		return entry.getValue() != null && !(entry
 			.getValue() instanceof SciJavaPlugin) && !(entry
 				.getValue() instanceof Context);
+	}
+
+	private class PExecutor {
+
+		List<Map<String, Object>> execute(String commandTypeName,
+			List<Map<String, Object>> inputs,
+			UnaryOperator<List<Map<String, Object>>> toExecute)
+		{
+			List<ParameterProcessor> processors;
+			try (AutoCloseable parameterProcessor = cz.it4i.common.Collections
+				.closeAll(processors = // NOSONAR
+				constructParameterProcessors(remoteDataHandler, commandTypeName,
+					inputs)))
+			{
+
+				inputs = processValues(inputs, processors,
+					ParameterProcessor::processInputs);
+				List<Map<String, Object>> outputs = toExecute.apply(inputs);
+				return processValues(outputs, processors,
+					ParameterProcessor::processOutputs);
+			}
+			catch (RuntimeException e) {
+				// this should be rethrown
+				throw e;
+			}
+			catch (Exception e) {
+				// this should not happen!
+				throw new RuntimeException(e);// NOSONAR
+			}
+
+		}
+
+		List<ParameterProcessor> constructParameterProcessors(
+			RemoteDataHandler pw,
+			String command, List<Map<String, Object>> inputs)
+		{
+			return IntStream.range(0, inputs.size()).mapToObj(
+				__ -> constructParameterProcessor(pw, command)).collect(Collectors // NOSONAR
+					.toList());
+		}
+		
+		ParameterProcessor constructParameterProcessor(
+			RemoteDataHandler pw, String command)
+		{
+
+			ParameterProcessor result = requestBrokerServiceParameterProvider
+				.constructProvider(command, pw);
+			if (result == null) {
+				result = new DefaultParameterProcessor(typeProvider, command, pw,
+					mappers);
+			}
+			return result;
+		}
+
+		List<Map<String, Object>> processValues(
+			List<Map<String, Object>> values, List<ParameterProcessor> processors,
+			BiFunction<ParameterProcessor, Map<String, Object>, Map<String, Object>> func)
+		{
+			return Streams.zip(values.stream(), processors.stream(), (i, p) -> func
+				.apply(p, i)).collect(Collectors.toList());
+		}
+		
+	}
+	private class PRemoteDataHandler implements RemoteDataHandler {
+
+		@Override
+		public Object importData(final String fileName,
+			Consumer<OutputStream> osConsumer)
+		{
+
+			return importData(new AbstractContentBody(ContentType.create(
+				getContentType(fileName)))
+			{
+
+				@Override
+				public String getTransferEncoding() {
+					return MIME.ENC_BINARY;
+				}
+
+				@Override
+				public long getContentLength() {
+					return -1;
+				}
+
+				@Override
+				public void writeTo(OutputStream out) throws IOException {
+					osConsumer.accept(out);
+				}
+
+				@Override
+				public String getFilename() {
+					return fileName;
+				}
+			});
+		}
+
+
+		@Override
+		public void exportData(final Object dataset, final String filePath,
+			Consumer<InputStream> isConsumer) throws IOException
+		{
+
+			final String objectId = getObjectId(dataset);
+			final String getUrl = HTTP_PROTOCOL + hostName + ":" + port +
+				"/objects/" + objectId + "/" + getImageType(filePath);
+			final HttpGet httpGet = new HttpGet(getUrl);
+
+			final HttpEntity entity = HttpClientBuilder.create().build().execute(
+				httpGet).getEntity();
+			if (entity != null) {
+				try (BufferedInputStream bis = new BufferedInputStream(entity
+					.getContent()))
+				{
+					isConsumer.accept(bis);
+				}
+			}
+		}
+
+		@Override
+		public void deleteData(final Object dataset) {
+
+			final String objectId = getObjectId(dataset);
+
+			try {
+				final String postUrl = HTTP_PROTOCOL + hostName + ":" + port +
+					"/objects/" + objectId;
+				final HttpDelete httpDelete = new HttpDelete(postUrl);
+				HttpClientBuilder.create().build().execute(httpDelete);
+			}
+			catch (final Exception e) {
+				throw new SciJavaParallelRuntimeException(e);
+			}
+		}
+
+		PRemoteObject importData(ContentBody contentBody) {
+			return Routines.supplyWithExceptionHandling(() -> {
+
+				final String postUrl = HTTP_PROTOCOL + hostName + ":" + port +
+					"/objects/upload";
+				final HttpPost httpPost = new HttpPost(postUrl);
+
+				final HttpEntity entity = MultipartEntityBuilder.create().addPart(
+					"file", contentBody).build();
+				httpPost.setEntity(entity);
+
+				final HttpResponse response = HttpClientBuilder.create().build()
+					.execute(httpPost);
+
+				final String json = EntityUtils.toString(response.getEntity());
+				org.json.JSONObject result = new org.json.JSONObject(json);
+				return indexImported(new PRemoteObject(result));
+			});
+		}
 	}
 
 	private class PRemoteObject {

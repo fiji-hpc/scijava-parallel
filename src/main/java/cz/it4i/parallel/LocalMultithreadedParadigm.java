@@ -41,25 +41,4 @@ public class LocalMultithreadedParadigm extends SimpleOstravaParadigm {
 		}
 	}
 
-	@Override
-	protected ParameterProcessor constructParameterProcessor(RemoteDataHandler pw,
-		String command)
-	{
-		return new AbstractParameterProcessor((_1, _2) -> null, command, pw) {
-
-			@Override
-			protected <T> ParallelizationParadigmConverter<T> construcConverter(
-				Class<T> expectedType, RemoteDataHandler servingWorker)
-			{
-				return null;
-			}
-
-		};
-	}
-
-	@Override
-	protected ParameterTypeProvider getTypeProvider() {
-		// TODO Auto-generated method stub
-		return null;
-	}
 }

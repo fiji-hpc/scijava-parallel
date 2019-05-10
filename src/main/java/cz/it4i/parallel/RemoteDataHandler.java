@@ -1,13 +1,16 @@
-
 package cz.it4i.parallel;
 
-import java.nio.file.Path;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.function.Consumer;
 
 public interface RemoteDataHandler {
 
-	Object importData(Path filePath);
+	void exportData(Object dataset, String filePath,
+		Consumer<InputStream> isConsumer) throws IOException;
 
-	void exportData(Object data, Path filePath);
+	Object importData(String fileName, Consumer<OutputStream> osConsumer);
 
 	void deleteData(Object ds);
 

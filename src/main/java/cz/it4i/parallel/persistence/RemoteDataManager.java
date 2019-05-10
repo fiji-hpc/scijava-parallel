@@ -1,14 +1,15 @@
 package cz.it4i.parallel.persistence;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.Serializable;
-import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
-
-import org.scijava.parallel.PersistentParallelizationParadigm.CompletableFutureID;
+import java.util.function.Consumer;
 
 import cz.it4i.parallel.RemoteDataHandler;
 import lombok.AllArgsConstructor;
@@ -61,14 +62,20 @@ class RemoteDataManager {
 
 		Serializable id;
 
+
 		@Override
-		public Object importData(Path filePath) {
-			return handler.importData(filePath);
+		public void exportData(Object dataset, String filePath,
+			Consumer<InputStream> isConsumer) throws IOException
+		{
+			handler.exportData(dataset, filePath, isConsumer);
+
 		}
 
 		@Override
-		public void exportData(Object data, Path filePath) {
-			handler.exportData(data, filePath);
+		public Object importData(String fileName,
+			Consumer<OutputStream> osConsumer)
+		{
+			return handler.importData(fileName, osConsumer);
 		}
 
 		@Override

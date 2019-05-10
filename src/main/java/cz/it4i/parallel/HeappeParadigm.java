@@ -12,6 +12,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.scijava.Context;
 import org.scijava.parallel.ParallelizationParadigm;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
@@ -26,6 +27,7 @@ import cz.it4i.fiji.haas_java_client.SettingsProvider;
 import cz.it4i.fiji.haas_java_client.TunnelToNode;
 import cz.it4i.fiji.haas_java_client.UploadingFileData;
 
+@Deprecated
 @Plugin(type = ParallelizationParadigm.class)
 public class HeappeParadigm extends SimpleOstravaParadigm {
 
@@ -115,8 +117,8 @@ public class HeappeParadigm extends SimpleOstravaParadigm {
 							continue;
 						}
 						tunnels.add(tunnel);
-						return new HeappeWorker(tunnel.getLocalHost(), tunnel
-							.getLocalPort());
+						return new ImageJServerWorker(tunnel.getLocalHost(), tunnel
+							.getLocalPort(), new Context(), null, null);
 					}
 					while (true);
 				}
@@ -211,15 +213,5 @@ public class HeappeParadigm extends SimpleOstravaParadigm {
 		void run() throws Exception;
 	}
 
-	@Override
-	protected ParameterProcessor constructParameterProcessor(RemoteDataHandler pw,
-		String command)
-	{
-		return null;
-	}
 
-	@Override
-	protected ParameterTypeProvider getTypeProvider() {
-		return null;
-	}
 }

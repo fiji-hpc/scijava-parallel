@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 
 import org.scijava.command.Command;
 
-public interface ParallelWorker extends Closeable, RemoteDataHandler {
+public interface ParallelWorker extends Closeable {
 
 	default Map<String, Object> executeCommand(
 		Class<? extends Command> commandType, Map<String, ?> map)

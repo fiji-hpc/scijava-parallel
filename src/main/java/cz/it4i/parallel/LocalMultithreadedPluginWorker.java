@@ -3,13 +3,9 @@ package cz.it4i.parallel;
 
 import io.scif.services.DatasetIOService;
 
-import java.io.IOException;
-import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
-
-import net.imagej.Dataset;
 
 import org.scijava.Context;
 import org.scijava.command.CommandService;
@@ -35,30 +31,6 @@ public class LocalMultithreadedPluginWorker implements ParallelWorker {
 		new Context().inject(this);
 	}
 
-	@Override
-	public Dataset importData(final Path filePath) {
-		try {
-			return datasetIOService.open(filePath.toString());
-		}
-		catch (final IOException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	@Override
-	public void exportData(final Object dataset, final Path filePath) {
-		try {
-			datasetIOService.save((Dataset) dataset, filePath.toString());
-		}
-		catch (final IOException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	@Override
-	public void deleteData(final Object ds) {
-		((Dataset) ds).decrementReferences();
-	}
 
 	@Override
 	public Map<String, Object> executeCommand(
