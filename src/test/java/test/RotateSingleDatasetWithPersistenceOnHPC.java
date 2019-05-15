@@ -25,7 +25,9 @@ import org.scijava.parallel.PersistentParallelizationParadigm;
 import org.scijava.parallel.PersistentParallelizationParadigm.CompletableFutureID;
 import org.scijava.ui.UIService;
 
+import cz.it4i.parallel.HPCSettings;
 import cz.it4i.parallel.ui.HPCImageJServerRunnerWithUI;
+import cz.it4i.parallel.ui.HPCSettingsGui;
 import cz.it4i.parallel.utils.TestParadigmPersistent;
 import lombok.extern.slf4j.Slf4j;
 
@@ -33,108 +35,134 @@ import lombok.extern.slf4j.Slf4j;
 public class RotateSingleDatasetWithPersistenceOnHPC
 {
 
+	private final static String REQUEST_DATA_FILE = "requestData.obj";
+
+	private final static Path PATH_TO_STORED_REQUEST_DATA_FILE;
+
 	private static Context context;
 
 	private static DatasetIOService ioService;
 
 	private static UIService uiService;
 
+	private static ImageJ ij;
+
 	public static void main(String[] args) throws InterruptedException,
 		ExecutionException, ClassNotFoundException, IOException
 	{
 		initImageJAndSciJava();
 
-		List<CompletableFutureID> futureIDs;
-		try (PersistentParallelizationParadigm paradigm = constructParadigm())
+		Map<Class<?>, Object> requestData = null;
+		if (areRequestDataStored()) {
+			requestData = loadRequestData();
+		}
+		else {
+			requestData = new HashMap<>();
+		}
+		boolean exit = false;
+		try (PersistentParallelizationParadigm paradigm = constructParadigm(
+			requestData))
 		{
 
-			if (areRequestIDSStored()) {
+			if (!requestData.containsKey(List.class)) {
 				List<CompletableFuture<Map<String, Object>>> results = paradigm
 					.runAllAsync(RotateImageXY.class, initParameters());
-
-				futureIDs = paradigm.getIDs(results);
-
-				storeRequestID(futureIDs);
+				requestData.put(List.class, paradigm.getIDs(results));
+				storeRequestData(requestData);
+				exit = true;
 			}
 			else {
-				futureIDs = loadRequestID();
-
+				@SuppressWarnings("unchecked")
+				List<CompletableFutureID> futureIDs =
+					(List<CompletableFutureID>) requestData.get(List.class);
 				CompletableFuture<Map<String, Object>> resultFuture = paradigm.getByIDs(
 					futureIDs).get(0);
 				Dataset ds = (Dataset) resultFuture.get().get("dataset");
 				uiService.show(ds);
-
 				paradigm.purge(futureIDs);
 			}
+
 		}
-	
+		if (exit) {
+			context.dispose();
+			uiService.dispose();
+			System.exit(0);
+		}
+		else {
+			ij.ui().getDefaultUI().dispose();
+		}
 
 	}
 
-	private static PersistentParallelizationParadigm constructParadigm() {
-		final HPCImageJServerRunnerWithUI runner = HPCImageJServerRunnerWithUI.gui(
-			context);
-		registerShutDownAction(runner);
-		return TestParadigmPersistent.runningImageJServer(context, runner, false);
+	private static PersistentParallelizationParadigm constructParadigm(
+		Map<Class<?>, Object> requestData)
+	{
+		HPCSettings settings = (HPCSettings) requestData.get(
+			HPCSettings.class);
+		boolean shutDownOnClose = true;
+		if (settings != null) {
+			shutDownOnClose &= settings.isShutdownJobAfterClose();
+		}
+		else {
+			shutDownOnClose = false;
+			settings = HPCSettingsGui.showDialog(context);
+			requestData.put(HPCSettings.class, settings);
+		}
+		final HPCSettings finalHpcSettings = settings;
+
+		final HPCImageJServerRunnerWithUI runner = new HPCImageJServerRunnerWithUI(
+			finalHpcSettings, shutDownOnClose)
+		{
+
+			@Override
+			public void start() {
+				super.start();
+				finalHpcSettings.setJobID(this.getJob().getID());
+			}
+		};
+		return TestParadigmPersistent.runningImageJServer(context, runner);
 
 	}
 
 	private static void initImageJAndSciJava() {
-		final ImageJ ij = new ImageJ();
+		ij = new ImageJ();
 		ij.ui().showUI();
 		context = ij.getContext();
 		ioService = context.service(DatasetIOService.class);
 		uiService = context.service(UIService.class);
 	}
 
-	private final static String REQUEST_ID_FILE = "requestID.obj";
-
-	private final static Path PATH_TO_STORED_REQUESTIDS_FILE;
 	static {
-		PATH_TO_STORED_REQUESTIDS_FILE = Paths.get(REQUEST_ID_FILE);
+		PATH_TO_STORED_REQUEST_DATA_FILE = Paths.get(REQUEST_DATA_FILE);
 	}
 
-	private static boolean areRequestIDSStored() {
-		return !Files.exists(PATH_TO_STORED_REQUESTIDS_FILE);
+	private static boolean areRequestDataStored() {
+		return Files.exists(PATH_TO_STORED_REQUEST_DATA_FILE);
 	}
 
 	@SuppressWarnings("unchecked")
-	private static List<CompletableFutureID> loadRequestID() throws IOException,
+	private static Map<Class<?>, Object> loadRequestData() throws IOException,
 		ClassNotFoundException
 	{
-		List<CompletableFutureID> result = null;
+		Map<Class<?>, Object> result = null;
 		try (ObjectInputStream ois = new ObjectInputStream(Files.newInputStream(
-			PATH_TO_STORED_REQUESTIDS_FILE)))
+			PATH_TO_STORED_REQUEST_DATA_FILE)))
 		{
-			result = (List<CompletableFutureID>) ois.readObject();
+			result = (Map<Class<?>, Object>) ois.readObject();
 		}
-		Files.delete(PATH_TO_STORED_REQUESTIDS_FILE);
+		Files.delete(PATH_TO_STORED_REQUEST_DATA_FILE);
 		return result;
 	}
 
-	private static void registerShutDownAction(
-		final HPCImageJServerRunnerWithUI runner)
-	{
-		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-			if (runner.isShutdownJob()) {
-				runner.close();
-			}
-		}));
-	}
-
-
-	private static void storeRequestID(List<CompletableFutureID> futureIDs)
+	private static void storeRequestData(Map<Class<?>, Object> requestData)
 		throws IOException
 	{
 		try (ObjectOutputStream oos = new ObjectOutputStream(Files.newOutputStream(
-			PATH_TO_STORED_REQUESTIDS_FILE)))
+			PATH_TO_STORED_REQUEST_DATA_FILE)))
 		{
-			oos.writeObject(futureIDs);
+			oos.writeObject(requestData);
 		}
-	
 	}
-
-
 
 	private static List<Map<String, Object>> initParameters()
 	{
@@ -156,4 +184,6 @@ public class RotateSingleDatasetWithPersistenceOnHPC
 	private static String getName(Object dataset) {
 		return dataset.getClass().toString() + System.identityHashCode(dataset);
 	}
+
+
 }

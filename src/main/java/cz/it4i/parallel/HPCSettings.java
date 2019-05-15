@@ -1,6 +1,7 @@
 package cz.it4i.parallel;
 
 import java.io.File;
+import java.io.Serializable;
 
 import lombok.Builder;
 import lombok.Data;
@@ -8,7 +9,7 @@ import lombok.Data;
 @Data
 
 @Builder
-public class HPCSettings
+public class HPCSettings implements Serializable
 {
 	private final String host;
 
@@ -26,7 +27,7 @@ public class HPCSettings
 
 	private final int ncpus;
 
-	private final String jobID;
+	private String jobID;
 
 	private final boolean shutdownJobAfterClose;
 

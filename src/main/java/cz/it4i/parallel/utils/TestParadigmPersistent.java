@@ -26,44 +26,19 @@ public class TestParadigmPersistent extends TestParadigm implements
 
 
 	public static ParallelizationParadigm localImageJServer( String fiji, Context context ) {
-		return new TestParadigmPersistent( new ImageJServerRunner( fiji ), context );
+		return new TestParadigmPersistent(new ImageJServerRunner(fiji, true),
+			context);
 	}
 
 	public static PersistentParallelizationParadigm runningImageJServer(
-		Context context, HPCImageJServerRunnerWithUI runner,
-		boolean stopImageJServerOnClose)
+		Context context, HPCImageJServerRunnerWithUI runner)
 	{
-		return new TestParadigmPersistent(new PNonClosingServerRunner(runner,
-			stopImageJServerOnClose), context);
+		return new TestParadigmPersistent(runner, context);
 	}
 
 	public TestParadigmPersistent(ServerRunner runner, Context context)
 	{
 		super(runner, initParadigm(runner, context));
-	}
-	
-	
-
-	private static class PNonClosingServerRunner extends TestServerRunner {
-
-		final boolean started;
-
-		public PNonClosingServerRunner(ServerRunner serverRunner, boolean started) {
-			super(serverRunner);
-			this.started = started;
-		}
-
-		@Override
-		public void start() {
-			if (!started) {
-				super.start();
-			}
-		}
-
-		@Override
-		public void close() {
-			// do nothing
-		}
 	}
 
 	private static PersistentParallelizationParadigm initParadigm(

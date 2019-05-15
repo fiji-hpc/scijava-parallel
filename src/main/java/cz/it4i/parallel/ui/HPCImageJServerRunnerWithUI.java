@@ -25,8 +25,10 @@ public class HPCImageJServerRunnerWithUI extends HPCImageJServerRunner {
 	@Getter
 	final private boolean shutdownJob;
 
-	public HPCImageJServerRunnerWithUI(HPCSettings settings) {
-		super(settings);
+	public HPCImageJServerRunnerWithUI(HPCSettings settings,
+		boolean shutdownOnClose)
+	{
+		super(settings, shutdownOnClose);
 		shutdownJob = settings.isShutdownJobAfterClose();
 	}
 
@@ -48,12 +50,14 @@ public class HPCImageJServerRunnerWithUI extends HPCImageJServerRunner {
 	}
 
 	private void imageJServerStarted() {
+		log.info("imageJServerStarted");
 		dialog.setVisible(false);
 		this.label.setText("Waiting for a ImageJ server start.");
 		dialog.setVisible(true);
 	}
 
 	private void imageJServerRunning() {
+		log.info("imageJServerRunning");
 		dialog.setVisible(false);
 		log.info("job: " + getJob().getID() + " started on hosts: " + getJob()
 			.getNodes());
@@ -61,13 +65,23 @@ public class HPCImageJServerRunnerWithUI extends HPCImageJServerRunner {
 
 	@Override
 	public void close() {
+		log.info("close");
 		label.setText("Waiting for stop.");
 		dialog.setVisible(true);
 		super.close();
 		dialog.setVisible(false);
+		dialog.dispose();
+		log.info("close done");
+	}
+
+	public static HPCImageJServerRunnerWithUI gui(Context context,
+		boolean shutdownOnClose)
+	{
+		return new HPCImageJServerRunnerWithUI(HPCSettingsGui.showDialog(context),
+			shutdownOnClose);
 	}
 
 	public static HPCImageJServerRunnerWithUI gui(Context context) {
-		return new HPCImageJServerRunnerWithUI(HPCSettingsGui.showDialog(context));
+		return gui(context, true);
 	}
 }

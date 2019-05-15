@@ -29,4 +29,9 @@ public class TestServerRunner implements ServerRunner {
 		serverRunner.close();
 	}
 
+	@Override
+	public void shutdown() {
+		serverRunner.shutdown();
+	}
+
 }

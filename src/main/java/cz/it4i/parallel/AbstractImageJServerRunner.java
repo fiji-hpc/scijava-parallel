@@ -8,6 +8,9 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import lombok.AllArgsConstructor;
+
+@AllArgsConstructor
 public abstract class AbstractImageJServerRunner implements AutoCloseable, ServerRunner {
 
 	private final static Logger log = LoggerFactory.getLogger(
@@ -16,6 +19,8 @@ public abstract class AbstractImageJServerRunner implements AutoCloseable, Serve
 	public final static List<String> IMAGEJ_SERVER_PARAMETERS = Arrays.asList(
 		"-Dimagej.legacy.modernOnlyCommands=true", "--", "--ij2", "--headless",
 		"--server" );
+
+	private final boolean shutdownOnClose;
 
 	@Override
 	public void start() {
@@ -37,7 +42,11 @@ public abstract class AbstractImageJServerRunner implements AutoCloseable, Serve
 	public abstract int getNCores();
 
 	@Override
-	abstract public void close();
+	public void close() {
+		if (shutdownOnClose) {
+			shutdown();
+		}
+	}
 
 	protected abstract void doStartImageJServer()
 		throws IOException;

@@ -7,10 +7,13 @@ public interface ServerRunner {
 
 	void start();
 
+	void shutdown();
+
 	List<Integer> getPorts();
 
 	int getNCores();
 
 	void close();
+
 
 }

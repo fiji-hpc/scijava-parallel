@@ -15,8 +15,16 @@ public class ImageJServerRunner extends AbstractImageJServerRunner {
 
 	private String fijiExecutable;
 
-	public ImageJServerRunner(String fiji) {
+	public ImageJServerRunner(String fiji, boolean shutdownOnClose) {
+		super(shutdownOnClose);
 		fijiExecutable = fiji;
+	}
+
+	@Override
+	public void shutdown() {
+		if (imageJServerProcess != null) {
+			imageJServerProcess.destroy();
+		}
 	}
 
 	@Override
@@ -27,13 +35,6 @@ public class ImageJServerRunner extends AbstractImageJServerRunner {
 	@Override
 	public List<Integer> getPorts() {
 		return Collections.singletonList(8080);
-	}
-
-	@Override
-	public void close() {
-		if (imageJServerProcess != null) {
-			imageJServerProcess.destroy();
-		}
 	}
 
 	@Override

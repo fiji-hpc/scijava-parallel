@@ -18,9 +18,9 @@ public class HPCImageJServerRunner extends AbstractImageJServerRunner {
 
 	private ClusterJobLauncher launcher;
 
-	public HPCImageJServerRunner( HPCSettings settings )
+	public HPCImageJServerRunner(HPCSettings settings, boolean shutdownOnClose)
 	{
-		super();
+		super(shutdownOnClose);
 		this.settings = settings;
 		this.ports = Collections.emptyList();
 	}
@@ -35,10 +35,15 @@ public class HPCImageJServerRunner extends AbstractImageJServerRunner {
 	}
 
 	@Override
-	public void close() {
+	public void shutdown() {
 		if (job != null) {
 			job.stop();
 		}
+	}
+
+	@Override
+	public void close() {
+		super.close();
 		launcher.close();
 	}
 
@@ -64,4 +69,6 @@ public class HPCImageJServerRunner extends AbstractImageJServerRunner {
 	{
 		return ports;
 	}
+
+
 }
