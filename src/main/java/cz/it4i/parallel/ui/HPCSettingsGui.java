@@ -49,7 +49,7 @@ public class HPCSettingsGui implements Command {
 	private int ncpus;
 
 	@Parameter(style = TextWidget.FIELD_STYLE, label = "Running job ID")
-	private String jobID;
+	private String jobID = "";
 
 	@Parameter(style = TextWidget.FIELD_STYLE,
 		label = "Shutdown job when application finishes.")
