@@ -67,4 +67,15 @@ public class Routines {
 		}
 		return unwrapException(exc.getCause());
 	}
+
+
+	public static void rethrowAsUnchecked(Throwable exc) {
+		if (exc instanceof Error) {
+			throw (Error) exc;
+		}
+		if (exc instanceof RuntimeException) {
+			throw (RuntimeException) exc;
+		}
+		throw new SciJavaParallelRuntimeException(exc);
+	}
 }

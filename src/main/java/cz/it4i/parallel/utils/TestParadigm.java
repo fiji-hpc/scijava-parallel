@@ -29,7 +29,7 @@ public class TestParadigm implements ParallelizationParadigm
 		this.runner = runner;
 	}
 
-	TestParadigm(ServerRunner runner, ParallelizationParadigm paradigm)
+	public TestParadigm(ServerRunner runner, ParallelizationParadigm paradigm)
 	{
 		super();
 		this.runner = runner;
