@@ -16,9 +16,9 @@ public abstract class AbstractImageJServerRunner implements AutoCloseable, Serve
 	private final static Logger log = LoggerFactory.getLogger(
 		cz.it4i.parallel.AbstractImageJServerRunner.class);
 
-	public final static List<String> IMAGEJ_SERVER_PARAMETERS = Arrays.asList(
+	private final static List<String> IMAGEJ_SERVER_PARAMETERS = Arrays.asList(
 		"-Dimagej.legacy.modernOnlyCommands=true", "--", "--ij2", "--headless",
-		"--server" );
+		"--server");
 
 	private final boolean shutdownOnClose;
 
@@ -48,10 +48,14 @@ public abstract class AbstractImageJServerRunner implements AutoCloseable, Serve
 		}
 	}
 
+	protected List<String> getParameters() {
+		return IMAGEJ_SERVER_PARAMETERS;
+	}
+
 	protected abstract void doStartImageJServer()
 		throws IOException;
 
-	private void waitForImageJServer( Integer port )
+	protected void waitForImageJServer(Integer port)
 	{
 		WaitForHTTPServerRunTS.create("http://localhost:" + port + "/modules")
 			.run();

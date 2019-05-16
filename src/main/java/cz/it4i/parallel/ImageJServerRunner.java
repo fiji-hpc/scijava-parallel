@@ -46,9 +46,8 @@ public class ImageJServerRunner extends AbstractImageJServerRunner {
 					"). The property 'Fiji.executable.path' may not be configured properly in the 'configuration.properties' file.");
 		}
 
-		List<String> command = Stream.concat(Stream.of(fijiPath),
-			AbstractImageJServerRunner.IMAGEJ_SERVER_PARAMETERS.stream()).collect(
-				Collectors.toList());
+		List<String> command = Stream.concat(Stream.of(fijiPath), getParameters()
+			.stream()).collect(Collectors.toList());
 
 		final ProcessBuilder pb = new ProcessBuilder(command).inheritIO();
 		imageJServerProcess = pb.start();

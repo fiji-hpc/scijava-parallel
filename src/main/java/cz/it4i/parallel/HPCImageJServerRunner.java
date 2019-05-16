@@ -52,8 +52,8 @@ public class HPCImageJServerRunner extends AbstractImageJServerRunner {
 		launcher = Routines.supplyWithExceptionHandling(
 			() -> new ClusterJobLauncher(settings.getHost(), settings.getUserName(), settings.getKeyFile().toString(),
 				settings.getKeyFilePassword()));
-		final String arguments = AbstractImageJServerRunner.IMAGEJ_SERVER_PARAMETERS
-				.stream().collect( Collectors.joining( " " ) );
+		final String arguments = getParameters().stream().collect(Collectors
+			.joining(" "));
 		if (settings.getJobID() != null) {
 			job = launcher.getSubmittedJob(settings.getJobID());
 		}
