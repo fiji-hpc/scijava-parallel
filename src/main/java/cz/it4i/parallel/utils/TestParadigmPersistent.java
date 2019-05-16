@@ -13,12 +13,10 @@ import org.scijava.parallel.ParallelizationParadigmProfile;
 import org.scijava.parallel.PersistentParallelizationParadigm;
 
 import cz.it4i.parallel.ImageJServerParadigm;
+import cz.it4i.parallel.ImageJServerParadigm.Host;
 import cz.it4i.parallel.ImageJServerRunner;
 import cz.it4i.parallel.ServerRunner;
-import cz.it4i.parallel.TestServerRunner;
-import cz.it4i.parallel.ImageJServerParadigm.Host;
 import cz.it4i.parallel.persistence.PersistentParallelizationParadigmImpl;
-import cz.it4i.parallel.ui.HPCImageJServerRunnerWithUI;
 
 public class TestParadigmPersistent extends TestParadigm implements
 	PersistentParallelizationParadigm
@@ -31,7 +29,7 @@ public class TestParadigmPersistent extends TestParadigm implements
 	}
 
 	public static PersistentParallelizationParadigm runningImageJServer(
-		Context context, HPCImageJServerRunnerWithUI runner)
+		Context context, ServerRunner runner)
 	{
 		return new TestParadigmPersistent(runner, context);
 	}

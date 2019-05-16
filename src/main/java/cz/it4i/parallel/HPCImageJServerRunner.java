@@ -48,6 +48,12 @@ public class HPCImageJServerRunner extends AbstractImageJServerRunner {
 	}
 
 	@Override
+	public List< Integer > getPorts()
+	{
+		return ports;
+	}
+
+	@Override
 	protected void doStartImageJServer() throws IOException {
 		launcher = Routines.supplyWithExceptionHandling(
 			() -> new ClusterJobLauncher(settings.getHost(), settings.getUserName(), settings.getKeyFile().toString(),
@@ -61,13 +67,11 @@ public class HPCImageJServerRunner extends AbstractImageJServerRunner {
 			job = launcher.submit(settings.getRemoteDirectory(), settings
 				.getCommand(), arguments, settings.getNodes(), settings.getNcpus());
 		}
-		ports = job.createTunnels(8080, 8080);
+		ports = job.createTunnels(getStartPort(), getStartPort());
 	}
 
-	@Override
-	public List< Integer > getPorts()
-	{
-		return ports;
+	protected int getStartPort() {
+		return 8080;
 	}
 
 
