@@ -28,6 +28,7 @@ import org.scijava.ui.UIService;
 import cz.it4i.parallel.HPCSettings;
 import cz.it4i.parallel.ui.HPCImageJServerRunnerWithUI;
 import cz.it4i.parallel.ui.HPCSettingsGui;
+import cz.it4i.parallel.utils.TestParadigm;
 import cz.it4i.parallel.utils.TestParadigmPersistent;
 import lombok.extern.slf4j.Slf4j;
 
@@ -120,7 +121,8 @@ public class RotateSingleDatasetWithPersistenceOnHPC
 				finalHpcSettings.setJobID(this.getJob().getID());
 			}
 		};
-		return TestParadigmPersistent.runningImageJServer(context, runner);
+		return TestParadigmPersistent.addPersistency(new TestParadigm(runner,
+			context), runner);
 
 	}
 

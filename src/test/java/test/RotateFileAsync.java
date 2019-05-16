@@ -22,7 +22,7 @@ import org.scijava.parallel.ParallelizationParadigm;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import cz.it4i.parallel.utils.TestParadigmPersistent;
+import cz.it4i.parallel.utils.TestParadigm;
 
 public class RotateFileAsync {
 
@@ -33,8 +33,8 @@ public class RotateFileAsync {
 	public static void main(String[] args) throws IOException {
 		Context context = new Context();
 		ioService = context.service(DatasetIOService.class);
-		try (ParallelizationParadigm paradigm = TestParadigmPersistent
-			.localImageJServer(Config.getFijiExecutable(), context))
+		try (ParallelizationParadigm paradigm = TestParadigm.localImageJServer(
+			Config.getFijiExecutable(), context))
 		{
 			List<Map<String, Object>> parametersList = RotateFile.initParameters(
 				ioService);

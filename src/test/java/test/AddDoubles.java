@@ -11,7 +11,7 @@ import net.imagej.ops.math.PrimitiveMath;
 import org.scijava.Context;
 import org.scijava.parallel.ParallelizationParadigm;
 
-import cz.it4i.parallel.utils.TestParadigmPersistent;
+import cz.it4i.parallel.utils.TestParadigm;
 
 public class AddDoubles
 {
@@ -19,8 +19,8 @@ public class AddDoubles
 	public static void main(String[] args)
 	{
 		Context context = new Context();
-		try (ParallelizationParadigm paradigm = TestParadigmPersistent
-			.localImageJServer(Config.getFijiExecutable(), context))
+		try (ParallelizationParadigm paradigm = TestParadigm.localImageJServer(
+			Config.getFijiExecutable(), context))
 		{
 
 			List<Map<String, Object>> inputs = new LinkedList<>();
