@@ -53,7 +53,7 @@
 	</scm>
 	<issueManagement>
 		<system>GitHub Issues</system>
-		<url>http://github.com/imagej/imagej-server</url>
+		<url>https://github.com/imagej/imagej-server</url>
 	</issueManagement>
 	<ciManagement>
 		<system>Travis CI</system>
