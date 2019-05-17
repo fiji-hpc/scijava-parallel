@@ -9,7 +9,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class ImageJServerRunner extends AbstractImageJServerRunner {
+public class ImageJServerRunner extends AbstractImageJServerRunner implements
+	RunningRemoteServer
+{
 
 	private Process imageJServerProcess;
 
@@ -28,13 +30,24 @@ public class ImageJServerRunner extends AbstractImageJServerRunner {
 	}
 
 	@Override
-	public int getNCores() {
-		return Runtime.getRuntime().availableProcessors();
+	public List<Integer> getNCores() {
+		return Collections.singletonList(Runtime.getRuntime()
+			.availableProcessors());
+	}
+
+	@Override
+	public List<String> getRemoteHosts() {
+		return Collections.singletonList("localhost");
 	}
 
 	@Override
 	public List<Integer> getPorts() {
 		return Collections.singletonList(8080);
+	}
+
+	@Override
+	public List<Integer> getRemotePorts() {
+		return getPorts();
 	}
 
 	@Override

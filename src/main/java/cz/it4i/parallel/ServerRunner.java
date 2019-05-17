@@ -11,7 +11,7 @@ public interface ServerRunner {
 
 	List<Integer> getPorts();
 
-	int getNCores();
+	List<Integer> getNCores();
 
 	void close();
 

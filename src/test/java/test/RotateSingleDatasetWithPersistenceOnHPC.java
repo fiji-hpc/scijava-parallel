@@ -26,10 +26,10 @@ import org.scijava.parallel.PersistentParallelizationParadigm.CompletableFutureI
 import org.scijava.ui.UIService;
 
 import cz.it4i.parallel.HPCSettings;
+import cz.it4i.parallel.persistence.PersistentParallelizationParadigmImpl;
 import cz.it4i.parallel.ui.HPCImageJServerRunnerWithUI;
 import cz.it4i.parallel.ui.HPCSettingsGui;
 import cz.it4i.parallel.utils.TestParadigm;
-import cz.it4i.parallel.utils.TestParadigmPersistent;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -121,8 +121,8 @@ public class RotateSingleDatasetWithPersistenceOnHPC
 				finalHpcSettings.setJobID(this.getJob().getID());
 			}
 		};
-		return TestParadigmPersistent.addPersistency(new TestParadigm(runner,
-			context), runner);
+		return PersistentParallelizationParadigmImpl.addPersistencyToParadigm(
+			new TestParadigm(runner, context), runner);
 
 	}
 

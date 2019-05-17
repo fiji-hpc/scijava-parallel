@@ -1,5 +1,7 @@
 package cz.it4i.parallel.utils;
 
+import com.google.common.collect.Streams;
+
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -44,9 +46,9 @@ public class TestParadigm implements ParallelizationParadigm
 	private static ParallelizationParadigm initParadigm( ServerRunner runner, Context context )
 	{
 		runner.start();
-		int nCores = runner.getNCores();
-		List<Host> hosts = runner.getPorts().stream()
-			.map(port -> new ImageJServerParadigm.Host("localhost:" + port, nCores))
+		List<Host> hosts = Streams.zip(runner.getPorts().stream(), runner
+			.getNCores().stream(), (port, nCores) -> new ImageJServerParadigm.Host(
+				"localhost:" + port, nCores))
 				.collect( Collectors.toList() );
 		return configureParadigm( context.service( ParallelService.class ), hosts );
 	}

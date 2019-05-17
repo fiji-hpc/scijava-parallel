@@ -39,7 +39,7 @@ public abstract class AbstractImageJServerRunner implements AutoCloseable, Serve
 	public abstract List<Integer> getPorts();
 
 	@Override
-	public abstract int getNCores();
+	public abstract List<Integer> getNCores();
 
 	@Override
 	public void close() {

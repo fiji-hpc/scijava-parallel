@@ -1,5 +1,7 @@
 package cz.it4i.parallel.persistence;
 
+import com.google.common.collect.Streams;
+
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
@@ -14,7 +16,9 @@ import java.util.stream.Collectors;
 import org.scijava.parallel.ParallelizationParadigm;
 import org.scijava.parallel.PersistentParallelizationParadigm;
 
+import cz.it4i.parallel.ImageJServerParadigm;
 import cz.it4i.parallel.ImageJServerParadigm.Host;
+import cz.it4i.parallel.RunningRemoteServer;
 import cz.it4i.parallel.plugins.RequestBrokerServiceCallCommand;
 import cz.it4i.parallel.plugins.RequestBrokerServiceGetResultCommand;
 import cz.it4i.parallel.plugins.RequestBrokerServiceInitCommand;
@@ -53,8 +57,14 @@ public class PersistentParallelizationParadigmImpl implements
 	}
 
 	public static PersistentParallelizationParadigm addPersistencyToParadigm(
-		ParallelizationParadigm paradigm, List<Host> hosts)
+		ParallelizationParadigm paradigm, RunningRemoteServer runningServer)
 	{
+		
+		List<Host> hosts = Streams.zip(Streams.zip(runningServer.getRemoteHosts()
+			.stream(), runningServer.getRemotePorts().stream(), (host, port) -> host +
+				":" + port), runningServer.getNCores().stream(),
+			ImageJServerParadigm.Host::new).collect(Collectors.toList());
+
 		PersistentParallelizationParadigmImpl result =
 			new PersistentParallelizationParadigmImpl(paradigm);
 		result.setHosts(hosts);

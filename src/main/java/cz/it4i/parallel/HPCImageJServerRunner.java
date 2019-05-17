@@ -8,7 +8,9 @@ import java.util.stream.Collectors;
 
 import cz.it4i.parallel.ClusterJobLauncher.Job;
 
-public class HPCImageJServerRunner extends AbstractImageJServerRunner {
+public class HPCImageJServerRunner extends AbstractImageJServerRunner implements
+	RunningRemoteServer
+{
 
 	private List< Integer > ports;
 
@@ -30,8 +32,9 @@ public class HPCImageJServerRunner extends AbstractImageJServerRunner {
 	}
 
 	@Override
-	public int getNCores() {
-		return settings.getNcpus();
+	public List<Integer> getNCores() {
+		return getRemoteHosts().stream().map(__ -> settings.getNcpus()).collect(
+			Collectors.toList());
 	}
 
 	@Override
@@ -48,9 +51,19 @@ public class HPCImageJServerRunner extends AbstractImageJServerRunner {
 	}
 
 	@Override
+	public List<String> getRemoteHosts() {
+		return getJob().getNodes();
+	}
+
+	@Override
 	public List< Integer > getPorts()
 	{
 		return ports;
+	}
+
+	@Override
+	public List<Integer> getRemotePorts() {
+		return ports.stream().map(X -> getStartPort()).collect(Collectors.toList());
 	}
 
 	@Override

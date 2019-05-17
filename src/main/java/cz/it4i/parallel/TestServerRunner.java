@@ -20,7 +20,7 @@ public class TestServerRunner implements ServerRunner {
 	}
 
 	@Override
-	public int getNCores() {
+	public List<Integer> getNCores() {
 		return serverRunner.getNCores();
 	}
 
