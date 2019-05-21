@@ -19,10 +19,13 @@ public class RequestBrokerServiceInitCommand implements Command {
 	@Parameter(type = ItemIO.INPUT)
 	private List<Integer> ncores;
 
+	@Parameter(type = ItemIO.INPUT)
+	private String paradigmClassName;
+
 
 	@Override
 	public void run() {
-		service.initParallelizationParadigm(names, ncores);
+		service.initParallelizationParadigm(paradigmClassName, names, ncores);
 	}
 
 }

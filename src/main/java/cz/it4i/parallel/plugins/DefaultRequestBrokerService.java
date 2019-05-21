@@ -22,8 +22,9 @@ import org.scijava.plugin.Plugin;
 import org.scijava.service.AbstractService;
 import org.scijava.service.Service;
 
-import cz.it4i.parallel.ImageJServerParadigm;
 import cz.it4i.parallel.ImageJServerParadigm.Host;
+import cz.it4i.parallel.MultipleHostParadigm;
+import cz.it4i.parallel.SciJavaParallelRuntimeException;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -39,7 +40,6 @@ public class DefaultRequestBrokerService extends AbstractService implements
 	
 	private static final Map<Predicate<CompletableFuture<?>>, State> STATE_MAP;
 
-	private static final String IMAGEJ_SERVER_PARADIGM = "ImageJServerParadigm";
 	static {
 		Map<Predicate<CompletableFuture<?>>, State> initMap = new LinkedHashMap<>();
 		initMap.put(f -> f.isDone(), State.DONE);
@@ -59,22 +59,31 @@ public class DefaultRequestBrokerService extends AbstractService implements
 		Collections.synchronizedMap(new HashMap<>());
 
 	@Override
-	public synchronized void initParallelizationParadigm(List<String> hostNames,
+	public synchronized void initParallelizationParadigm(String paradigmClassName,
+		List<String> hostNames,
 		List<Integer> ncores)
 	{
-		if (!paradigmInitialized) {
-			parallelService.deleteProfiles();
-			parallelService.addProfile(new ParallelizationParadigmProfile(
-				ImageJServerParadigm.class, IMAGEJ_SERVER_PARADIGM));
-			parallelService.selectProfile(IMAGEJ_SERVER_PARADIGM);
-			ParallelizationParadigm paradigm = parallelService.getParadigm();
-			((ImageJServerParadigm) paradigm).setHosts(Host
-				.constructListFromNamesAndCores(hostNames, ncores));
-			paradigm.init();
-			paradigmInitialized = true;
+		try {
+			if (!paradigmInitialized) {
+				parallelService.deleteProfiles();
+				@SuppressWarnings("unchecked")
+				Class<? extends ParallelizationParadigm> clazz = (Class<? extends ParallelizationParadigm>) Class.forName(
+					paradigmClassName);
+				parallelService.addProfile(new ParallelizationParadigmProfile(clazz,
+					clazz.getName()));
+				parallelService.selectProfile(clazz.getName());
+				ParallelizationParadigm paradigm = parallelService.getParadigm();
+				((MultipleHostParadigm) paradigm).setHosts(Host
+					.constructListFromNamesAndCores(hostNames, ncores));
+				paradigm.init();
+				paradigmInitialized = true;
+			}
+			else {
+				log.info("Parallelization paradigm already initialized");
+			}
 		}
-		else {
-			log.info("Parallelization paradigm already initialized");
+		catch (ClassNotFoundException exc) {
+			throw new SciJavaParallelRuntimeException(exc);
 		}
 	}
 

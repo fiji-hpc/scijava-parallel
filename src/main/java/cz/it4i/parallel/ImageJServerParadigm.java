@@ -28,7 +28,9 @@ import org.slf4j.LoggerFactory;
 import lombok.Data;
 
 @Plugin(type = ParallelizationParadigm.class)
-public class ImageJServerParadigm extends SimpleOstravaParadigm {
+public class ImageJServerParadigm extends SimpleOstravaParadigm implements
+	MultipleHostParadigm
+{
 
 	public static final Logger log = LoggerFactory.getLogger(
 		cz.it4i.parallel.ImageJServerParadigm.class);
@@ -66,6 +68,7 @@ public class ImageJServerParadigm extends SimpleOstravaParadigm {
 		this.port = port;
 	}
 
+	@Override
 	public void setHosts(final Collection<Host> hosts) {
 		this.hosts.clear();
 		this.hosts.addAll(hosts.stream().map(host -> host.getName()).collect(

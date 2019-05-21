@@ -10,7 +10,8 @@ import cz.it4i.parallel.plugins.DefaultRequestBrokerService.State;
 
 public interface RequestBrokerService extends SciJavaService {
 
-	public void initParallelizationParadigm(List<String> hostName,
+	public void initParallelizationParadigm(String paradigmClassName,
+		List<String> hostName,
 		List<Integer> ncores);
 
 	public List<Object> call(String commandName,

@@ -68,7 +68,8 @@ public class PersistentParallelizationParadigmImpl implements
 		PersistentParallelizationParadigmImpl result =
 			new PersistentParallelizationParadigmImpl(paradigm);
 		result.setHosts(hosts);
-		result.initRemoteParallelizationParadigm();
+		result.initRemoteParallelizationParadigm(paradigm.getClass()
+			.getCanonicalName());
 		return result;
 	}
 
@@ -157,16 +158,16 @@ public class PersistentParallelizationParadigmImpl implements
 		this.hosts = hosts;
 	}
 
-	private void initRemoteParallelizationParadigm() {
+	private void initRemoteParallelizationParadigm(String paradigmClassName) {
 		Map<String, Object> inputForExecution = new HashMap<>();
 		inputForExecution.put("names", hosts.stream().map(Host::getName).collect(
 			Collectors.toList()));
-		inputForExecution.put("ncores", hosts.stream().map(Host::getNCores)
-			.collect(Collectors.toList()));
-		paradigm.runAll(
-				RequestBrokerServiceInitCommand.class.getCanonicalName(),
+		inputForExecution.put("ncores", hosts.stream().map(Host::getNCores).collect(
+			Collectors.toList()));
+		inputForExecution.put("paradigmClassName", paradigmClassName);
+		paradigm.runAll(RequestBrokerServiceInitCommand.class.getCanonicalName(),
 			Collections.singletonList(inputForExecution));
-	
+
 	}
 
 	@SuppressWarnings("unchecked")
