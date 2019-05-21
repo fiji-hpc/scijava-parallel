@@ -41,7 +41,7 @@ public class ClusterJobLauncher implements Closeable {
 		private Job(String jobId) {
 			super();
 			this.jobId = jobId;
-			nodesFuture = CompletableFuture.supplyAsync(() -> getNodesFromServer());
+			nodesFuture = CompletableFuture.supplyAsync(this::getNodesFromServer);
 		}
 
 		public CompletableFuture<List<String>> getNodesFuture() {
@@ -132,9 +132,11 @@ public class ClusterJobLauncher implements Closeable {
 					}
 				}
 			}
-			return new LinkedList<>(new LinkedHashSet<>(Arrays.asList(hostLines
-				.stream().collect(Collectors.joining("")).replaceAll(" +", "")
+			result = new LinkedList<>(new LinkedHashSet<>(Arrays.asList(
+				hostLines
+				.stream().collect(Collectors.joining("")).replaceAll("\\s+", "")
 				.replaceAll("exec_host=", "").replaceAll("/[^+]+", "").split("\\+"))));
+			return result;
 		}
 
 		private class P_OutThread extends Thread
