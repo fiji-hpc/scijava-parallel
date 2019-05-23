@@ -7,6 +7,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * Extension of {@link ParallelizationParadigm} that allows send request,
+ * disconnect, save/load requests IDs, reconnect and get results.
+ * 
+ * @author koz01
+ */
 public interface PersistentParallelizationParadigm extends
 	ParallelizationParadigm
 {

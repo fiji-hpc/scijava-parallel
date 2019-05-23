@@ -18,6 +18,13 @@ import org.scijava.ui.UIService;
 
 import cz.it4i.parallel.utils.TestParadigm;
 
+/**
+ * Demonstration example showing basic usage of ParalellizationParadigm with
+ * ImageJ server started in local system. It downloads a picture (Lena) and
+ * rotate it for 90 degree. Result is immediately showed.
+ * 
+ * @author koz01
+ */
 public class RotateSingleDataset
 {
 

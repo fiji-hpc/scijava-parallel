@@ -13,6 +13,11 @@ import java.nio.file.StandardCopyOption;
 
 import static cz.it4i.parallel.Routines.getSuffix;
 
+/**
+ * Helper class for testing image downloading
+ * 
+ * @author koz01
+ */
 public class ExampleImage
 {
 

@@ -33,6 +33,23 @@ import cz.it4i.parallel.ui.HPCSettingsGui;
 import cz.it4i.parallel.utils.TestParadigm;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Demonstration example showing basic usage of {@link PersistentParallelizationParadigm} with
+ * ImageJ server started in HPC cluster. It downloads a picture (Lena) and
+ * rotate it for 90 degree. Result is immediately showed.
+ * 
+ * @formatter:off
+ * 
+ * You can use settings: 
+ * 1. Host name: salomon.it4i.cz
+ * 2. Remote directory with Fiji: /scratch/work/project/open-15-12/apps/Fiji.app-scijava-parallel
+ * 3. Remote ImageJ command: fiji-linux64
+ * 4. Number of nodes: 1
+ * 5. Number of CPUs per node: 24
+ * @formatter:on
+ * 
+ * @author koz01
+ */
 @Slf4j
 public class RotateSingleDatasetWithPersistenceOnHPC
 {
