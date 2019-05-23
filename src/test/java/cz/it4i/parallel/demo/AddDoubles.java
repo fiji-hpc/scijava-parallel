@@ -1,5 +1,5 @@
 
-package test;
+package cz.it4i.parallel.demo;
 
 import java.util.HashMap;
 import java.util.LinkedList;

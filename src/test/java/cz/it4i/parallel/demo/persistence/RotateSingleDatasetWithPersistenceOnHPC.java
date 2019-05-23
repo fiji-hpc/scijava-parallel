@@ -1,5 +1,5 @@
 
-package test;
+package cz.it4i.parallel.demo.persistence;
 
 import io.scif.services.DatasetIOService;
 
@@ -26,6 +26,7 @@ import org.scijava.parallel.PersistentParallelizationParadigm.CompletableFutureI
 import org.scijava.ui.UIService;
 
 import cz.it4i.parallel.HPCSettings;
+import cz.it4i.parallel.demo.ExampleImage;
 import cz.it4i.parallel.persistence.PersistentParallelizationParadigmImpl;
 import cz.it4i.parallel.ui.HPCImageJServerRunnerWithUI;
 import cz.it4i.parallel.ui.HPCSettingsGui;

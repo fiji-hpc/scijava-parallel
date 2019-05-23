@@ -1,5 +1,5 @@
 
-package test;
+package cz.it4i.parallel.demo;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,7 +16,7 @@ public class Config {
 
 	public static final String PNG_SUFFIX = ".png";
 
-	public static final Logger log = LoggerFactory.getLogger(test.Config.class);
+	public static final Logger log = LoggerFactory.getLogger(cz.it4i.parallel.demo.Config.class);
 
 	static Properties properties;
 

@@ -1,5 +1,5 @@
 
-package test;
+package cz.it4i.parallel.demo;
 
 import static cz.it4i.parallel.Routines.runWithExceptionHandling;
 
@@ -24,6 +24,14 @@ import org.slf4j.LoggerFactory;
 
 import cz.it4i.parallel.utils.TestParadigm;
 
+/**
+ * Demonstration example showing basic usage of ParalellizationParadigm with
+ * ImageJ server started in local system. It downloads a picture (Lena) and
+ * rotate it for 170 and 340 degree. Result is stored into directory output
+ * located in working directory. Result is processed asynchronously.
+ * 
+ * @author koz01
+ */
 public class RotateFileAsync {
 
 	private final static Logger log = LoggerFactory.getLogger(

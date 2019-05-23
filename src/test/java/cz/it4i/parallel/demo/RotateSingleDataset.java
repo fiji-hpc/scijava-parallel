@@ -1,5 +1,5 @@
 
-package test;
+package cz.it4i.parallel.demo;
 
 import io.scif.services.DatasetIOService;
 

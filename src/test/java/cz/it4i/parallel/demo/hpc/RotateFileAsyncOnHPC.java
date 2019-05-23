@@ -1,5 +1,5 @@
 
-package test;
+package cz.it4i.parallel.demo.hpc;
 
 import static cz.it4i.parallel.Routines.runWithExceptionHandling;
 
@@ -23,9 +23,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cz.it4i.parallel.AbstractImageJServerRunner;
+import cz.it4i.parallel.demo.RotateFile;
 import cz.it4i.parallel.ui.HPCImageJServerRunnerWithUI;
 import cz.it4i.parallel.utils.TestParadigm;
 
+/**
+ * Demonstration example showing basic usage of ParalellizationParadigm with
+ * ImageJ server started on HPC cluster. It downloads a picture (Lena) and
+ * rotate it for 170 and 340 degree. Result is stored into directory output
+ * located in working directory. Result is processed asynchronously.
+ * 
+ * @author koz01
+ */
 public class RotateFileAsyncOnHPC {
 
 	private final static Logger log = LoggerFactory.getLogger(

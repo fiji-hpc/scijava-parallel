@@ -1,5 +1,5 @@
 
-package test;
+package cz.it4i.parallel.demo;
 
 import static cz.it4i.parallel.Routines.runWithExceptionHandling;
 
@@ -40,7 +40,7 @@ public class RotateFile {
 		}
 	}
 
-	static void callRemotePlugin(final ParallelizationParadigm paradigm)
+	public static void callRemotePlugin(final ParallelizationParadigm paradigm)
 		throws IOException
 	{
 		if (ioService == null) {
@@ -52,7 +52,7 @@ public class RotateFile {
 		saveOutputs( parametersList, results );
 	}
 
-	static List<Map<String, Object>> initParameters(
+	public static List<Map<String, Object>> initParameters(
 		DatasetIOService ioServiceLocal)
 		throws IOException
 	{
@@ -82,7 +82,7 @@ public class RotateFile {
 		}
 	}
 
-	static Path prepareOutputDirectory() {
+	public static Path prepareOutputDirectory() {
 		Path outputDirectory = Paths.get(OUTPUT_DIRECTORY);
 		if (!Files.exists(outputDirectory)) {
 			Routines.runWithExceptionHandling(() -> Files.createDirectories(

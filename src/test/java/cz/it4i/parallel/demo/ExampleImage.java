@@ -1,4 +1,4 @@
-package test;
+package cz.it4i.parallel.demo;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +18,7 @@ public class ExampleImage
 
 	private final static Logger log = LoggerFactory.getLogger(RotateFile.class);
 
-	static Path lenaAsTempFile()
+	public static Path lenaAsTempFile()
 	{
 		return downloadToTmpFile( "https://upload.wikimedia.org/wikipedia/en/7/7d/Lenna_%28test_image%29.png" );
 	}
