@@ -177,12 +177,7 @@ public class ImageJServerWorker implements ParallelWorker {
 		return unwrapOutputMap(doRequest(commandTypeName, wrappedInputs));
 	}
 
-	private String getObjectId(final Object dataset) {
-		if (dataset instanceof String) {
-			return (String) dataset;
-		}
-		return ((PRemoteObject) dataset).getId();
-	}
+
 
 	private Map<String, Object> jsonToMap(final org.json.JSONObject jsonObj) {
 		final Map<String, Object> rawOutputs = new HashMap<>();
@@ -212,29 +207,6 @@ public class ImageJServerWorker implements ParallelWorker {
 			result.put(pair.getKey(), pair.getValue());
 		}
 		return result;
-	}
-
-
-
-	private PRemoteObject indexImported(PRemoteObject obj) {
-		id2importedData.put(obj.getId(), obj);
-		return obj;
-	}
-
-	// TODO: support another types
-	private String getContentType(final String path) {
-		return "image/" + getImageType(path);
-	}
-
-	private String getImageType(final String path) {
-		for (final String type : supportedImageTypes) {
-			if (path.endsWith("." + type)) {
-				return type;
-			}
-		}
-
-		throw new UnsupportedOperationException("Only " + supportedImageTypes +
-			" image files supported");
 	}
 
 	private Map<String, Object> wrapInputMap(final Map<String, ?> map) {
@@ -424,6 +396,34 @@ public class ImageJServerWorker implements ParallelWorker {
 				org.json.JSONObject result = new org.json.JSONObject(json);
 				return indexImported(new PRemoteObject(result));
 			});
+		}
+
+		// TODO: support another types
+		private String getContentType(final String path) {
+			return "image/" + getImageType(path);
+		}
+
+		private String getImageType(final String path) {
+			for (final String type : supportedImageTypes) {
+				if (path.endsWith("." + type)) {
+					return type;
+				}
+			}
+
+			throw new UnsupportedOperationException("Only " + supportedImageTypes +
+				" image files supported");
+		}
+
+		private String getObjectId(final Object dataset) {
+			if (dataset instanceof String) {
+				return (String) dataset;
+			}
+			return ((PRemoteObject) dataset).getId();
+		}
+
+		private PRemoteObject indexImported(PRemoteObject obj) {
+			id2importedData.put(obj.getId(), obj);
+			return obj;
 		}
 	}
 
