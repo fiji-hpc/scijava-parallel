@@ -1,5 +1,5 @@
 
-package org.scijava.parallel;
+package cz.it4i.parallel.plugins;
 
 import com.sun.management.OperatingSystemMXBean;
 
