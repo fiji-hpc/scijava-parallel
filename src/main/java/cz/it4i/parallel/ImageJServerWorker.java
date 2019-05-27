@@ -65,7 +65,8 @@ public class ImageJServerWorker implements ParallelWorker {
 	private ParameterTypeProvider typeProvider;
 	private PExecutor executer;
 
-	ImageJServerWorker(final String hostName, final int port, Context context,
+	public ImageJServerWorker(final String hostName, final int port,
+		Context context,
 		ParameterTypeProvider typeProvider,
 		Map<Class<?>, ParallelizationParadigmConverter<?>> mappers)
 	{

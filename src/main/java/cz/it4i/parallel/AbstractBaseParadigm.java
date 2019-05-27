@@ -22,7 +22,7 @@ import org.scijava.thread.ThreadService;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public abstract class SimpleOstravaParadigm implements ParallelizationParadigm {
+public abstract class AbstractBaseParadigm implements ParallelizationParadigm {
 
 	protected WorkerPool workerPool;
 

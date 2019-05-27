@@ -86,11 +86,6 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>cz.it4i.fiji</groupId>
-			<artifactId>heappe-java-client</artifactId>
-			<version>1.0.1</version>
-		</dependency>
-		<dependency>
 			<groupId>net.imagej</groupId>
 			<artifactId>imagej</artifactId>
 		</dependency>
