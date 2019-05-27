@@ -38,9 +38,12 @@ public class ClusterJobLauncher implements Closeable {
 
 		private CompletableFuture<List<String>> nodesFuture;
 
-		private Job(String jobId) {
+		private boolean openOut;
+
+		private Job(String jobId, boolean openOut) {
 			super();
 			this.jobId = jobId;
+			this.openOut = openOut;
 			nodesFuture = CompletableFuture.supplyAsync(this::getNodesFromServer);
 		}
 
@@ -108,8 +111,10 @@ public class ClusterJobLauncher implements Closeable {
 				sleepForWhile(1000);
 			}
 			while (!(!time.equals("0") && state.equals("R")));
-			new P_OutThread(System.out, "OU").start();
-			new P_OutThread(System.err, "ER").start();
+			if (openOut) {
+				new POutThread(System.out, "OU").start();
+				new POutThread(System.err, "ER").start();
+			}
 		}
 
 		private List<String> getNodesFromServer() {
@@ -139,14 +144,15 @@ public class ClusterJobLauncher implements Closeable {
 			return result;
 		}
 
-		private class P_OutThread extends Thread
+		private class POutThread extends Thread
 
 		{
 
 			private OutputStream outputStream;
 			private String suffix;
+			private SshExecutionSession usedSession;
 
-			public P_OutThread(OutputStream outputStream, String suffix) {
+			public POutThread(OutputStream outputStream, String suffix) {
 				super();
 				this.outputStream = outputStream;
 				this.suffix = suffix;
@@ -154,9 +160,10 @@ public class ClusterJobLauncher implements Closeable {
 
 			@Override
 			public void run() {
-				try (SshExecutionSession session = client.openSshExecutionSession(
+				try (SshExecutionSession session = (usedSession = client
+					.openSshExecutionSession(
 					"ssh " + getNodes().get(0) + " tail -f -n +1 /var/spool/PBS/spool/" +
-						jobId + "." + suffix))
+							jobId + "." + suffix)))
 				{
 					byte[] buffer = new byte[1024];
 					int readed;
@@ -169,6 +176,12 @@ public class ClusterJobLauncher implements Closeable {
 				catch (IOException exc) {
 					log.error(exc.getMessage(), exc);
 				}
+			}
+
+			@Override
+			public void interrupt() {
+				usedSession.close();
+				super.interrupt();
 			}
 		}
 	}
@@ -187,11 +200,11 @@ public class ClusterJobLauncher implements Closeable {
 		long usedNodes, long ncpus)
 	{
 		String jobId = runJob(directory, command, parameters, usedNodes, ncpus);
-		return new Job(jobId);
+		return new Job(jobId, false);
 	}
 
 	public Job getSubmittedJob(String jobId) {
-		return new Job(jobId);
+		return new Job(jobId, false);
 	}
 
 	@Override
