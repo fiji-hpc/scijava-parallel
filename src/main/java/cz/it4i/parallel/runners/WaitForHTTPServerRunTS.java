@@ -1,8 +1,10 @@
-package cz.it4i.parallel;
+package cz.it4i.parallel.runners;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+
+import cz.it4i.parallel.Routines;
 
 class WaitForHTTPServerRunTS {
 

@@ -7,7 +7,7 @@ import java.util.concurrent.CompletableFuture;
 
 import org.scijava.parallel.PersistentParallelizationParadigm;
 
-import cz.it4i.parallel.ServerRunner;
+import cz.it4i.parallel.runners.ServerRunner;
 
 public class TestPersistentParadigm extends TestParadigm implements
 	PersistentParallelizationParadigm

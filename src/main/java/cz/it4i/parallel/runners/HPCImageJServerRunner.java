@@ -1,12 +1,15 @@
 
-package cz.it4i.parallel;
+package cz.it4i.parallel.runners;
 
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import cz.it4i.parallel.ClusterJobLauncher.Job;
+import cz.it4i.parallel.HPCSettings;
+import cz.it4i.parallel.Routines;
+import cz.it4i.parallel.RunningRemoteServer;
+import cz.it4i.parallel.runners.ClusterJobLauncher.Job;
 
 public class HPCImageJServerRunner extends AbstractImageJServerRunner implements
 	RunningRemoteServer

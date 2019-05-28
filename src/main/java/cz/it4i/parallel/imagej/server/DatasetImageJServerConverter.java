@@ -1,5 +1,5 @@
 
-package cz.it4i.parallel;
+package cz.it4i.parallel.imagej.server;
 
 import static cz.it4i.parallel.Routines.castTo;
 import static cz.it4i.parallel.Routines.getSuffix;
@@ -23,6 +23,8 @@ import net.imagej.Dataset;
 
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
+
+import cz.it4i.parallel.Routines;
 
 @Plugin(type = ParallelizationParadigmConverter.class)
 public class DatasetImageJServerConverter extends

@@ -1,4 +1,4 @@
-package cz.it4i.parallel.persistence;
+package cz.it4i.parallel.imagej.server;
 
 import java.io.Serializable;
 

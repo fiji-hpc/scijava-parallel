@@ -22,7 +22,7 @@ import org.scijava.plugin.Plugin;
 import org.scijava.service.AbstractService;
 import org.scijava.service.Service;
 
-import cz.it4i.parallel.ImageJServerParadigm.Host;
+import cz.it4i.parallel.Host;
 import cz.it4i.parallel.MultipleHostParadigm;
 import cz.it4i.parallel.SciJavaParallelRuntimeException;
 import lombok.extern.slf4j.Slf4j;

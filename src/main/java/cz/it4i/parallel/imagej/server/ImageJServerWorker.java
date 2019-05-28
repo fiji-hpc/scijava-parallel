@@ -1,5 +1,5 @@
 
-package cz.it4i.parallel;
+package cz.it4i.parallel.imagej.server;
 
 import com.google.common.collect.Streams;
 
@@ -43,7 +43,9 @@ import org.json.simple.JSONObject;
 import org.scijava.Context;
 import org.scijava.plugin.SciJavaPlugin;
 
-import cz.it4i.parallel.persistence.RequestBrokerServiceParameterProvider;
+import cz.it4i.parallel.ParallelWorker;
+import cz.it4i.parallel.Routines;
+import cz.it4i.parallel.SciJavaParallelRuntimeException;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

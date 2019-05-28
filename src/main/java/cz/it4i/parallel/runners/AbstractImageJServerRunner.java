@@ -1,5 +1,5 @@
 
-package cz.it4i.parallel;
+package cz.it4i.parallel.runners;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -14,7 +14,7 @@ import lombok.AllArgsConstructor;
 public abstract class AbstractImageJServerRunner implements AutoCloseable, ServerRunner {
 
 	private final static Logger log = LoggerFactory.getLogger(
-		cz.it4i.parallel.AbstractImageJServerRunner.class);
+		cz.it4i.parallel.runners.AbstractImageJServerRunner.class);
 
 	private final static List<String> IMAGEJ_SERVER_PARAMETERS = Arrays.asList(
 		"-Dimagej.legacy.modernOnlyCommands=true", "--", "--ij2", "--headless",

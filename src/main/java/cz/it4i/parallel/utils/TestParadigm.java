@@ -13,10 +13,10 @@ import org.scijava.parallel.ParallelService;
 import org.scijava.parallel.ParallelizationParadigm;
 import org.scijava.parallel.ParallelizationParadigmProfile;
 
-import cz.it4i.parallel.ImageJServerParadigm;
-import cz.it4i.parallel.ImageJServerRunner;
-import cz.it4i.parallel.ServerRunner;
-import cz.it4i.parallel.ImageJServerParadigm.Host;
+import cz.it4i.parallel.Host;
+import cz.it4i.parallel.imagej.server.ImageJServerParadigm;
+import cz.it4i.parallel.runners.ImageJServerRunner;
+import cz.it4i.parallel.runners.ServerRunner;
 
 public class TestParadigm implements ParallelizationParadigm
 {
@@ -55,7 +55,7 @@ public class TestParadigm implements ParallelizationParadigm
 	{
 		runner.start();
 		List<Host> hosts = Streams.zip(runner.getPorts().stream(), runner
-			.getNCores().stream(), (port, nCores) -> new ImageJServerParadigm.Host(
+			.getNCores().stream(), (port, nCores) -> new Host(
 				"localhost:" + port, nCores))
 				.collect( Collectors.toList() );
 		return configureParadigm( context.service( ParallelService.class ), hosts );

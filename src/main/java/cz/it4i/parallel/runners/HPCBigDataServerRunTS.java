@@ -1,11 +1,11 @@
-package cz.it4i.parallel;
+package cz.it4i.parallel.runners;
 
 import java.util.Collections;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import cz.it4i.parallel.ClusterJobLauncher.Job;
+import cz.it4i.parallel.runners.ClusterJobLauncher.Job;
 
 public class HPCBigDataServerRunTS {
 

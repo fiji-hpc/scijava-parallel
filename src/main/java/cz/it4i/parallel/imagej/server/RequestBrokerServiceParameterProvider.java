@@ -1,4 +1,4 @@
-package cz.it4i.parallel.persistence;
+package cz.it4i.parallel.imagej.server;
 
 import static cz.it4i.parallel.persistence.PersistentParallelizationParadigmImpl.INPUTS;
 import static cz.it4i.parallel.persistence.PersistentParallelizationParadigmImpl.MODULE_ID;
@@ -23,11 +23,6 @@ import org.scijava.service.AbstractService;
 import org.scijava.service.SciJavaService;
 import org.scijava.service.Service;
 
-import cz.it4i.parallel.DefaultParameterProcessor;
-import cz.it4i.parallel.ParallelizationParadigmConverter;
-import cz.it4i.parallel.ParameterProcessor;
-import cz.it4i.parallel.ParameterTypeProvider;
-import cz.it4i.parallel.RemoteDataHandler;
 import cz.it4i.parallel.plugins.RequestBrokerServiceCallCommand;
 import cz.it4i.parallel.plugins.RequestBrokerServiceGetResultCommand;
 import cz.it4i.parallel.plugins.RequestBrokerServicePurgeCommand;

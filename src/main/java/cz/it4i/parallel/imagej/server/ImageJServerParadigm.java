@@ -1,12 +1,9 @@
 
-package cz.it4i.parallel;
-
-import com.google.common.collect.Streams;
+package cz.it4i.parallel.imagej.server;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -18,7 +15,10 @@ import org.scijava.plugin.PluginService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import lombok.Data;
+import cz.it4i.parallel.AbstractBaseParadigm;
+import cz.it4i.parallel.Host;
+import cz.it4i.parallel.MultipleHostParadigm;
+import cz.it4i.parallel.ParallelWorker;
 
 @Plugin(type = ParallelizationParadigm.class)
 public class ImageJServerParadigm extends AbstractBaseParadigm implements
@@ -26,21 +26,8 @@ public class ImageJServerParadigm extends AbstractBaseParadigm implements
 {
 
 	public static final Logger log = LoggerFactory.getLogger(
-		cz.it4i.parallel.ImageJServerParadigm.class);
+		cz.it4i.parallel.imagej.server.ImageJServerParadigm.class);
 	
-	@Data
-	public static class Host {
-		private final String name;
-		private final int nCores;
-
-		public static List<Host> constructListFromNamesAndCores(List<String> names,
-			List<Integer> cores)
-		{
-			return Streams.zip(names.stream(), cores.stream(), Host::new).collect(
-				Collectors.toList());
-		}
-	}
-
 	@Parameter
 	private Context context;
 

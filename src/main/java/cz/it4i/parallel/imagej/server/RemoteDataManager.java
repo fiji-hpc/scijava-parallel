@@ -1,4 +1,4 @@
-package cz.it4i.parallel.persistence;
+package cz.it4i.parallel.imagej.server;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,7 +11,6 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import cz.it4i.parallel.RemoteDataHandler;
 import lombok.AllArgsConstructor;
 
 class RemoteDataManager {

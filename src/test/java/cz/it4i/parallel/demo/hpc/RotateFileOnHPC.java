@@ -7,8 +7,8 @@ import net.imagej.ImageJ;
 
 import org.scijava.parallel.ParallelizationParadigm;
 
-import cz.it4i.parallel.AbstractImageJServerRunner;
 import cz.it4i.parallel.demo.RotateFile;
+import cz.it4i.parallel.runners.AbstractImageJServerRunner;
 import cz.it4i.parallel.ui.HPCImageJServerRunnerWithUI;
 import cz.it4i.parallel.utils.TestParadigm;
 

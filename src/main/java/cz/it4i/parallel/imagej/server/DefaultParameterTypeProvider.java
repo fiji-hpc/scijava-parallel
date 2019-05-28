@@ -1,4 +1,4 @@
-package cz.it4i.parallel;
+package cz.it4i.parallel.imagej.server;
 
 import static cz.it4i.parallel.Routines.supplyWithExceptionHandling;
 

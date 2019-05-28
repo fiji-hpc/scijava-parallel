@@ -1,4 +1,4 @@
-package cz.it4i.parallel;
+package cz.it4i.parallel.imagej.server;
 
 import java.io.IOException;
 import java.io.InputStream;

@@ -1,5 +1,5 @@
 
-package cz.it4i.parallel;
+package cz.it4i.parallel.imagej.server;
 
 import static cz.it4i.parallel.Routines.supplyWithExceptionHandling;
 
@@ -7,6 +7,8 @@ import java.io.Closeable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import cz.it4i.parallel.Routines;
 
 public abstract class AbstractParameterProcessor implements ParameterProcessor {
 

@@ -16,8 +16,7 @@ import java.util.stream.Collectors;
 import org.scijava.parallel.ParallelizationParadigm;
 import org.scijava.parallel.PersistentParallelizationParadigm;
 
-import cz.it4i.parallel.ImageJServerParadigm;
-import cz.it4i.parallel.ImageJServerParadigm.Host;
+import cz.it4i.parallel.Host;
 import cz.it4i.parallel.RunningRemoteServer;
 import cz.it4i.parallel.plugins.RequestBrokerServiceCallCommand;
 import cz.it4i.parallel.plugins.RequestBrokerServiceGetResultCommand;
@@ -32,10 +31,10 @@ public class PersistentParallelizationParadigmImpl implements
 	PersistentParallelizationParadigm
 {
 
-	static final String INPUTS = "inputs";
-	static final String MODULE_ID = "moduleId";
-	static final String REQUEST_IDS = "requestIDs";
-	static final String RESULTS = "results";
+	public static final String INPUTS = "inputs";
+	public static final String MODULE_ID = "moduleId";
+	public static final String REQUEST_IDS = "requestIDs";
+	public static final String RESULTS = "results";
 
 	enum CompletableFutureIDCases implements CompletableFutureID {
 			UNKNOWN;
@@ -63,7 +62,7 @@ public class PersistentParallelizationParadigmImpl implements
 		List<Host> hosts = Streams.zip(Streams.zip(runningServer.getRemoteHosts()
 			.stream(), runningServer.getRemotePorts().stream(), (host, port) -> host +
 				":" + port), runningServer.getNCores().stream(),
-			ImageJServerParadigm.Host::new).collect(Collectors.toList());
+			Host::new).collect(Collectors.toList());
 
 		PersistentParallelizationParadigmImpl result =
 			new PersistentParallelizationParadigmImpl(paradigm);

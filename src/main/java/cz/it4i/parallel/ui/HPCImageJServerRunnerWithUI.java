@@ -11,8 +11,8 @@ import javax.swing.SwingConstants;
 
 import org.scijava.Context;
 
-import cz.it4i.parallel.HPCImageJServerRunner;
 import cz.it4i.parallel.HPCSettings;
+import cz.it4i.parallel.runners.HPCImageJServerRunner;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
