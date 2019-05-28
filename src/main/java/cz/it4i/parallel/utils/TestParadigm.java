@@ -25,6 +25,13 @@ public class TestParadigm implements ParallelizationParadigm
 	private final ParallelizationParadigm paradigm;
 	private boolean closed = false;
 
+	protected TestParadigm(ParallelizationParadigm paradigm,
+		ServerRunner runner)
+	{
+		this.paradigm = paradigm;
+		this.runner = runner;
+	}
+
 	public TestParadigm(ServerRunner runner, Context context)
 	{
 		this.paradigm = initParadigm( runner, context );
@@ -43,7 +50,8 @@ public class TestParadigm implements ParallelizationParadigm
 	}
 
 
-	private static ParallelizationParadigm initParadigm( ServerRunner runner, Context context )
+	public static ParallelizationParadigm initParadigm(ServerRunner runner,
+		Context context)
 	{
 		runner.start();
 		List<Host> hosts = Streams.zip(runner.getPorts().stream(), runner

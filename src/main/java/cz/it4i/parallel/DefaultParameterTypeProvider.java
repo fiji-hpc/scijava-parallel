@@ -3,13 +3,13 @@ package cz.it4i.parallel;
 import static cz.it4i.parallel.Routines.supplyWithExceptionHandling;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONObject;
 
 import lombok.AllArgsConstructor;
 
@@ -53,9 +53,9 @@ public class DefaultParameterTypeProvider implements
 		org.json.JSONObject json, String direction)
 	{
 		org.json.JSONArray inputs = (org.json.JSONArray) json.get(direction);
-		Iterator<?> iter = inputs.iterator();
-		while (iter.hasNext()) {
-			org.json.JSONObject param = (org.json.JSONObject) iter.next();
+
+		for (int i = 0; i < inputs.length(); i++) {
+			JSONObject param = (JSONObject) inputs.get(i);
 			String typeName = ((String) param.get("genericType")).trim();
 			typeName = clearTypeName(typeName);
 			if (Character.isLowerCase(typeName.charAt(0)) && !typeName.contains(

@@ -21,6 +21,7 @@ import net.imagej.ImageJ;
 import net.imagej.plugins.commands.imglib.RotateImageXY;
 
 import org.scijava.Context;
+import org.scijava.parallel.ParallelizationParadigm;
 import org.scijava.parallel.PersistentParallelizationParadigm;
 import org.scijava.parallel.PersistentParallelizationParadigm.CompletableFutureID;
 import org.scijava.ui.UIService;
@@ -31,6 +32,7 @@ import cz.it4i.parallel.persistence.PersistentParallelizationParadigmImpl;
 import cz.it4i.parallel.ui.HPCImageJServerRunnerWithUI;
 import cz.it4i.parallel.ui.HPCSettingsGui;
 import cz.it4i.parallel.utils.TestParadigm;
+import cz.it4i.parallel.utils.TestPersistentParadigm;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -139,9 +141,13 @@ public class RotateSingleDatasetWithPersistenceOnHPC
 				finalHpcSettings.setJobID(this.getJob().getID());
 			}
 		};
-		return PersistentParallelizationParadigmImpl.addPersistencyToParadigm(
-			new TestParadigm(runner, context), runner);
-
+		ParallelizationParadigm innerParadigm = TestParadigm.initParadigm(runner,
+			context);
+		PersistentParallelizationParadigm result =
+			PersistentParallelizationParadigmImpl.addPersistencyToParadigm(
+			innerParadigm, runner);
+		result = new TestPersistentParadigm(result, runner);
+		return result;
 	}
 
 	private static void initImageJAndSciJava() {
