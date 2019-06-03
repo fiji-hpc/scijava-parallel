@@ -15,13 +15,20 @@ import org.scijava.plugin.Plugin;
 import org.scijava.widget.FileWidget;
 import org.scijava.widget.TextWidget;
 
-import cz.it4i.parallel.HPCSettings;
+import cz.it4i.parallel.runners.HPCSchedulerType;
+import cz.it4i.parallel.runners.HPCSettings;
 
 @Plugin(type = Command.class, headless = false)
 public class HPCSettingsGui implements Command {
 
 	@Parameter(style = TextWidget.FIELD_STYLE, label = "Host name")
 	private String host;
+
+	@Parameter(style = TextWidget.FIELD_STYLE, label = "Port number")
+	private int port = 22;
+
+	@Parameter(choices = { "PBS", "Slurm" }, label = "HPC Scheduler type")
+	private String schedulerType = "PBS";
 
 	@Parameter(style = TextWidget.FIELD_STYLE, label = "User name")
 	private String userName;
@@ -60,11 +67,12 @@ public class HPCSettingsGui implements Command {
 
 	@Override
 	public void run() {
-		settings = HPCSettings.builder().host(host).userName(userName).keyFile(
-			keyFile).keyFilePassword(keyFilePassword).remoteDirectory(remoteDirectory)
-			.command(command).nodes(nodes).ncpus(ncpus).jobID(Strings.emptyToNull(
-				jobID))
-			.shutdownJobAfterClose(shutdownJobAfterClose).build();
+		settings = HPCSettings.builder().host(host).portNumber(port).userName(
+			userName).keyFile(keyFile).keyFilePassword(keyFilePassword)
+			.remoteDirectory(remoteDirectory).command(command).nodes(nodes).ncpus(
+				ncpus).jobID(Strings.emptyToNull(jobID)).shutdownOnClose(
+					shutdownJobAfterClose).adapterType(HPCSchedulerType.getByString(
+						schedulerType)).build();
 	}
 
 	public static HPCSettings showDialog(Context context) {

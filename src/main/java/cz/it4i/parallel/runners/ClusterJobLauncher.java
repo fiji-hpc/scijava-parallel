@@ -7,13 +7,10 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Arrays;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,7 +86,7 @@ public class ClusterJobLauncher implements Closeable {
 		}
 
 		public void stop() {
-			client.executeCommand("qdel " + jobId);
+			adapter.stop(client, jobId);
 		}
 
 		public String getID() {
@@ -101,19 +98,13 @@ public class ClusterJobLauncher implements Closeable {
 			if (jobId == null) {
 				throw new IllegalStateException("jobId not initialized");
 			}
-			String state;
-			String time;
-			do {
-				String result = client.executeCommand("qstat " + jobId).get(2);
-				String[] tokens = result.split(" +");
-				state = tokens[4];
-				time = tokens[3];
-				sleepForWhile(1000);
-			}
-			while (!(!time.equals("0") && state.equals("R")));
+
+			adapter.waitForStart(client, jobId);
 			if (openOut) {
 				new POutThread(System.out, "OU").start();
-				new POutThread(System.err, "ER").start();
+				if (!adapter.isOutErrTogether()) {
+					new POutThread(System.err, "ER").start();
+				}
 			}
 		}
 
@@ -122,26 +113,7 @@ public class ClusterJobLauncher implements Closeable {
 			if (jobId == null) {
 				throw new IllegalStateException("jobId not initialized");
 			}
-			List<String> result = client.executeCommand("qstat -f " + jobId);
-			List<String> hostLines = new LinkedList<>();
-			for (String line : result) {
-				if (hostLines.isEmpty() && line.contains("exec_host")) {
-					hostLines.add(line);
-				}
-				else if (!hostLines.isEmpty()) {
-					if (!line.contains("exec_vnode")) {
-						hostLines.add(line);
-					}
-					else {
-						break;
-					}
-				}
-			}
-			result = new LinkedList<>(new LinkedHashSet<>(Arrays.asList(
-				hostLines
-				.stream().collect(Collectors.joining("")).replaceAll("\\s+", "")
-				.replaceAll("exec_host=", "").replaceAll("/[^+]+", "").split("\\+"))));
-			return result;
+			return adapter.getNodes(client, jobId);
 		}
 
 		private class POutThread extends Thread
@@ -162,8 +134,8 @@ public class ClusterJobLauncher implements Closeable {
 			public void run() {
 				try (SshExecutionSession session = (usedSession = client
 					.openSshExecutionSession(
-					"ssh " + getNodes().get(0) + " tail -f -n +1 /var/spool/PBS/spool/" +
-							jobId + "." + suffix)))
+						"ssh " + getNodes().get(0) + " tail -f -n +1 " + adapter
+							.getOutputFileName(jobId, suffix))))
 				{
 					byte[] buffer = new byte[1024];
 					int readed;
@@ -188,12 +160,17 @@ public class ClusterJobLauncher implements Closeable {
 
 	private SshCommandClient client;
 
-	public ClusterJobLauncher(String hostName, String userName,
-		String keyLocation, String keyPassword) throws JSchException
+	private HPCSchedulerAdapter adapter;
+
+	public ClusterJobLauncher(String hostName, int port, String userName,
+		String keyLocation, String keyPassword,
+		HPCSchedulerAdapter hpcSchedulerAdapter) throws JSchException
 	{
 		super();
 		this.client = new SshCommandClient(hostName, userName, keyLocation,
 			keyPassword);
+		this.client.setPort(port);
+		this.adapter = hpcSchedulerAdapter;
 	}
 
 	public Job submit(String directory, String command, String parameters,
@@ -222,16 +199,16 @@ public class ClusterJobLauncher implements Closeable {
 			"echo '" + 
 			"#!/usr/bin/env bash\n" +
 			"cd "+directory+"\n" +
-			"pbsdsh -- `readlink -f "+command+"` " + parameters + "\n" +
+			adapter.getSpawnCommand() + " `readlink -f "+command+"` " + parameters + "\n" +
 			"/usr/bin/tail -f /dev/null' > " + fileName + " && " +
-			"chmod +x " + fileName +" &&" + 
-			"qsub  -q qexp -l select=" + nodes + ":ncpus=" + ncpus + " `readlink -f " + fileName + "`").get(0);
+			"chmod +x " + fileName +" && " +
+			adapter.constructSubmitCommand(nodes, ncpus, "`readlink -f " + fileName + "`")).get(0);
 // @formatter:on
 		client.executeCommand("rm " + fileName);
 		return result;
 	}
 
-	static private void sleepForWhile(long timeout) {
+	static void sleepForWhile(long timeout) {
 		try {
 			Thread.sleep(timeout);
 		}

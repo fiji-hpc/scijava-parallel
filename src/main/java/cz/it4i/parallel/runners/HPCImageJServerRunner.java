@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import cz.it4i.parallel.HPCSettings;
 import cz.it4i.parallel.Routines;
 import cz.it4i.parallel.RunningRemoteServer;
 import cz.it4i.parallel.runners.ClusterJobLauncher.Job;
@@ -22,6 +21,10 @@ public class HPCImageJServerRunner extends AbstractImageJServerRunner implements
 	private Job job;
 
 	private ClusterJobLauncher launcher;
+
+	public HPCImageJServerRunner(HPCSettings settings) {
+		this(settings, settings.isShutdownOnClose());
+	}
 
 	public HPCImageJServerRunner(HPCSettings settings, boolean shutdownOnClose)
 	{
@@ -72,8 +75,9 @@ public class HPCImageJServerRunner extends AbstractImageJServerRunner implements
 	@Override
 	protected void doStartImageJServer() throws IOException {
 		launcher = Routines.supplyWithExceptionHandling(
-			() -> new ClusterJobLauncher(settings.getHost(), settings.getUserName(), settings.getKeyFile().toString(),
-				settings.getKeyFilePassword()));
+			() -> new ClusterJobLauncher(settings.getHost(), settings.getPort(),
+				settings.getUserName(), settings.getKeyFile().toString(), settings
+					.getKeyFilePassword(), settings.getAdapterType().create()));
 		final String arguments = getParameters().stream().collect(Collectors
 			.joining(" "));
 		if (settings.getJobID() != null) {

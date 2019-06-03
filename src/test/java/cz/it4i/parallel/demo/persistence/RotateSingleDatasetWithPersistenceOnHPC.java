@@ -21,18 +21,16 @@ import net.imagej.ImageJ;
 import net.imagej.plugins.commands.imglib.RotateImageXY;
 
 import org.scijava.Context;
-import org.scijava.parallel.ParallelizationParadigm;
 import org.scijava.parallel.PersistentParallelizationParadigm;
 import org.scijava.parallel.PersistentParallelizationParadigm.CompletableFutureID;
 import org.scijava.ui.UIService;
 
-import cz.it4i.parallel.HPCSettings;
 import cz.it4i.parallel.demo.ExampleImage;
 import cz.it4i.parallel.persistence.PersistentParallelizationParadigmImpl;
+import cz.it4i.parallel.runners.HPCSettings;
 import cz.it4i.parallel.ui.HPCImageJServerRunnerWithUI;
 import cz.it4i.parallel.ui.HPCSettingsGui;
 import cz.it4i.parallel.utils.TestParadigm;
-import cz.it4i.parallel.utils.TestPersistentParadigm;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -53,8 +51,7 @@ import lombok.extern.slf4j.Slf4j;
  * @author koz01
  */
 @Slf4j
-public class RotateSingleDatasetWithPersistenceOnHPC
-{
+public class RotateSingleDatasetWithPersistenceOnHPC {
 
 	private final static String REQUEST_DATA_FILE = "requestData.obj";
 
@@ -118,11 +115,10 @@ public class RotateSingleDatasetWithPersistenceOnHPC
 	private static PersistentParallelizationParadigm constructParadigm(
 		Map<Class<?>, Object> requestData)
 	{
-		HPCSettings settings = (HPCSettings) requestData.get(
-			HPCSettings.class);
+		HPCSettings settings = (HPCSettings) requestData.get(HPCSettings.class);
 		boolean shutDownOnClose = true;
 		if (settings != null) {
-			shutDownOnClose &= settings.isShutdownJobAfterClose();
+			shutDownOnClose &= settings.isShutdownOnClose();
 		}
 		else {
 			shutDownOnClose = false;
@@ -141,13 +137,10 @@ public class RotateSingleDatasetWithPersistenceOnHPC
 				finalHpcSettings.setJobID(this.getJob().getID());
 			}
 		};
-		ParallelizationParadigm innerParadigm = TestParadigm.initParadigm(runner,
-			context);
-		PersistentParallelizationParadigm result =
-			PersistentParallelizationParadigmImpl.addPersistencyToParadigm(
-			innerParadigm, runner);
-		result = new TestPersistentParadigm(result, runner);
-		return result;
+		TestParadigm innerParadigm = new TestParadigm(runner, context);
+		return PersistentParallelizationParadigmImpl.addPersistencyToParadigm(
+			innerParadigm, runner, innerParadigm.getParadigm().getClass()
+				.getCanonicalName());
 	}
 
 	private static void initImageJAndSciJava() {
@@ -190,26 +183,23 @@ public class RotateSingleDatasetWithPersistenceOnHPC
 		}
 	}
 
-	private static List<Map<String, Object>> initParameters()
-	{
-		try
-		{
-			Dataset dataset = ioService.open( ExampleImage.lenaAsTempFile().toString());
+	private static List<Map<String, Object>> initParameters() {
+		try {
+			Dataset dataset = ioService.open(ExampleImage.lenaAsTempFile()
+				.toString());
 			log.info("input dataset: " + getName(dataset));
 			Map<String, Object> parameters = new HashMap<>();
 			parameters.put("dataset", dataset);
 			parameters.put("angle", 90);
 			return Collections.singletonList(parameters);
 		}
-		catch ( IOException e )
-		{
-			throw new RuntimeException( e );
+		catch (IOException e) {
+			throw new RuntimeException(e);
 		}
 	}
 
 	private static String getName(Object dataset) {
 		return dataset.getClass().toString() + System.identityHashCode(dataset);
 	}
-
 
 }

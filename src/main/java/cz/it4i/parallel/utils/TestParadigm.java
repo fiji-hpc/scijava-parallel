@@ -50,7 +50,7 @@ public class TestParadigm implements ParallelizationParadigm
 	}
 
 
-	public static ParallelizationParadigm initParadigm(ServerRunner runner,
+	private static ParallelizationParadigm initParadigm(ServerRunner runner,
 		Context context)
 	{
 		runner.start();
@@ -118,7 +118,7 @@ public class TestParadigm implements ParallelizationParadigm
 		runner.close();
 	}
 
-	ParallelizationParadigm getParadigm() {
+	public ParallelizationParadigm getParadigm() {
 		return paradigm;
 	}
 

@@ -11,9 +11,8 @@ import javax.swing.SwingConstants;
 
 import org.scijava.Context;
 
-import cz.it4i.parallel.HPCSettings;
 import cz.it4i.parallel.runners.HPCImageJServerRunner;
-import lombok.Getter;
+import cz.it4i.parallel.runners.HPCSettings;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -22,14 +21,15 @@ public class HPCImageJServerRunnerWithUI extends HPCImageJServerRunner {
 	private JDialog dialog;
 	private JLabel label;
 
-	@Getter
-	final private boolean shutdownJob;
+
+	public HPCImageJServerRunnerWithUI(HPCSettings settings) {
+		super(settings);
+	}
 
 	public HPCImageJServerRunnerWithUI(HPCSettings settings,
 		boolean shutdownOnClose)
 	{
 		super(settings, shutdownOnClose);
-		shutdownJob = settings.isShutdownJobAfterClose();
 	}
 
 	@Override

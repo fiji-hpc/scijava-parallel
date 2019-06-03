@@ -58,17 +58,24 @@ public class PersistentParallelizationParadigmImpl implements
 	public static PersistentParallelizationParadigm addPersistencyToParadigm(
 		ParallelizationParadigm paradigm, RunningRemoteServer runningServer)
 	{
-		
+		return addPersistencyToParadigm(paradigm, runningServer, paradigm.getClass()
+			.getCanonicalName());
+	}
+
+	public static PersistentParallelizationParadigm addPersistencyToParadigm(
+		ParallelizationParadigm paradigm, RunningRemoteServer runningServer,
+		String paradigmClassName)
+	{
+
 		List<Host> hosts = Streams.zip(Streams.zip(runningServer.getRemoteHosts()
 			.stream(), runningServer.getRemotePorts().stream(), (host, port) -> host +
-				":" + port), runningServer.getNCores().stream(),
-			Host::new).collect(Collectors.toList());
+				":" + port), runningServer.getNCores().stream(), Host::new).collect(
+					Collectors.toList());
 
 		PersistentParallelizationParadigmImpl result =
 			new PersistentParallelizationParadigmImpl(paradigm);
 		result.setHosts(hosts);
-		result.initRemoteParallelizationParadigm(paradigm.getClass()
-			.getCanonicalName());
+		result.initRemoteParallelizationParadigm(paradigmClassName);
 		return result;
 	}
 
