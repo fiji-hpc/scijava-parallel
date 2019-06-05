@@ -4,7 +4,7 @@ import java.util.List;
 
 import cz.it4i.fiji.scpclient.SshCommandClient;
 
-public interface HPCSchedulerAdapter {
+interface HPCSchedulerBridge {
 	String getSpawnCommand();
 
 	String constructSubmitCommand(long nodes, long ncpus, String string);

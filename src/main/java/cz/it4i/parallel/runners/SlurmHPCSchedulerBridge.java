@@ -6,7 +6,7 @@ import java.util.List;
 
 import cz.it4i.fiji.scpclient.SshCommandClient;
 
-public class SlurmHPCSchedulerAdapter implements HPCSchedulerAdapter {
+class SlurmHPCSchedulerBridge implements HPCSchedulerBridge {
 
 	private static final String DIRECTORY_FOR_OUT = "~/.scijava-parallel";
 	@Override

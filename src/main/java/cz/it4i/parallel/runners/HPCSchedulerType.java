@@ -8,8 +8,8 @@ import java.util.stream.Collectors;
 import cz.it4i.parallel.SciJavaParallelRuntimeException;
 
 public enum HPCSchedulerType {
-		SLURM("Slurm", SlurmHPCSchedulerAdapter.class), PBS("PBS",
-			PBSHPCSchedulerAdapter.class);
+		SLURM("Slurm", SlurmHPCSchedulerBridge.class), PBS("PBS",
+			PBSHPCSchedulerBridge.class);
 
 	private static final Map<String, HPCSchedulerType> string2Type = EnumSet
 		.allOf(
@@ -20,7 +20,7 @@ public enum HPCSchedulerType {
 		return string2Type.get(string);
 	}
 	private HPCSchedulerType(String name,
-		Class<? extends HPCSchedulerAdapter> adapterType)
+		Class<? extends HPCSchedulerBridge> adapterType)
 	{
 		this.name = name;
 		this.adapterType = adapterType;
@@ -28,14 +28,14 @@ public enum HPCSchedulerType {
 
 	private final String name;
 
-	private final Class<? extends HPCSchedulerAdapter> adapterType;
+	private final Class<? extends HPCSchedulerBridge> adapterType;
 
 	@Override
 	public String toString() {
 		return name;
 	}
 
-	public HPCSchedulerAdapter create() {
+	HPCSchedulerBridge create() {
 		try {
 			return adapterType.getConstructor().newInstance();
 		}

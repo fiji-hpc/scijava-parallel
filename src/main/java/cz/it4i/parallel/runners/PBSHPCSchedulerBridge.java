@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 
 import cz.it4i.fiji.scpclient.SshCommandClient;
 
-public class PBSHPCSchedulerAdapter implements HPCSchedulerAdapter {
+class PBSHPCSchedulerBridge implements HPCSchedulerBridge {
 
 	@Override
 	public String getSpawnCommand() {

@@ -160,17 +160,17 @@ public class ClusterJobLauncher implements Closeable {
 
 	private SshCommandClient client;
 
-	private HPCSchedulerAdapter adapter;
+	private HPCSchedulerBridge adapter;
 
 	public ClusterJobLauncher(String hostName, int port, String userName,
 		String keyLocation, String keyPassword,
-		HPCSchedulerAdapter hpcSchedulerAdapter) throws JSchException
+		HPCSchedulerType hpcSchedulerType) throws JSchException
 	{
 		super();
 		this.client = new SshCommandClient(hostName, userName, keyLocation,
 			keyPassword);
 		this.client.setPort(port);
-		this.adapter = hpcSchedulerAdapter;
+		this.adapter = hpcSchedulerType.create();
 	}
 
 	public Job submit(String directory, String command, String parameters,
