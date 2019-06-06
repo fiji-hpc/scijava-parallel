@@ -82,7 +82,7 @@ public class DefaultParallelService extends
 	@Override
 	public void deleteProfiles() {
 		profiles.clear();
-		saveProfiles();
+		clearProfiles();
 	}
 
 	// -- Service methods --
@@ -94,6 +94,12 @@ public class DefaultParallelService extends
 
 	// -- Helper methods --
 
+	// -- Service methods --
+	
+	private void clearProfiles() {
+		prefService.remove(this.getClass(), PROFILES);
+	}
+
 	private void saveProfiles() {
 		final List<String> serializedProfiles = new LinkedList<>();
 		profiles.forEach(p -> {
@@ -104,10 +110,8 @@ public class DefaultParallelService extends
 
 	private void retrieveProfiles() {
 		profiles = new LinkedList<>();
-		prefService.getList(this.getClass(), PROFILES).forEach((
-			serializedProfile) -> {
-			profiles.add(deserializeProfile(serializedProfile));
-		});
+		prefService.getList(this.getClass(), PROFILES).forEach(
+			serializedProfile -> profiles.add(deserializeProfile(serializedProfile)));
 	}
 
 	private String serializeProfile(

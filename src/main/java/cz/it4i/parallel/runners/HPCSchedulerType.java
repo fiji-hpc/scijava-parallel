@@ -37,7 +37,7 @@ public enum HPCSchedulerType {
 
 	HPCSchedulerBridge create() {
 		try {
-			return adapterType.getConstructor().newInstance();
+			return adapterType.getDeclaredConstructor().newInstance();
 		}
 		catch (InstantiationException | IllegalAccessException
 				| IllegalArgumentException | InvocationTargetException
