@@ -45,8 +45,16 @@ public class HPCImageJServerRunnerWithUI extends HPCImageJServerRunner {
 		dialog.setVisible(true);
 
 		imageJServerStarted();
-		super.start();
+		try  { 
+			super.start();
+		} finally {
+			imageJServerStartFinished();
+		}
 		imageJServerRunning();
+	}
+
+	private void imageJServerStartFinished() {
+		dialog.setVisible(false);
 	}
 
 	private void imageJServerStarted() {
@@ -58,7 +66,6 @@ public class HPCImageJServerRunnerWithUI extends HPCImageJServerRunner {
 
 	private void imageJServerRunning() {
 		log.info("imageJServerRunning");
-		dialog.setVisible(false);
 		log.info("job: " + getJob().getID() + " started on hosts: " + getJob()
 			.getNodes());
 	}
@@ -68,8 +75,12 @@ public class HPCImageJServerRunnerWithUI extends HPCImageJServerRunner {
 		log.info("close");
 		label.setText("Waiting for stop.");
 		dialog.setVisible(true);
-		super.close();
-		dialog.setVisible(false);
+		try {
+			super.close();
+		}
+		finally {
+			dialog.setVisible(false);
+		}
 		dialog.dispose();
 		log.info("close done");
 	}
