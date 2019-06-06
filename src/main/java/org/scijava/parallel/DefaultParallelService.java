@@ -17,8 +17,11 @@ import org.scijava.plugin.Plugin;
 import org.scijava.prefs.PrefService;
 import org.scijava.service.Service;
 
+import lombok.extern.slf4j.Slf4j;
+
 // TODO: Add description
 
+@Slf4j
 @Plugin(type = Service.class)
 public class DefaultParallelService extends
 	AbstractSingletonService<ParallelizationParadigm> implements ParallelService
@@ -68,7 +71,7 @@ public class DefaultParallelService extends
 
 	@Override
 	public void selectProfile(final String name) {
-		profiles.forEach(p -> {
+		profiles.stream().filter(p -> p != null).forEach(p -> {
 			if (p.getName().equals(name)) {
 				p.setSelected(true);
 			}
@@ -110,8 +113,9 @@ public class DefaultParallelService extends
 
 	private void retrieveProfiles() {
 		profiles = new LinkedList<>();
-		prefService.getList(this.getClass(), PROFILES).forEach(
-			serializedProfile -> profiles.add(deserializeProfile(serializedProfile)));
+		prefService.getList(this.getClass(), PROFILES).stream().map(
+			this::deserializeProfile).filter(p -> p != null).forEach(p -> profiles
+				.add(p));
 	}
 
 	private String serializeProfile(
@@ -125,7 +129,7 @@ public class DefaultParallelService extends
 			return Base64.getEncoder().encodeToString(baos.toByteArray());
 		}
 		catch (final Exception e) {
-			// TODO: Proper error handling
+			log.error(e.getMessage(), e);
 		}
 		return null;
 	}
