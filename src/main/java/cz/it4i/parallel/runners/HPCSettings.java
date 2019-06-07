@@ -13,40 +13,38 @@ import lombok.EqualsAndHashCode;
 public class HPCSettings implements Serializable
 {
 
-	private String host;
+	private final String host;
 
-	private Integer port;
+	private final Integer port;
 
-	private String userName;
+	private final String userName;
 
-	private File keyFile;
+	private final File keyFile;
 
-	private String keyFilePassword;
+	private final String keyFilePassword;
 
-	private String remoteDirectory;
+	private final String remoteDirectory;
 
-	private String command;
+	private final String command;
 
-	private int nodes;
+	private final int nodes;
 
-	private int ncpus;
+	private final int ncpus;
 
 	private String jobID;
 
-	private HPCSchedulerType adapterType;
+	private final HPCSchedulerType adapterType;
 
-	private boolean shutdownOnClose;
+	private final boolean shutdownOnClose;
 
-	@SuppressWarnings("unused")
-	private HPCSettings() {
-	}
+	private final boolean redirectStdInErr;
 
 	@Builder
 	private HPCSettings(String host, Integer portNumber, String userName,
 		File keyFile,
 		String keyFilePassword, String remoteDirectory, String command, int nodes,
 		int ncpus, String jobID, HPCSchedulerType adapterType,
-		boolean shutdownOnClose)
+		boolean shutdownOnClose, boolean redirectStdInErr)
 	{
 		this.host = host;
 		this.port = portNumber != null ? portNumber : 22;
@@ -61,6 +59,7 @@ public class HPCSettings implements Serializable
 		this.adapterType = adapterType != null ? adapterType
 			: HPCSchedulerType.SLURM;
 		this.shutdownOnClose = shutdownOnClose;
+		this.redirectStdInErr = redirectStdInErr;
 	}
 
 

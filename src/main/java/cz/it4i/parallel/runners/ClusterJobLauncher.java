@@ -35,12 +35,12 @@ public class ClusterJobLauncher implements Closeable {
 
 		private CompletableFuture<List<String>> nodesFuture;
 
-		private boolean openOut;
+		private boolean redirectOut;
 
 		private Job(String jobId, boolean openOut) {
 			super();
 			this.jobId = jobId;
-			this.openOut = openOut;
+			this.redirectOut = openOut;
 			nodesFuture = CompletableFuture.supplyAsync(this::getNodesFromServer);
 		}
 
@@ -100,7 +100,7 @@ public class ClusterJobLauncher implements Closeable {
 			}
 
 			adapter.waitForStart(client, jobId);
-			if (openOut) {
+			if (redirectOut) {
 				new POutThread(System.out, "OU").start();
 				if (!adapter.isOutErrTogether()) {
 					new POutThread(System.err, "ER").start();
@@ -162,26 +162,30 @@ public class ClusterJobLauncher implements Closeable {
 
 	private HPCSchedulerBridge adapter;
 
+	private boolean redirectStdOutErr;
+
 	public ClusterJobLauncher(String hostName, int port, String userName,
 		String keyLocation, String keyPassword,
-		HPCSchedulerType hpcSchedulerType) throws JSchException
+		HPCSchedulerType hpcSchedulerType, boolean redirectStdOutErr)
+		throws JSchException
 	{
 		super();
 		this.client = new SshCommandClient(hostName, userName, keyLocation,
 			keyPassword);
 		this.client.setPort(port);
 		this.adapter = hpcSchedulerType.create();
+		this.redirectStdOutErr = redirectStdOutErr;
 	}
 
 	public Job submit(String directory, String command, String parameters,
 		long usedNodes, long ncpus)
 	{
 		String jobId = runJob(directory, command, parameters, usedNodes, ncpus);
-		return new Job(jobId, false);
+		return new Job(jobId, redirectStdOutErr);
 	}
 
 	public Job getSubmittedJob(String jobId) {
-		return new Job(jobId, false);
+		return new Job(jobId, redirectStdOutErr);
 	}
 
 	@Override
