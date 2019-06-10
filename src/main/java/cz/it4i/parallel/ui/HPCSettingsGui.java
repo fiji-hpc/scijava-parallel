@@ -62,6 +62,10 @@ public class HPCSettingsGui implements Command {
 		label = "Shutdown job when application finishes.")
 	private boolean shutdownJobAfterClose;
 
+	@Parameter(style = TextWidget.FIELD_STYLE,
+		label = "Redirect standard output ")
+	private boolean redirectStdOutErr;
+
 	@Parameter(type = ItemIO.OUTPUT)
 	private HPCSettings settings;
 
@@ -71,7 +75,8 @@ public class HPCSettingsGui implements Command {
 			userName).keyFile(keyFile).keyFilePassword(keyFilePassword)
 			.remoteDirectory(remoteDirectory).command(command).nodes(nodes).ncpus(
 				ncpus).jobID(Strings.emptyToNull(jobID)).shutdownOnClose(
-					shutdownJobAfterClose).adapterType(HPCSchedulerType.getByString(
+					shutdownJobAfterClose).redirectStdInErr(redirectStdOutErr)
+			.adapterType(HPCSchedulerType.getByString(
 						schedulerType)).build();
 	}
 
