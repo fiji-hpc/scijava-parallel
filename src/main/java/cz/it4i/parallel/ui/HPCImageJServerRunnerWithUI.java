@@ -68,7 +68,7 @@ public class HPCImageJServerRunnerWithUI extends HPCImageJServerRunner {
 		log.info("close done");
 	}
 
-	private String getServerName() {
+	protected String getServerName() {
 		return "ImageJ server";
 	}
 
