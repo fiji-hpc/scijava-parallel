@@ -53,23 +53,6 @@ public class HPCImageJServerRunnerWithUI extends HPCImageJServerRunner {
 		imageJServerRunning();
 	}
 
-	private void imageJServerStartFinished() {
-		dialog.setVisible(false);
-	}
-
-	private void imageJServerStarted() {
-		log.info("imageJServerStarted");
-		dialog.setVisible(false);
-		this.label.setText("Waiting for a ImageJ server start.");
-		dialog.setVisible(true);
-	}
-
-	private void imageJServerRunning() {
-		log.info("imageJServerRunning");
-		log.info("job: " + getJob().getID() + " started on hosts: " + getJob()
-			.getNodes());
-	}
-
 	@Override
 	public void close() {
 		log.info("close");
@@ -83,6 +66,25 @@ public class HPCImageJServerRunnerWithUI extends HPCImageJServerRunner {
 		}
 		dialog.dispose();
 		log.info("close done");
+	}
+
+	private String getServerName() {
+		return "ImageJ server";
+	}
+
+	private void imageJServerStartFinished() {
+		dialog.setVisible(false);
+	}
+
+	private void imageJServerStarted() {
+		dialog.setVisible(false);
+		this.label.setText("Waiting for a " + getServerName() + " start.");
+		dialog.setVisible(true);
+	}
+
+	private void imageJServerRunning() {
+		log.info("job: " + getJob().getID() + " started on hosts: " + getJob()
+			.getNodes());
 	}
 
 	public static HPCImageJServerRunnerWithUI gui(Context context,
