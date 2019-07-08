@@ -164,14 +164,20 @@ public class ClusterJobLauncher implements Closeable {
 
 	private boolean redirectStdOutErr;
 
-	public ClusterJobLauncher(String hostName, int port, String userName,
-		String keyLocation, String keyPassword,
+	public ClusterJobLauncher(String hostName, int port, String userName, String authenticationChoice, 
+		String password, String keyLocation, String keyPassword,
 		HPCSchedulerType hpcSchedulerType, boolean redirectStdOutErr)
 		throws JSchException
 	{
 		super();
-		this.client = new SshCommandClient(hostName, userName, keyLocation,
+		log.info("Authentication method: "+authenticationChoice);
+		if(authenticationChoice.equals("Password"))
+		{
+			this.client = new SshCommandClient(hostName, userName, password);
+		} else {
+			this.client = new SshCommandClient(hostName, userName, keyLocation,
 			keyPassword);
+		}
 		this.client.setPort(port);
 		this.adapter = hpcSchedulerType.create();
 		this.redirectStdOutErr = redirectStdOutErr;

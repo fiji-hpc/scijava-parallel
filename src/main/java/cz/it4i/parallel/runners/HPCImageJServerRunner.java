@@ -76,7 +76,7 @@ public class HPCImageJServerRunner extends AbstractImageJServerRunner implements
 	protected void doStartImageJServer() throws IOException {
 		launcher = Routines.supplyWithExceptionHandling(
 			() -> new ClusterJobLauncher(settings.getHost(), settings.getPort(),
-				settings.getUserName(), settings.getKeyFile().toString(), settings
+				settings.getUserName(), settings.getAuthenticationChoice(), settings.getPassword(), settings.getKeyFile().toString(), settings
 					.getKeyFilePassword(), settings.getAdapterType(), settings
 						.isRedirectStdInErr()));
 		final String arguments = getParameters().stream().collect(Collectors

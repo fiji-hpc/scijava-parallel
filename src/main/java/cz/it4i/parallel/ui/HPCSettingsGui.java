@@ -8,11 +8,14 @@ import java.util.concurrent.ExecutionException;
 
 import org.scijava.Context;
 import org.scijava.ItemIO;
+import org.scijava.ItemVisibility;
 import org.scijava.command.Command;
 import org.scijava.command.CommandService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
+import org.scijava.widget.ChoiceWidget;
 import org.scijava.widget.FileWidget;
+import org.scijava.widget.NumberWidget;
 import org.scijava.widget.TextWidget;
 
 import cz.it4i.parallel.runners.HPCSchedulerType;
@@ -20,18 +23,23 @@ import cz.it4i.parallel.runners.HPCSettings;
 
 @Plugin(type = Command.class, headless = false)
 public class HPCSettingsGui implements Command {
+	
+	@Parameter(visibility = ItemVisibility.MESSAGE)
+	private final String labelSSH = "SSH Settings";
 
 	@Parameter(style = TextWidget.FIELD_STYLE, label = "Host name")
 	private String host;
 
-	@Parameter(style = TextWidget.FIELD_STYLE, label = "Port number")
+	@Parameter(style = NumberWidget.SPINNER_STYLE, label = "Port number", min = "1", max = "65535")
 	private int port = 22;
-
-	@Parameter(choices = { "PBS", "Slurm" }, label = "HPC Scheduler type")
-	private String schedulerType = "PBS";
 
 	@Parameter(style = TextWidget.FIELD_STYLE, label = "User name")
 	private String userName;
+	
+	@Parameter(label = "Authentication method:",
+			style = ChoiceWidget.RADIO_BUTTON_HORIZONTAL_STYLE, choices = { "Key file",
+				"Password"})
+		private String authenticationChoice;	
 
 	@Parameter(style = FileWidget.OPEN_STYLE, label = "Key file")
 	private File keyFile;
@@ -39,9 +47,19 @@ public class HPCSettingsGui implements Command {
 	@Parameter(style = TextWidget.PASSWORD_STYLE, label = "Key file password",
 		persist = false, required = false)
 	private String keyFilePassword;
+	
+	@Parameter(style = TextWidget.PASSWORD_STYLE, label = "Password",
+			persist = false, required = false)
+		private String password;
+	
+	@Parameter(visibility = ItemVisibility.MESSAGE)
+	private final String labelHPC = "HPC Settings";
+	
+	@Parameter(choices = { "PBS", "Slurm" }, label = "HPC Scheduler type")
+	private String schedulerType = "PBS";
 
 	// for salomon /scratch/work/project/dd-18-42/apps/fiji-with-server
-	@Parameter(style = TextWidget.FIELD_STYLE,
+	@Parameter(style = FileWidget.DIRECTORY_STYLE,
 		label = "Remote directory with Fiji")
 	private String remoteDirectory;
 
@@ -49,10 +67,10 @@ public class HPCSettingsGui implements Command {
 	private String command = "ImageJ-linux64";
 
 	// for salomon run-workers.sh
-	@Parameter(style = TextWidget.FIELD_STYLE, label = "Number of nodes")
+	@Parameter(style = NumberWidget.SPINNER_STYLE, label = "Number of nodes", min = "1")
 	private int nodes;
 
-	@Parameter(style = TextWidget.FIELD_STYLE, label = "Number of cpus per node")
+	@Parameter(style = NumberWidget.SPINNER_STYLE, label = "Number of cpus per node", min = "1")
 	private int ncpus;
 
 	@Parameter(style = TextWidget.FIELD_STYLE, label = "Running job ID")
@@ -72,7 +90,7 @@ public class HPCSettingsGui implements Command {
 	@Override
 	public void run() {
 		settings = HPCSettings.builder().host(host).portNumber(port).userName(
-			userName).keyFile(keyFile).keyFilePassword(keyFilePassword)
+			userName).authenticationChoice(authenticationChoice).password(password).keyFile(keyFile).keyFilePassword(keyFilePassword)
 			.remoteDirectory(remoteDirectory).command(command).nodes(nodes).ncpus(
 				ncpus).jobID(Strings.emptyToNull(jobID)).shutdownOnClose(
 					shutdownJobAfterClose).redirectStdInErr(redirectStdOutErr)

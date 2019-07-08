@@ -22,6 +22,10 @@ public class HPCSettings implements Serializable
 	private final File keyFile;
 
 	private final String keyFilePassword;
+	
+	private String authenticationChoice;
+	
+	private String password;
 
 	private final String remoteDirectory;
 
@@ -40,15 +44,16 @@ public class HPCSettings implements Serializable
 	private final boolean redirectStdInErr;
 
 	@Builder
-	private HPCSettings(String host, Integer portNumber, String userName,
-		File keyFile,
-		String keyFilePassword, String remoteDirectory, String command, int nodes,
-		int ncpus, String jobID, HPCSchedulerType adapterType,
+	private HPCSettings(String host, Integer portNumber, String userName, String authenticationChoice, 
+		String password, File keyFile, String keyFilePassword, String remoteDirectory, String command, 
+		int nodes, int ncpus, String jobID, HPCSchedulerType adapterType,
 		boolean shutdownOnClose, boolean redirectStdInErr)
 	{
 		this.host = host;
 		this.port = portNumber != null ? portNumber : 22;
 		this.userName = userName;
+		this.authenticationChoice = authenticationChoice;
+		this.password = password;
 		this.keyFile = keyFile;
 		this.keyFilePassword = keyFilePassword;
 		this.remoteDirectory = remoteDirectory;

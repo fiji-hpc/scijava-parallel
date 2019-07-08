@@ -27,7 +27,7 @@ public class Config {
 			final InputStream resource = Config.class.getClassLoader().getResourceAsStream(
 					CONFIG_FILE_NAME );
 			if( resource == null )
-				throw new RuntimeException( "Configuration file " + CONFIG_FILE_NAME + "needs to be set up correctly." );
+				throw new RuntimeException( "Configuration file " + CONFIG_FILE_NAME + " needs to be set up correctly." );
 			properties.load( resource );
 		}
 		catch (final IOException e) {
