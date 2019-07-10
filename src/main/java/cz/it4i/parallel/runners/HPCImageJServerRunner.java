@@ -1,6 +1,8 @@
 
 package cz.it4i.parallel.runners;
 
+import com.jcraft.jsch.JSchException;
+
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
@@ -75,7 +77,7 @@ public class HPCImageJServerRunner extends AbstractImageJServerRunner implements
 	@Override
 	protected void doStartImageJServer() throws IOException {
 		launcher = Routines.supplyWithExceptionHandling(
-			() -> new ClusterJobLauncher(settings.getHost(), settings.getPort(),
+			() -> createClusterJobLauncher(settings.getHost(), settings.getPort(),
 				settings.getUserName(), settings.getAuthenticationChoice(), settings.getPassword(), settings.getKeyFile().toString(), settings
 					.getKeyFilePassword(), settings.getAdapterType(), settings
 						.isRedirectStdInErr()));
@@ -89,6 +91,19 @@ public class HPCImageJServerRunner extends AbstractImageJServerRunner implements
 				.getCommand(), arguments, settings.getNodes(), settings.getNcpus());
 		}
 		ports = job.createTunnels(getStartPort(), getStartPort());
+	}
+
+	private ClusterJobLauncher createClusterJobLauncher(String host, Integer port,
+		String userName, String authenticationChoice, String password,
+		String keyFile, String keyFilePassword, HPCSchedulerType adapterType,
+		boolean redirectStdInErr) throws JSchException
+	{
+		if (authenticationChoice.equals("Password")) {
+			return ClusterJobLauncher.createWithPasswordAuthentication(host, port,
+				userName, password, adapterType, redirectStdInErr);
+		}
+		return ClusterJobLauncher.createWithKeyAuthentication(host, port,
+			userName, keyFile, keyFilePassword, adapterType, redirectStdInErr);
 	}
 
 	protected int getStartPort() {

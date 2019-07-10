@@ -176,20 +176,31 @@ public class ClusterJobLauncher implements Closeable {
 
 	private boolean redirectStdOutErr;
 
-	public ClusterJobLauncher(String hostName, int port, String userName, String authenticationChoice, 
-		String password, String keyLocation, String keyPassword,
+	public static ClusterJobLauncher createWithKeyAuthentication(String hostName,
+		int port, String userName, String keyLocation,
+		String keyPassword, HPCSchedulerType hpcSchedulerType,
+		boolean redirectStdOutErr) throws JSchException
+	{
+		return new ClusterJobLauncher(new SshCommandClient(hostName, userName,
+			keyLocation, keyPassword), port, hpcSchedulerType, redirectStdOutErr);
+	}
+
+	public static ClusterJobLauncher createWithPasswordAuthentication(
+		String hostName,
+		int port, String userName, String password,
 		HPCSchedulerType hpcSchedulerType, boolean redirectStdOutErr)
-		throws JSchException
+
+	{
+		return new ClusterJobLauncher(new SshCommandClient(hostName, userName,
+			password), port, hpcSchedulerType, redirectStdOutErr);
+	}
+
+	private ClusterJobLauncher(SshCommandClient client, int port,
+		HPCSchedulerType hpcSchedulerType, boolean redirectStdOutErr)
 	{
 		super();
-		log.info("Authentication method: "+authenticationChoice);
-		if(authenticationChoice.equals("Password"))
-		{
-			this.client = new SshCommandClient(hostName, userName, password);
-		} else {
-			this.client = new SshCommandClient(hostName, userName, keyLocation,
-			keyPassword);
-		}
+
+		this.client = client;
 		this.client.setPort(port);
 		this.adapter = hpcSchedulerType.create();
 		this.redirectStdOutErr = redirectStdOutErr;
