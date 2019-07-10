@@ -29,14 +29,18 @@ public class CpuLoadExplorer implements Command {
 
 	@Override
 	public void run() {
-
+		// In milliseconds:
 		RuntimeMXBean runtimeBean = ManagementFactory.getRuntimeMXBean();
 		uptime = runtimeBean.getUptime();
 
 		OperatingSystemMXBean osBean = ManagementFactory.getPlatformMXBean(
 			OperatingSystemMXBean.class);
+		
 		processCpuLoad = osBean.getProcessCpuLoad();
+		
 		systemCpuLoad = osBean.getSystemCpuLoad();
+		
+		// The bellow functionality is not supported on Windows, it always outputs "-1":
 		systemLoadAverage = osBean.getSystemLoadAverage();
 
 	}
