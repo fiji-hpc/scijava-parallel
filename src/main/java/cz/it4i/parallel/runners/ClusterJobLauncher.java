@@ -7,6 +7,8 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PrintStream;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -17,6 +19,7 @@ import org.slf4j.LoggerFactory;
 
 import cz.it4i.fiji.scpclient.SshCommandClient;
 import cz.it4i.fiji.scpclient.SshExecutionSession;
+import cz.it4i.parallel.runners.ClusterJobLauncher.Job.POutThread;
 
 public class ClusterJobLauncher implements Closeable {
 
@@ -24,6 +27,8 @@ public class ClusterJobLauncher implements Closeable {
 		ClusterJobLauncher.class);
 
 	private final static long REMOTE_CONSOLE_READ_TIMEOUT = 500;
+
+	private Collection<POutThread> threads = new LinkedList<>();
 
 	public class Job {
 
@@ -101,9 +106,9 @@ public class ClusterJobLauncher implements Closeable {
 
 			adapter.waitForStart(client, jobId);
 			if (redirectOut) {
-				new POutThread(System.out, "OU").start();
+				startOutThread(System.out, "OU");
 				if (!adapter.isOutErrTogether()) {
-					new POutThread(System.err, "ER").start();
+					startOutThread(System.err, "ER");
 				}
 			}
 		}
@@ -116,7 +121,14 @@ public class ClusterJobLauncher implements Closeable {
 			return adapter.getNodes(client, jobId);
 		}
 
-		private class POutThread extends Thread
+		private void startOutThread(PrintStream out, String suffix) {
+			POutThread thread = new POutThread(out, suffix);
+			threads.add(thread);
+			thread.start();
+		
+		}
+
+		class POutThread extends Thread
 
 		{
 
@@ -134,8 +146,8 @@ public class ClusterJobLauncher implements Closeable {
 			public void run() {
 				try (SshExecutionSession session = (usedSession = client
 					.openSshExecutionSession(
-						"ssh " + getNodes().get(0) + " tail -f -n +1 " + adapter
-							.getOutputFileName(jobId, suffix))))
+						"ssh -t " + getNodes().get(0) + " tail -f -n +1 " + adapter
+							.getOutputFileName(jobId, suffix), true)))
 				{
 					byte[] buffer = new byte[1024];
 					int readed;
@@ -196,6 +208,7 @@ public class ClusterJobLauncher implements Closeable {
 
 	@Override
 	public void close() {
+		threads.forEach(POutThread::interrupt);
 		this.client.close();
 	}
 
