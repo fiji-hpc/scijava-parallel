@@ -38,9 +38,8 @@ public abstract class AbstractMultipleHostParadigm extends AbstractBaseParadigm
 		Map<String, Object> parameters, List<String> usedHosts)
 	{
 		return usedHosts.parallelStream().map(name -> hostName2Worker.get(name))
-			.map(worker -> worker.executeCommand(commandName, Collections
-				.singletonList(
-				parameters))).map(result -> result.get(0)).collect(Collectors.toList());
+			.map(worker -> worker.executeCommand(commandName, parameters)).collect(
+				Collectors.toList());
 
 	}
 

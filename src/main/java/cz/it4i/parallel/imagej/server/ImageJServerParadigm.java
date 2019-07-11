@@ -42,6 +42,13 @@ public class ImageJServerParadigm extends AbstractMultipleHostParadigm {
 	// -- SimpleOstravaParadigm methods --
 
 	@Override
+	protected void initWorkerPool() {
+		typeProvider = new DefaultParameterTypeProvider(port, getHosts().iterator()
+			.next());
+		super.initWorkerPool();
+	}
+
+	@Override
 	protected ParallelWorker createWorker(String host) {
 		if (host.contains(":")) {
 			final String[] tokensOfHost = host.split(":");
