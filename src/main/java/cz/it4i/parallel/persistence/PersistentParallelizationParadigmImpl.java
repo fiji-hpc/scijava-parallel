@@ -10,13 +10,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import org.scijava.parallel.ParallelizationParadigm;
 import org.scijava.parallel.PersistentParallelizationParadigm;
 
 import cz.it4i.parallel.Host;
+import cz.it4i.parallel.MultipleHostParadigm;
 import cz.it4i.parallel.RunningRemoteServer;
 import cz.it4i.parallel.plugins.RequestBrokerServiceCallCommand;
 import cz.it4i.parallel.plugins.RequestBrokerServiceGetResultCommand;
@@ -51,9 +51,7 @@ public class PersistentParallelizationParadigmImpl implements
 
 	private List<Host> hosts;
 
-	public PersistentParallelizationParadigmImpl() {
-		this(null);
-	}
+	private PInnerCallStrategy callStrategy;
 
 	public static PersistentParallelizationParadigm addPersistencyToParadigm(
 		ParallelizationParadigm paradigm, RunningRemoteServer runningServer)
@@ -71,12 +69,31 @@ public class PersistentParallelizationParadigmImpl implements
 			.stream(), runningServer.getRemotePorts().stream(), (host, port) -> host +
 				":" + port), runningServer.getNCores().stream(), Host::new).collect(
 					Collectors.toList());
-
+		PInnerCallStrategy callStrategy;
+		if (!(paradigm instanceof MultipleHostParadigm) && hosts.size() > 1) {
+			throw new IllegalArgumentException(
+				"Only MultipleHostsParadigm with multiple hosts is allowed.");
+		}
+		else if (hosts.size() > 1) {
+			MultipleHostParadigm multipleHostParadigm =
+				(MultipleHostParadigm) paradigm;
+			callStrategy = new PInnerCallStrategyMoreHost(multipleHostParadigm,
+				multipleHostParadigm.getHosts().get(0));
+		} else {
+			callStrategy = new PInnerCallStrategyOneHost(paradigm);
+		}
 		PersistentParallelizationParadigmImpl result =
-			new PersistentParallelizationParadigmImpl(paradigm);
+			new PersistentParallelizationParadigmImpl(paradigm, callStrategy);
 		result.setHosts(hosts);
 		result.initRemoteParallelizationParadigm(paradigmClassName);
 		return result;
+	}
+
+	private PersistentParallelizationParadigmImpl(
+		ParallelizationParadigm paradigmParam, PInnerCallStrategy callStrategy)
+	{
+		paradigm = paradigmParam;
+		this.callStrategy = callStrategy;
 	}
 
 	@Override
@@ -100,10 +117,9 @@ public class PersistentParallelizationParadigmImpl implements
 		inputForExecution.put(INPUTS, inputs);
 
 		@SuppressWarnings("unchecked")
-		List<Serializable> result = (List<Serializable>) paradigm
-			.runAll(RequestBrokerServiceCallCommand.class.getCanonicalName(),
-				Collections
-				.singletonList(inputForExecution)).get(0).get(REQUEST_IDS);
+		List<Serializable> result = (List<Serializable>) callStrategy.call(
+			RequestBrokerServiceCallCommand.class.getCanonicalName(),
+			inputForExecution).get(REQUEST_IDS);
 
 		return result.stream().map(this::getFuture4FutureID).collect(Collectors
 			.toList());
@@ -133,15 +149,8 @@ public class PersistentParallelizationParadigmImpl implements
 			ids.stream().forEach(this::removeFutureID);
 		}
 		inputForExecution.put(REQUEST_IDS, new LinkedList<>(ids));
-		try {
-			paradigm.runAllAsync(RequestBrokerServicePurgeCommand.class
-				.getCanonicalName(), Collections.singletonList(inputForExecution)).get(
-					0).get();
-
-		}
-		catch (InterruptedException | ExecutionException exc) {
-			throw new RuntimeException(exc);
-		}
+		callStrategy.call(RequestBrokerServicePurgeCommand.class.getCanonicalName(),
+			inputForExecution);
 	}
 
 	@Override
@@ -152,12 +161,6 @@ public class PersistentParallelizationParadigmImpl implements
 //				.runAllAsync(RequestBrokerServiceGetAllCommand.class.getCanonicalName(),
 //					Collections.emptyList()).get(0).get().get(REQUEST_IDS);
 
-	}
-
-	private PersistentParallelizationParadigmImpl(
-		ParallelizationParadigm paradigmParam)
-	{
-		paradigm = paradigmParam;
 	}
 
 	private void setHosts(List<Host> hosts) {
@@ -171,8 +174,8 @@ public class PersistentParallelizationParadigmImpl implements
 		inputForExecution.put("ncores", hosts.stream().map(Host::getNCores).collect(
 			Collectors.toList()));
 		inputForExecution.put("paradigmClassName", paradigmClassName);
-		paradigm.runAll(RequestBrokerServiceInitCommand.class.getCanonicalName(),
-			Collections.singletonList(inputForExecution));
+		callStrategy.call(RequestBrokerServiceInitCommand.class.getCanonicalName(),
+			inputForExecution);
 
 	}
 
@@ -196,9 +199,9 @@ public class PersistentParallelizationParadigmImpl implements
 		final Map<String, Object> inputForExecution = new HashMap<>();
 		inputForExecution.put(REQUEST_IDS, new LinkedList<>(Collections.singleton(
 			requestID)));
-		CompletableFuture<Map<String, Object>> resultFuture = paradigm.runAllAsync(
-			RequestBrokerServiceGetResultCommand.class.getCanonicalName(), Collections
-				.singletonList(inputForExecution)).get(0).thenApply(
+		CompletableFuture<Map<String, Object>> resultFuture = callStrategy
+			.callAsync(RequestBrokerServiceGetResultCommand.class.getCanonicalName(),
+				inputForExecution).thenApply(
 					result -> ((List<Map<String, Object>>) result.get(RESULTS)).get(0));
 
 		id2futures.put(requestID, resultFuture);
@@ -245,5 +248,70 @@ public class PersistentParallelizationParadigmImpl implements
 			}
 			return new PComletableFutureID(id);
 		}
+	}
+
+	private interface PInnerCallStrategy {
+
+		Map<String, Object> call(String commandName, Map<String, Object> inputs);
+
+		CompletableFuture<Map<String, Object>> callAsync(String commandName,
+			Map<String, Object> inputs);
+	}
+
+	private static class PInnerCallStrategyOneHost implements PInnerCallStrategy {
+
+		private ParallelizationParadigm paradigm;
+
+		public PInnerCallStrategyOneHost(ParallelizationParadigm paradigm) {
+			this.paradigm = paradigm;
+		}
+
+		@Override
+		public Map<String, Object> call(String commandName,
+			Map<String, Object> inputs)
+		{
+			return paradigm.runAll(commandName, Collections.singletonList(inputs))
+				.get(0);
+		}
+
+		@Override
+		public CompletableFuture<Map<String, Object>> callAsync(String commandName,
+			Map<String, Object> inputs)
+		{
+			return paradigm.runAllAsync(commandName, Collections.singletonList(
+				inputs)).get(0);
+		}
+
+	}
+
+	private static class PInnerCallStrategyMoreHost implements
+		PInnerCallStrategy
+	{
+
+		private MultipleHostParadigm paradigm;
+		private String hostName;
+
+		public PInnerCallStrategyMoreHost(MultipleHostParadigm paradigm,
+			String hostName)
+		{
+			this.paradigm = paradigm;
+			this.hostName = hostName;
+		}
+
+		@Override
+		public Map<String, Object> call(String commandName,
+			Map<String, Object> inputs)
+		{
+			return paradigm.runOnHosts(commandName, inputs, Collections.singletonList(
+				hostName)).get(0);
+		}
+
+		@Override
+		public CompletableFuture<Map<String, Object>> callAsync(String commandName,
+			Map<String, Object> inputs)
+		{
+			return CompletableFuture.supplyAsync(() -> call(commandName, inputs));
+		}
+
 	}
 }
