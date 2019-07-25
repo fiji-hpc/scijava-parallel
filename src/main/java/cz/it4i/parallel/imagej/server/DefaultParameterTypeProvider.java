@@ -5,6 +5,7 @@ import static cz.it4i.parallel.Routines.supplyWithExceptionHandling;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang3.ClassUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -12,7 +13,9 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONObject;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @AllArgsConstructor
 public class DefaultParameterTypeProvider implements
 	ParameterTypeProvider
@@ -58,13 +61,16 @@ public class DefaultParameterTypeProvider implements
 			JSONObject param = (JSONObject) inputs.get(i);
 			String typeName = ((String) param.get("genericType")).trim();
 			typeName = clearTypeName(typeName);
-			if (Character.isLowerCase(typeName.charAt(0)) && !typeName.contains(
-				"."))
-			{
-				typeName = "java.lang." + Character.toUpperCase(typeName.charAt(0)) +
-					typeName.substring(1);
+			try {
+				Class<?> type = ClassUtils.getClass(typeName);
+				if (type.isPrimitive()) {
+					typeName = ClassUtils.primitiveToWrapper(type).getName();
+				}
+				result.put((String) param.get("name"), typeName);
 			}
-			result.put((String) param.get("name"), typeName);
+			catch (ClassNotFoundException exc) {
+				log.error(exc.getMessage(), exc);
+			}
 		}
 	}
 
