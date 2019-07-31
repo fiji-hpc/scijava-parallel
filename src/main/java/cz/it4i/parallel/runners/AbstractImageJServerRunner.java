@@ -5,45 +5,55 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import cz.it4i.parallel.SciJavaParallelRuntimeException;
+import lombok.AccessLevel;
+import lombok.Setter;
 
-import lombok.AllArgsConstructor;
+public abstract class AbstractImageJServerRunner implements AutoCloseable,
+	ServerRunner
+{
 
-@AllArgsConstructor
-public abstract class AbstractImageJServerRunner implements AutoCloseable, ServerRunner {
-
-	private final static Logger log = LoggerFactory.getLogger(
-		cz.it4i.parallel.runners.AbstractImageJServerRunner.class);
-
-	private final static List<String> IMAGEJ_SERVER_PARAMETERS = Arrays.asList(
+	private static final List<String> IMAGEJ_SERVER_PARAMETERS = Arrays.asList(
 		"-Dimagej.legacy.modernOnlyCommands=true", "--", "--ij2", "--headless",
 		"--server");
 
-	private final boolean shutdownOnClose;
+	@Setter(value = AccessLevel.PROTECTED)
+	private boolean shutdownOnClose;
+
+	private boolean shutdownOnNextClose;
+
+
+	@Override
+	public ServerRunner init(RunnerSettings settings) {
+		shutdownOnClose = settings.isShutdownOnClose();
+		return this;
+	}
 
 	@Override
 	public void start() {
 
 		try {
-			doStartImageJServer();
-			getPorts().parallelStream().forEach( this::waitForImageJServer );
+			doStartServer();
+			getPorts().parallelStream().forEach(this::waitForServer);
 		}
 		catch (IOException exc) {
-			log.error("start imageJServer", exc);
-			throw new RuntimeException(exc);
+			throw new SciJavaParallelRuntimeException(exc);
 		}
 	}
 
 	@Override
-	public abstract List<Integer> getPorts();
+	public final synchronized void close() {
+		doCloseInternally(shutdownOnClose || shutdownOnNextClose);
+		shutdownOnNextClose = false;
+	}
 
 	@Override
-	public abstract List<Integer> getNCores();
+	public final synchronized void letShutdownOnClose() {
+		shutdownOnNextClose = true;
+	}
 
-	@Override
-	public void close() {
-		if (shutdownOnClose) {
+	protected void doCloseInternally(boolean shutdown) {
+		if (shutdown) {
 			shutdown();
 		}
 	}
@@ -52,10 +62,12 @@ public abstract class AbstractImageJServerRunner implements AutoCloseable, Serve
 		return IMAGEJ_SERVER_PARAMETERS;
 	}
 
-	protected abstract void doStartImageJServer()
+	protected abstract void doStartServer()
 		throws IOException;
 
-	protected void waitForImageJServer(Integer port)
+	protected abstract void shutdown();
+
+	protected void waitForServer(Integer port)
 	{
 		WaitForHTTPServerRunTS.create("http://localhost:" + port + "/modules")
 			.run();

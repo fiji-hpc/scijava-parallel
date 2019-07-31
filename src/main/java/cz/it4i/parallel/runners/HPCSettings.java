@@ -1,8 +1,8 @@
 package cz.it4i.parallel.runners;
 
 import java.io.File;
-import java.io.Serializable;
 
+import cz.it4i.parallel.SciJavaParallelRuntimeException;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -10,7 +10,7 @@ import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class HPCSettings implements Serializable
+public class HPCSettings extends RunnerSettings
 {
 
 	private final String host;
@@ -25,7 +25,7 @@ public class HPCSettings implements Serializable
 	
 	private String authenticationChoice;
 	
-	private String password;
+	private transient String password;
 
 	private final String remoteDirectory;
 
@@ -44,11 +44,13 @@ public class HPCSettings implements Serializable
 	private final boolean redirectStdInErr;
 
 	@Builder
-	private HPCSettings(String host, Integer portNumber, String userName, String authenticationChoice, 
-		String password, File keyFile, String keyFilePassword, String remoteDirectory, String command, 
-		int nodes, int ncpus, String jobID, HPCSchedulerType adapterType,
+	private HPCSettings(String host, Integer portNumber, String userName,
+		String authenticationChoice, String password, File keyFile,
+		String keyFilePassword, String remoteDirectory, String command, int nodes,
+		int ncpus, String jobID, HPCSchedulerType adapterType,
 		boolean shutdownOnClose, boolean redirectStdInErr)
 	{
+		super(shutdownOnClose);
 		this.host = host;
 		this.port = portNumber != null ? portNumber : 22;
 		this.userName = userName;
@@ -67,5 +69,14 @@ public class HPCSettings implements Serializable
 		this.redirectStdInErr = redirectStdInErr;
 	}
 
+	@Override
+	public HPCSettings clone() {
+		try {
+			return (HPCSettings) super.clone();
+		}
+		catch (CloneNotSupportedException exc) {
+			throw new SciJavaParallelRuntimeException(exc);
+		}
+	}
 
 }

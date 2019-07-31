@@ -68,4 +68,6 @@ public interface ParallelService extends
 	default Class<ParallelizationParadigm> getPluginType() {
 		return ParallelizationParadigm.class;
 	}
+
+	void saveProfiles();
 }

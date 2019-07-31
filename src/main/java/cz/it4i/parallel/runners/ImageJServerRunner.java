@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.scijava.parallel.Status;
+
 import cz.it4i.parallel.RunningRemoteServer;
 
 public class ImageJServerRunner extends AbstractImageJServerRunner implements
@@ -18,18 +20,6 @@ public class ImageJServerRunner extends AbstractImageJServerRunner implements
 	private Process imageJServerProcess;
 
 	private String fijiExecutable;
-
-	public ImageJServerRunner(String fiji, boolean shutdownOnClose) {
-		super(shutdownOnClose);
-		fijiExecutable = fiji;
-	}
-
-	@Override
-	public void shutdown() {
-		if (imageJServerProcess != null) {
-			imageJServerProcess.destroy();
-		}
-	}
 
 	@Override
 	public List<Integer> getNCores() {
@@ -53,7 +43,20 @@ public class ImageJServerRunner extends AbstractImageJServerRunner implements
 	}
 
 	@Override
-	protected void doStartImageJServer() throws IOException {
+	public Status getStatus() {
+		return imageJServerProcess == null ? Status.NON_ACTIVE : Status.ACTIVE;
+	}
+
+	@Override
+	public ImageJServerRunner init(RunnerSettings settings) {
+		super.init(settings);
+		fijiExecutable = ((ImageJServerRunnerSettings) settings)
+			.getFijiExecutable();
+		return this;
+	}
+
+	@Override
+	protected void doStartServer() throws IOException {
 		String fijiPath = fijiExecutable;
 		if (fijiPath == null || !Files.exists(Paths.get(fijiPath))) {
 			throw new IllegalArgumentException(
@@ -67,6 +70,14 @@ public class ImageJServerRunner extends AbstractImageJServerRunner implements
 		final ProcessBuilder pb = new ProcessBuilder(command).inheritIO();
 		imageJServerProcess = pb.start();
 
+	}
+
+	@Override
+	protected void shutdown() {
+		if (imageJServerProcess != null) {
+			imageJServerProcess.destroy();
+			imageJServerProcess = null;
+		}
 	}
 
 }

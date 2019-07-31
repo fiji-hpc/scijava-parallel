@@ -11,7 +11,9 @@ import java.io.Serializable;
  *
  * @author Petr Bainar
  */
-public class ParallelizationParadigmProfile implements Serializable {
+public class ParallelizationParadigmProfile
+	implements Serializable
+{
 
 	private static final long serialVersionUID = 1L;
 
@@ -24,41 +26,6 @@ public class ParallelizationParadigmProfile implements Serializable {
 	/** A flag determining whether this profile has been selected by the user */
 	private Boolean selected;
 
-	/**
-	 * Returns {@link #profileName}
-	 */
-	String getName() {
-		return profileName;
-	}
-
-	/**
-	 * Gets the {@link ParallelizationParadigm} type which is to be used in this
-	 * profile
-	 * 
-	 * @return {@link Class} of given {@link ParallelizationParadigm} 
-	 */
-	@SuppressWarnings("unchecked")
-	<T extends ParallelizationParadigm> Class<T> getParadigmType() {
-		if (ParallelizationParadigm.class.isAssignableFrom(paradigmType)) {
-			return (Class<T>) paradigmType;
-		}
-		return null;
-	}
-
-	/**
-	 * Returns the {@link #selected} flag
-	 */
-	Boolean isSelected() {
-		return selected;
-	}
-
-	/**
-	 * Sets the {@link #selected} flag
-	 */
-	void setSelected(final Boolean selected) {
-		this.selected = selected;
-	}
-
 	public ParallelizationParadigmProfile(
 		final Class<? extends ParallelizationParadigm> paradigmType,
 		final String profileName)
@@ -67,4 +34,42 @@ public class ParallelizationParadigmProfile implements Serializable {
 		this.profileName = profileName;
 	}
 
+	/**
+	 * Gets the {@link ParallelizationParadigm} type which is to be used in this
+	 * profile
+	 * 
+	 * @return {@link Class} of given {@link ParallelizationParadigm} 
+	 */
+	public Class<? extends ParallelizationParadigm> getParadigmType() {
+		if (ParallelizationParadigm.class.isAssignableFrom(paradigmType)) {
+			return paradigmType;
+		}
+		return null;
+	}
+
+	/**
+	 * Returns the {@link #selected} flag
+	 */
+	public Boolean isSelected() {
+		return selected;
+	}
+
+	@Override
+	public String toString() {
+		return getName();
+	}
+
+	/**
+	 * Returns {@link #profileName}
+	 */
+	String getName() {
+		return profileName;
+	}
+
+	/**
+	 * Sets the {@link #selected} flag
+	 */
+	void setSelected(final Boolean selected) {
+		this.selected = selected;
+	}
 }

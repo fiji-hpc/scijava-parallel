@@ -12,17 +12,23 @@ import org.scijava.command.Command;
 import org.scijava.parallel.ParallelService;
 import org.scijava.parallel.ParallelizationParadigm;
 import org.scijava.parallel.ParallelizationParadigmProfile;
+import org.scijava.parallel.Status;
 
 import cz.it4i.parallel.Host;
+import cz.it4i.parallel.SciJavaParallelRuntimeException;
 import cz.it4i.parallel.imagej.server.ImageJServerParadigm;
 import cz.it4i.parallel.runners.ImageJServerRunner;
+import cz.it4i.parallel.runners.ImageJServerRunnerSettings;
 import cz.it4i.parallel.runners.ServerRunner;
+
 
 public class TestParadigm implements ParallelizationParadigm
 {
 
 	private final ServerRunner runner;
+
 	private final ParallelizationParadigm paradigm;
+
 	private boolean closed = false;
 
 	protected TestParadigm(ParallelizationParadigm paradigm,
@@ -45,8 +51,11 @@ public class TestParadigm implements ParallelizationParadigm
 		this.paradigm = paradigm;
 	}
 
+	@SuppressWarnings("resource")
 	public static ParallelizationParadigm localImageJServer( String fiji, Context context ) {
-		return new TestParadigm(new ImageJServerRunner(fiji, true), context);
+		ImageJServerRunnerSettings settings = ImageJServerRunnerSettings.builder()
+			.fiji(fiji).build();
+		return new TestParadigm(new ImageJServerRunner().init(settings), context);
 	}
 
 
@@ -55,9 +64,8 @@ public class TestParadigm implements ParallelizationParadigm
 	{
 		runner.start();
 		List<Host> hosts = Streams.zip(runner.getPorts().stream(), runner
-			.getNCores().stream(), (port, nCores) -> new Host(
-				"localhost:" + port, nCores))
-				.collect( Collectors.toList() );
+			.getNCores().stream(), (Integer port, Integer nCores) -> new Host(
+				"localhost:" + port, nCores)).collect(Collectors.toList());
 		return configureParadigm( context.service( ParallelService.class ), hosts );
 	}
 
@@ -122,10 +130,16 @@ public class TestParadigm implements ParallelizationParadigm
 		return paradigm;
 	}
 
+	@Override
+	public Status getStatus() {
+		return paradigm.getStatus();
+	}
+
 	void checkClosed()
 	{
 		if(closed)
-			throw new RuntimeException( "ParallelizationParadigm is used after it has been closed." );
+			throw new SciJavaParallelRuntimeException(
+				"ParallelizationParadigm is used after it has been closed.");
 	}
 
 }

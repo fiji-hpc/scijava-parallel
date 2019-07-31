@@ -1,14 +1,6 @@
 
 package cz.it4i.parallel.ui;
 
-import java.awt.BorderLayout;
-
-import javax.swing.JDialog;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.SwingConstants;
-
 import org.scijava.Context;
 
 import cz.it4i.parallel.runners.HPCImageJServerRunner;
@@ -18,83 +10,49 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class HPCImageJServerRunnerWithUI extends HPCImageJServerRunner {
 
-	private JDialog dialog;
-	private JLabel label;
 
+
+	public HPCImageJServerRunnerWithUI() {
+	}
 
 	public HPCImageJServerRunnerWithUI(HPCSettings settings) {
 		super(settings);
 	}
 
-	public HPCImageJServerRunnerWithUI(HPCSettings settings,
-		boolean shutdownOnClose)
-	{
-		super(settings, shutdownOnClose);
-	}
-
 	@Override
 	public void start() {
-		this.dialog = new JOptionPane().createDialog("Waiting");
-		JPanel panel = new JPanel(new BorderLayout());
-		dialog.setContentPane(panel);
-		this.label = new JLabel("Waiting for job schedule.");
-		label.setHorizontalAlignment(SwingConstants.CENTER);
-
-		panel.add(label, BorderLayout.CENTER);
-		dialog.setModal(false);
-		dialog.setVisible(true);
-
-		imageJServerStarted();
-		try  { 
+		try (HPCStatusDialog dialog = new HPCStatusDialog(getServerName())) {
+			dialog.imageJServerStarting();
 			super.start();
-		} finally {
-			imageJServerStartFinished();
+			imageJServerRunning();
 		}
-		imageJServerRunning();
 	}
 
 	@Override
-	public void close() {
-		log.info("close");
-		label.setText("Waiting for stop.");
-		dialog.setVisible(true);
-		try {
-			super.close();
+	protected void doCloseInternally(boolean shutdown) {
+
+		try (HPCStatusDialog dialog = new HPCStatusDialog(getServerName())) {
+			log.debug("close");
+			dialog.imageJServerStopping();
+			super.doCloseInternally(shutdown);
+			log.debug("close done");
 		}
-		finally {
-			dialog.setVisible(false);
-		}
-		dialog.dispose();
-		log.info("close done");
 	}
 
 	protected String getServerName() {
 		return "ImageJ server";
 	}
 
-	private void imageJServerStartFinished() {
-		dialog.setVisible(false);
-	}
-
-	private void imageJServerStarted() {
-		dialog.setVisible(false);
-		this.label.setText("Waiting for a " + getServerName() + " start.");
-		dialog.setVisible(true);
-	}
-
-	private void imageJServerRunning() {
+	void imageJServerRunning() {
 		log.info("job: " + getJob().getID() + " started on hosts: " + getJob()
 			.getNodes());
 	}
-
-	public static HPCImageJServerRunnerWithUI gui(Context context,
-		boolean shutdownOnClose)
+	public static HPCImageJServerRunnerWithUI gui(Context context)
 	{
-		return new HPCImageJServerRunnerWithUI(HPCSettingsGui.showDialog(context),
-			shutdownOnClose);
+		HPCImageJServerRunnerWithUI result = new HPCImageJServerRunnerWithUI(
+			HPCSettingsGui.showDialog(context));
+		return result;
 	}
 
-	public static HPCImageJServerRunnerWithUI gui(Context context) {
-		return gui(context, true);
-	}
+
 }

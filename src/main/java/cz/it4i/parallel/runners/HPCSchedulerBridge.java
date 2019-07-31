@@ -18,4 +18,6 @@ interface HPCSchedulerBridge {
 	boolean isOutErrTogether();
 
 	void stop(SshCommandClient client, String jobId);
+
+	boolean isJobRunning(SshCommandClient client, String jobID);
 }

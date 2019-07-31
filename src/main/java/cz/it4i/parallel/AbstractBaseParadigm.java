@@ -16,9 +16,11 @@ import java.util.stream.Collectors;
 import org.scijava.Context;
 import org.scijava.command.CommandService;
 import org.scijava.parallel.ParallelizationParadigm;
+import org.scijava.parallel.Status;
 import org.scijava.plugin.Parameter;
 import org.scijava.thread.ThreadService;
 
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -37,14 +39,19 @@ public abstract class AbstractBaseParadigm implements ParallelizationParadigm {
 
 	private ExecutorService executorService;
 
-	// -- SimpleOstravaParadigm methods --
-
-	protected abstract void initWorkerPool();
-
 	// -- ParallelizationParadigm methods --
+
+	@Setter
+	private Runnable initCommand;
+
+	@Setter
+	private Runnable closeCommand;
 
 	@Override
 	public void init() {
+		if (initCommand != null) {
+			initCommand.run();
+		}
 		workerPool = new WorkerPool();
 		initWorkerPool();
 		executorService = Executors.newFixedThreadPool(workerPool.size(),
@@ -69,16 +76,30 @@ public abstract class AbstractBaseParadigm implements ParallelizationParadigm {
 			.collect(Collectors.toList());
 	}
 
-	protected List<List<Map<String, Object>>> chunkParameters(
-		List<Map<String, Object>> listOfparameters) {
-		return Lists.partition(listOfparameters, 24);
-	}
-
 	@Override
 	public void close() {
 		workerPool.close();
+		workerPool = null;
 		executorService.shutdown();
+		executorService = null;
 		threadService.dispose();
+		if (closeCommand != null) {
+			closeCommand.run();
+		}
+	}
+
+	@Override
+	public Status getStatus() {
+		return workerPool == null ? Status.NON_ACTIVE : Status.ACTIVE;
+	}
+
+	// -- SimpleOstravaParadigm methods --
+	
+	protected abstract void initWorkerPool();
+
+	protected List<List<Map<String, Object>>> chunkParameters(
+		List<Map<String, Object>> listOfparameters) {
+		return Lists.partition(listOfparameters, 24);
 	}
 
 	@SuppressWarnings("unchecked")

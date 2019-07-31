@@ -36,7 +36,8 @@ public class RotateFileOnHPC {
 		final ImageJ ij = new ImageJ();
 		ij.ui().showUI();
 
-		AbstractImageJServerRunner runner = HPCImageJServerRunnerWithUI.gui( ij.context() );
+		AbstractImageJServerRunner runner = HPCImageJServerRunnerWithUI.gui(ij
+			.context());
 
 		try(ParallelizationParadigm paradigm = new TestParadigm( runner, ij.context() )) {
 			RotateFile.callRemotePlugin(paradigm);

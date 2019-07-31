@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 
 import org.scijava.parallel.ParallelizationParadigm;
 import org.scijava.parallel.PersistentParallelizationParadigm;
+import org.scijava.parallel.Status;
 
 import cz.it4i.parallel.Host;
 import cz.it4i.parallel.MultipleHostParadigm;
@@ -103,6 +104,11 @@ public class PersistentParallelizationParadigmImpl implements
 	@Override
 	public void close() {
 		paradigm.close();
+	}
+
+	@Override
+	public Status getStatus() {
+		return paradigm.getStatus();
 	}
 
 	@Override

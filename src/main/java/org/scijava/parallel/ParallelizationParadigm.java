@@ -18,6 +18,8 @@ public interface ParallelizationParadigm extends SingletonPlugin, Closeable {
 
 	void init();
 
+	Status getStatus();
+
 	default List<Map<String, Object>> runAll(
 		Class<? extends Command> commandClazz, List<Map<String, Object>> parameters)
 	{

@@ -71,6 +71,14 @@ class PBSHPCSchedulerBridge implements HPCSchedulerBridge {
 	}
 
 	@Override
+	public boolean isJobRunning(SshCommandClient client, String jobID) {
+		String result = client.executeCommand("qstat -x " + jobID).get(2);
+		String[] tokens = result.split(" +");
+		String state = tokens[4];
+		return state.equals("R");
+	}
+
+	@Override
 	public void stop(SshCommandClient client, String jobId) {
 		client.executeCommand("qdel " + jobId);
 	}

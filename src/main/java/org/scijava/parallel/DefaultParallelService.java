@@ -9,6 +9,7 @@ import java.io.ObjectOutputStream;
 import java.util.Base64;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.scijava.plugin.AbstractSingletonService;
@@ -30,17 +31,24 @@ public class DefaultParallelService extends
 	@Parameter
 	PrefService prefService;
 
+	@Parameter
+	private ParadigmManagerService paradigmManagerService;
+
 	/** List of parallelization profiles */
 	private List<ParallelizationParadigmProfile> profiles;
 
 	/** A string constant to be used by {@link PrefService} */
 	private final String PROFILES = "profiles";
+	
+
+
 
 	// -- ParallelService methods --
 
 	@Override
 	public ParallelizationParadigm getParadigm() {
-		final List<ParallelizationParadigmProfile> selectedProfiles = getProfiles()
+		final List<ParallelizationParadigmProfile> selectedProfiles =
+			getProfiles()
 			.stream().filter(p -> p.isSelected().equals(true)).collect(Collectors
 				.toList());
 
@@ -65,20 +73,29 @@ public class DefaultParallelService extends
 
 	@Override
 	public void addProfile(final ParallelizationParadigmProfile profile) {
+		if(getProfiles().stream().anyMatch(p -> p.getName().equals(profile.getName()))) {
+			throw new IllegalArgumentException("Profile with name " + profile
+				.getName() + " already exists.");
+		}
 		profiles.add(profile);
 		saveProfiles();
 	}
 
 	@Override
+	public void saveProfiles() {
+		final List<String> serializedProfiles = new LinkedList<>();
+		profiles.forEach(p -> serializedProfiles.add(serializeProfile(p)));
+		prefService.put(this.getClass(), PROFILES, serializedProfiles);
+	}
+
+	@Override
 	public void selectProfile(final String name) {
-		profiles.stream().filter(p -> p != null).forEach(p -> {
-			if (p.getName().equals(name)) {
-				p.setSelected(true);
-			}
-			else {
-				p.setSelected(false);
-			}
-		});
+		ParallelizationParadigm oldActiveParadigm = getParadigm();
+		profiles.stream().filter(Objects::nonNull).forEach(p -> p.setSelected(p
+			.getName().equals(name)));
+		if (oldActiveParadigm != null && oldActiveParadigm != getParadigm()) {
+			oldActiveParadigm.close();
+		}
 		saveProfiles();
 	}
 
@@ -93,6 +110,15 @@ public class DefaultParallelService extends
 	@Override
 	public void initialize() {
 		retrieveProfiles();
+		Runtime.getRuntime().addShutdownHook(new Thread(this::dispose));
+	}
+
+	@Override
+	public void dispose() {
+		super.dispose();
+		if (getParadigm().getStatus() == Status.ACTIVE) {
+			getParadigm().close();
+		}
 	}
 
 	// -- Helper methods --
@@ -103,18 +129,10 @@ public class DefaultParallelService extends
 		prefService.remove(this.getClass(), PROFILES);
 	}
 
-	private void saveProfiles() {
-		final List<String> serializedProfiles = new LinkedList<>();
-		profiles.forEach(p -> {
-			serializedProfiles.add(serializeProfile(p));
-		});
-		prefService.put(this.getClass(), PROFILES, serializedProfiles);
-	}
-
 	private void retrieveProfiles() {
 		profiles = new LinkedList<>();
 		prefService.getList(this.getClass(), PROFILES).stream().map(
-			this::deserializeProfile).filter(p -> p != null).forEach(p -> profiles
+			this::deserializeProfile).filter(Objects::nonNull).forEach(p -> profiles
 				.add(p));
 	}
 

@@ -217,6 +217,10 @@ public class ClusterJobLauncher implements Closeable {
 		return new Job(jobId, redirectStdOutErr);
 	}
 
+	public boolean isJobRunning(String jobID) {
+		return adapter.isJobRunning(client, jobID);
+	}
+
 	@Override
 	public void close() {
 		threads.forEach(POutThread::interrupt);

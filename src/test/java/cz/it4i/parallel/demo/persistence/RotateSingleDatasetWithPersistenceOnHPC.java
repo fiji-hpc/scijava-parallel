@@ -126,9 +126,10 @@ public class RotateSingleDatasetWithPersistenceOnHPC {
 			requestData.put(HPCSettings.class, settings);
 		}
 		final HPCSettings finalHpcSettings = settings;
-
+		HPCSettings modifiedSettings = finalHpcSettings.clone();
+		modifiedSettings.setShutdownOnClose(shutDownOnClose);
 		final HPCImageJServerRunnerWithUI runner = new HPCImageJServerRunnerWithUI(
-			finalHpcSettings, shutDownOnClose)
+			modifiedSettings)
 		{
 
 			@Override

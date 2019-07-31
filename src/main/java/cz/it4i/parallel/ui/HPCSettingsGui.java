@@ -1,15 +1,16 @@
 
 package cz.it4i.parallel.ui;
 
-import com.google.common.base.Strings;
-
 import java.io.File;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import org.scijava.Context;
 import org.scijava.ItemIO;
 import org.scijava.ItemVisibility;
 import org.scijava.command.Command;
+import org.scijava.command.CommandModule;
 import org.scijava.command.CommandService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
@@ -18,12 +19,60 @@ import org.scijava.widget.FileWidget;
 import org.scijava.widget.NumberWidget;
 import org.scijava.widget.TextWidget;
 
+import cz.it4i.parallel.SciJavaParallelRuntimeException;
 import cz.it4i.parallel.runners.HPCSchedulerType;
 import cz.it4i.parallel.runners.HPCSettings;
 
 @Plugin(type = Command.class, headless = false)
 public class HPCSettingsGui implements Command {
 	
+	public static void fillInputs(HPCSettings settings,
+		Map<String, Object> inputs)
+	{
+
+
+
+		inputs.put("host", settings.getHost());
+		inputs.put("port", settings.getPort());
+		inputs.put("userName", settings.getUserName());
+		inputs.put("authenticationChoice", settings.getAuthenticationChoice());
+		inputs.put("keyFile", settings.getKeyFile());
+		inputs.put("keyFilePassword", settings.getKeyFilePassword());
+		inputs.put("password", settings.getPassword());
+		inputs.put("schedulerType", settings.getAdapterType().toString());
+		inputs.put("remoteDirectory", settings.getRemoteDirectory());
+		inputs.put("command", settings.getCommand());
+		inputs.put("nodes", settings.getNodes());
+		inputs.put("ncpus", settings.getNcpus());
+		inputs.put("shutdownJobAfterClose", settings.isShutdownOnClose());
+		inputs.put("redirectStdOutErr", settings.isRedirectStdInErr());
+	}
+
+	public static HPCSettings showDialog(Context context,
+		Map<String, Object> inputs)
+	{
+		CommandService command = context.service(CommandService.class);
+		try {
+			Future<CommandModule> module;
+			if (inputs == null || inputs.isEmpty()) {
+				module = command.run(HPCSettingsGui.class, true);
+			}
+			else {
+				module = command.run(HPCSettingsGui.class, true, inputs);
+			}
+	
+			return (HPCSettings) module.get().getOutput("settings");
+		}
+		catch (InterruptedException | ExecutionException e) {
+			Thread.currentThread().interrupt();
+			throw new SciJavaParallelRuntimeException(e);
+		}
+	}
+
+	public static HPCSettings showDialog(Context context) {
+		return showDialog(context, null);
+	}
+
 	@Parameter(visibility = ItemVisibility.MESSAGE)
 	private final String labelSSH = "SSH Settings";
 
@@ -73,9 +122,6 @@ public class HPCSettingsGui implements Command {
 	@Parameter(style = NumberWidget.SPINNER_STYLE, label = "Number of cpus per node", min = "1")
 	private int ncpus;
 
-	@Parameter(style = TextWidget.FIELD_STYLE, label = "Running job ID")
-	private String jobID = "";
-
 	@Parameter(style = TextWidget.FIELD_STYLE,
 		label = "Shutdown job when application finishes.")
 	private boolean shutdownJobAfterClose;
@@ -90,22 +136,12 @@ public class HPCSettingsGui implements Command {
 	@Override
 	public void run() {
 		settings = HPCSettings.builder().host(host).portNumber(port).userName(
-			userName).authenticationChoice(authenticationChoice).password(password).keyFile(keyFile).keyFilePassword(keyFilePassword)
-			.remoteDirectory(remoteDirectory).command(command).nodes(nodes).ncpus(
-				ncpus).jobID(Strings.emptyToNull(jobID)).shutdownOnClose(
-					shutdownJobAfterClose).redirectStdInErr(redirectStdOutErr)
-			.adapterType(HPCSchedulerType.getByString(
-						schedulerType)).build();
+			userName).authenticationChoice(authenticationChoice).password(password)
+			.keyFile(keyFile).keyFilePassword(keyFilePassword).remoteDirectory(
+				remoteDirectory).command(command).nodes(nodes).ncpus(ncpus)
+			.shutdownOnClose(shutdownJobAfterClose).redirectStdInErr(
+				redirectStdOutErr).adapterType(HPCSchedulerType.getByString(
+					schedulerType)).build();
 	}
 
-	public static HPCSettings showDialog(Context context) {
-		CommandService command = context.service(CommandService.class);
-		try {
-			return (HPCSettings) command.run(HPCSettingsGui.class, true).get()
-				.getOutput("settings");
-		}
-		catch (InterruptedException | ExecutionException e) {
-			throw new RuntimeException(e);
-		}
-	}
 }

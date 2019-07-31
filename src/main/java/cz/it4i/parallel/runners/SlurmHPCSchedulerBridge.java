@@ -54,6 +54,15 @@ class SlurmHPCSchedulerBridge implements HPCSchedulerBridge {
 	}
 
 	@Override
+	public boolean isJobRunning(SshCommandClient client, String jobID) {
+		String result = client.executeCommand("squeue --format '%M %t' --job " +
+			jobID).get(1);
+		String[] tokens = result.split(" +");
+		String state = tokens[1];
+		return state.equals("R");
+	}
+
+	@Override
 	public void stop(SshCommandClient client, String jobId) {
 		client.executeCommand("scancel " + jobId);
 	}

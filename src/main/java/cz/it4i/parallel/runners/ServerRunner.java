@@ -3,11 +3,15 @@ package cz.it4i.parallel.runners;
 
 import java.util.List;
 
+import org.scijava.parallel.Status;
+
 public interface ServerRunner {
+
+	ServerRunner init(RunnerSettings settings);
 
 	void start();
 
-	void shutdown();
+	void letShutdownOnClose();
 
 	List<Integer> getPorts();
 
@@ -15,5 +19,5 @@ public interface ServerRunner {
 
 	void close();
 
-
+	Status getStatus();
 }
