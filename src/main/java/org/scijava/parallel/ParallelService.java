@@ -17,8 +17,6 @@ public interface ParallelService extends
 	SingletonService<ParallelizationParadigm>, SciJavaService
 {
 
-	// TODO: This API is super-preliminary
-
 	/**
 	 * Returns an instance of the parallelization paradigm corresponding to the
 	 * chosen profile, if available
@@ -27,9 +25,6 @@ public interface ParallelService extends
 	 */
 	public ParallelizationParadigm getParadigm();
 
-	// TODO: This method is meant to be package-specific only,
-	// profiles should be accessible only from the prospective configuration
-	// plugin
 	/**
 	 * Returns all saved parallelization paradigm profiles
 	 * 
@@ -37,18 +32,12 @@ public interface ParallelService extends
 	 */
 	public List<ParallelizationParadigmProfile> getProfiles();
 
-	// TODO: This method is meant to be package-specific only,
-	// profiles should be accessible only from the prospective configuration
-	// plugin
 	/**
 	 * Saves the given {@link ParallelizationParadigmProfile} using the
 	 * {@link PrefService}
 	 */
 	public void addProfile(final ParallelizationParadigmProfile profile);
 
-	// TODO: This method is meant to be package-specific only,
-	// profiles should be accessible only from the prospective configuration
-	// plugin
 	/**
 	 * Selects the given {@link ParallelizationParadigmProfile}
 	 * 
@@ -56,10 +45,13 @@ public interface ParallelService extends
 	 */
 	public void selectProfile(final String name);
 
-	// TODO: This method is meant to be package-specific only,
-	// profiles should be accessible only from the prospective configuration
-	// plugin
-	/** Removes all saved parallelization paradigm profiles */
+	/**
+	 * Deletes the given {@link ParallelizationParadigmProfile}
+	 * 
+	 * @param name of the {@link ParallelizationParadigmProfile} to be deleted
+	 */
+	public void deleteProfile(final String name);
+
 	public void deleteProfiles();
 
 	// -- PTService methods --

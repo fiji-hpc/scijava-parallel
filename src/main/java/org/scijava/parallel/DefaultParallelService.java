@@ -7,11 +7,13 @@ import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.Base64;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.BooleanUtils;
 import org.scijava.plugin.AbstractSingletonService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
@@ -47,10 +49,9 @@ public class DefaultParallelService extends
 
 	@Override
 	public ParallelizationParadigm getParadigm() {
-		final List<ParallelizationParadigmProfile> selectedProfiles =
-			getProfiles()
-			.stream().filter(p -> p.isSelected().equals(true)).collect(Collectors
-				.toList());
+		final List<ParallelizationParadigmProfile> selectedProfiles = getProfiles()
+			.stream().filter(p -> BooleanUtils.isTrue(p.isSelected())).collect(
+				Collectors.toList());
 
 		if (selectedProfiles.size() == 1) {
 
@@ -100,6 +101,19 @@ public class DefaultParallelService extends
 	}
 
 	@Override
+	public void deleteProfile(String name) {
+		Iterator<ParallelizationParadigmProfile> iterator = profiles.iterator();
+		while (iterator.hasNext()) {
+			ParallelizationParadigmProfile paradigm = iterator.next();
+			if (paradigm.getName().equals(name)) {
+				iterator.remove();
+			}
+		}
+		clearProfiles();
+		saveProfiles();
+	}
+
+	@Override
 	public void deleteProfiles() {
 		profiles.clear();
 		clearProfiles();
@@ -116,7 +130,7 @@ public class DefaultParallelService extends
 	@Override
 	public void dispose() {
 		super.dispose();
-		if (getParadigm().getStatus() == Status.ACTIVE) {
+		if (getParadigm() != null && getParadigm().getStatus() == Status.ACTIVE) {
 			getParadigm().close();
 		}
 	}

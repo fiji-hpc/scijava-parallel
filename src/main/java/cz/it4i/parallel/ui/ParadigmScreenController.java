@@ -3,6 +3,7 @@ package cz.it4i.parallel.ui;
 import java.util.List;
 import java.util.Optional;
 
+import org.apache.commons.lang3.BooleanUtils;
 import org.scijava.parallel.ParadigmManager;
 import org.scijava.parallel.ParadigmManagerService;
 import org.scijava.parallel.ParallelService;
@@ -10,8 +11,6 @@ import org.scijava.parallel.ParallelizationParadigm;
 import org.scijava.parallel.ParallelizationParadigmProfile;
 import org.scijava.plugin.PluginInfo;
 
-import cz.it4i.parallel.imagej.server.ImageJServerParadigm;
-import cz.it4i.parallel.runners.ParadigmProfileUsingRunner;
 import cz.it4i.swing_javafx_ui.CloseableControl;
 import cz.it4i.swing_javafx_ui.JavaFXRoutines;
 import javafx.fxml.FXML;
@@ -26,10 +25,16 @@ public class ParadigmScreenController extends Pane implements CloseableControl {
 	private ComboBox<Class<? extends ParallelizationParadigm>> paradigms;
 	
 	@FXML
-	private ComboBox<ParallelizationParadigmProfile> profiles;
+	private ComboBox<ParallelizationParadigmProfile> cmbProfiles;
+
+	@FXML
+	private ComboBox<ParadigmManager> cmbParadigmManagers;
 
 	@FXML
 	private Button btnCreate;
+
+	@FXML
+	private Button btnDelete;
 
 	@FXML
 	private TextField txtNameOfNewProfile;
@@ -74,9 +79,21 @@ public class ParadigmScreenController extends Pane implements CloseableControl {
 		// do nothing
 	}
 
+	public void closeProfile() {
+		try (ParallelizationParadigm paradigm = parallelService.getParadigm()) {
+			if (paradigm != null) {
+				ParadigmManager manager = findManager(activeProfile);
+				if (manager != null) {
+					manager.shutdownIfPossible(activeProfile);
+				}
+			}
+		}
+	}
+
+
 	public void createNewProfile() {
-		ParadigmManager manager = selectProperManager(paradigmManagerService
-			.getManagers(paradigms.getValue()));
+		ParadigmManager manager = cmbParadigmManagers.getItems().isEmpty() ? null
+			: cmbParadigmManagers.getSelectionModel().getSelectedItem();
 		ParallelizationParadigmProfile profile;
 		if (manager != null) {
 			profile = manager.createProfile(txtNameOfNewProfile.getText());
@@ -86,8 +103,37 @@ public class ParadigmScreenController extends Pane implements CloseableControl {
 				txtNameOfNewProfile.getText());
 		}
 		parallelService.addProfile(profile);
-		profiles.getItems().add(profile);
-		profiles.getSelectionModel().select(profile);
+		cmbProfiles.getItems().add(profile);
+		cmbProfiles.getSelectionModel().select(profile);
+	}
+
+	public void deleteProfile() {
+		if (!cmbProfiles.getSelectionModel().isEmpty()) {
+			ParallelizationParadigmProfile toDelete = cmbProfiles.getSelectionModel()
+				.getSelectedItem();
+			int indexToSelect = cmbProfiles.getSelectionModel().getSelectedIndex();
+			parallelService.deleteProfile(toDelete.toString());
+			cmbProfiles.getItems().remove(toDelete);
+			indexToSelect = Math.min(indexToSelect, cmbProfiles.getItems().size() -
+				1);
+			if (indexToSelect >= 0) {
+				cmbProfiles.getSelectionModel().select(indexToSelect);
+			}
+			if (BooleanUtils.isTrue(toDelete.isSelected())) {
+				updateActiveProfile();
+			}
+		}
+	}
+
+	public void editProfile() {
+		if (!cmbProfiles.getSelectionModel().isEmpty()) {
+			ParallelizationParadigmProfile profile = cmbProfiles.getSelectionModel().getSelectedItem();
+			ParadigmManager manager = findManager(profile);
+			if (manager != null) {
+				manager.editProfile(profile);
+			}
+			parallelService.saveProfiles();
+		}
 	}
 
 
@@ -105,38 +151,36 @@ public class ParadigmScreenController extends Pane implements CloseableControl {
 		}
 	}
 
-	public void closeProfile() {
-		try (ParallelizationParadigm paradigm = parallelService.getParadigm()) {
-			if (paradigm != null) {
-				ParadigmManager manager = findManager(activeProfile);
-				if (manager != null) {
-					manager.shutdownIfPossible(activeProfile);
-				}
-			}
+	public void paradigmSelected() {
+		cmbParadigmManagers.getItems().clear();
+		cmbParadigmManagers.getItems().addAll(paradigmManagerService.getManagers(
+			paradigms.getValue()));
+		if (cmbParadigmManagers.getItems().isEmpty()) {
+			cmbParadigmManagers.setDisable(true);
+		}
+		else {
+			cmbParadigmManagers.setDisable(false);
+			cmbParadigmManagers.getSelectionModel().select(0);
 		}
 	}
 
 	public void profileSelected() {
-		txtProfileType.setText(profiles.getSelectionModel().getSelectedItem()
-			.getParadigmType().getSimpleName());
-	}
-
-	public void selectProfile() {
-		if (!profiles.getSelectionModel().isEmpty()) {
-			parallelService.selectProfile(profiles.getSelectionModel()
-				.getSelectedItem().toString());
-			updateActiveProfile();
+		if (!cmbProfiles.getSelectionModel().isEmpty()) {
+			txtProfileType.setText(cmbProfiles.getSelectionModel().getSelectedItem()
+				.getParadigmType().getSimpleName());
+			btnDelete.setDisable(false);
+		}
+		else {
+			txtProfileType.setText("");
+			btnDelete.setDisable(true);
 		}
 	}
 
-	public void editProfile() {
-		if (!profiles.getSelectionModel().isEmpty()) {
-			ParallelizationParadigmProfile profile = profiles.getSelectionModel().getSelectedItem();
-			ParadigmManager manager = findManager(profile);
-			if (manager != null) {
-				manager.editProfile(profile);
-			}
-			parallelService.saveProfiles();
+	public void selectProfile() {
+		if (!cmbProfiles.getSelectionModel().isEmpty()) {
+			parallelService.selectProfile(cmbProfiles.getSelectionModel()
+				.getSelectedItem().toString());
+			updateActiveProfile();
 		}
 	}
 
@@ -168,19 +212,13 @@ public class ParadigmScreenController extends Pane implements CloseableControl {
 		for (ParallelizationParadigmProfile profile : parallelService
 			.getProfiles())
 		{
-			profiles.getItems().add(profile);
+			cmbProfiles.getItems().add(profile);
 		}
 		JavaFXRoutines.runOnFxThread(() -> {
-			if (!profiles.getItems().isEmpty()) {
-				profiles.getSelectionModel().select(0);
+			if (!cmbProfiles.getItems().isEmpty()) {
+				cmbProfiles.getSelectionModel().select(0);
 			}
 		});
-	}
-
-	private ParadigmManager selectProperManager(List<ParadigmManager> managers) {
-		return managers.stream().filter(m -> m.isProfileSupported(
-			new ParadigmProfileUsingRunner(HPCImageJServerRunnerWithUI.class,
-				ImageJServerParadigm.class, null))).findAny().orElse(null);
 	}
 
 	private void updateCreateNewProfileButton() {
@@ -199,6 +237,8 @@ public class ParadigmScreenController extends Pane implements CloseableControl {
 		}
 		else {
 			activeProfile = null;
+			txtActiveProfile.setText("");
+			txtActiveProfileType.setText("");
 		}
 	}
 }

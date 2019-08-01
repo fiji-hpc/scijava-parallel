@@ -71,6 +71,10 @@ public abstract class ParadigmProfileManagerUsingRunner<T extends AbstractBasePa
 		});
 	}
 
+	@Override
+	public String toString() {
+		return "" + getTypeOfRunner().getSimpleName();
+	}
 
 	protected RunnerSettings editSettings(RunnerSettings settings) {
 		Map<String, Object> inputs = new HashMap<>();
