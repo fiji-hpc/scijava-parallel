@@ -16,6 +16,7 @@ public class ParadigmScreenWindow extends FXFrame<ParadigmScreenController> {
 		super(null, ParadigmScreenController::new);
 		getFxPanel().getControl().initWithServices(service,
 			paradigmManagerService);
+		setResizable(false);
 	}
 
 
