@@ -1,6 +1,7 @@
 package cz.it4i.parallel.runners;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.function.Consumer;
 
 import org.scijava.parallel.ParallelizationParadigm;
 import org.scijava.parallel.ParallelizationParadigmProfile;
@@ -31,12 +32,13 @@ public class ParadigmProfileUsingRunner extends
 	@Getter
 	private transient ServerRunner associatedRunner;
 
-	void initRunnerIfNeeded() {
+	void initRunnerIfNeeded(Consumer<ServerRunner> initializer) {
 		if (associatedRunner != null) {
 			return;
 		}
 		try {
 			associatedRunner = typeOfRunner.getConstructor().newInstance();
+			initializer.accept(associatedRunner);
 			associatedRunner.init(settings);
 		}
 		catch (InstantiationException | IllegalAccessException

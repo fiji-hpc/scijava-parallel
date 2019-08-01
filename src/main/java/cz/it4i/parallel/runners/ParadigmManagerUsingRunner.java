@@ -49,13 +49,15 @@ public abstract class ParadigmManagerUsingRunner<T extends AbstractBaseParadigm>
 		return false;
 	}
 
+
 	@Override
 	public void prepareParadigm(
 		ParallelizationParadigmProfile profile, ParallelizationParadigm paradigm)
 	{
 		runForObjectIfOfTypeElseException(profile,
 			ParadigmProfileUsingRunner.class,
-			typedProfile -> prepareParadigmInternal(typedProfile,
+			typedProfile -> prepareParadigmInternal(
+				typedProfile,
 				(AbstractBaseParadigm) paradigm));
 	}
 
@@ -84,6 +86,12 @@ public abstract class ParadigmManagerUsingRunner<T extends AbstractBaseParadigm>
 		return doEdit(inputs);
 	}
 
+	protected void initRunner(
+		@SuppressWarnings("unused") ServerRunner runner)
+	{
+		// initialy do nothing
+	}
+
 	protected abstract RunnerSettings doEdit(Map<String, Object> inputs);
 
 	protected abstract void fillInputs(RunnerSettings settings,
@@ -91,14 +99,16 @@ public abstract class ParadigmManagerUsingRunner<T extends AbstractBaseParadigm>
 
 	protected abstract Class<?> getTypeOfRunner();
 
-	protected abstract void initParadigm(ParadigmProfileUsingRunner typedProfile,
+	protected abstract void initParadigm(
+		ParadigmProfileUsingRunner typedProfile,
 		T paradigm);
 
 	@SuppressWarnings("unchecked")
 	private void prepareParadigmInternal(
 		ParadigmProfileUsingRunner typedProfile, AbstractBaseParadigm paradigm)
 	{
-		typedProfile.initRunnerIfNeeded();
+		typedProfile.initRunnerIfNeeded(this::initRunner);
+
 		ServerRunner runner = typedProfile.getAssociatedRunner();
 		paradigm.setInitCommand(() -> {
 			if (runner.getStatus() == Status.NON_ACTIVE) {
