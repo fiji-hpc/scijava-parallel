@@ -13,7 +13,8 @@ import org.scijava.parallel.Status;
 
 import cz.it4i.parallel.RunningRemoteServer;
 
-public class ImageJServerRunner extends AbstractImageJServerRunner implements
+public class ImageJServerRunner extends
+	AbstractImageJServerRunner<ImageJServerRunnerSettings> implements
 	RunningRemoteServer
 {
 
@@ -48,10 +49,9 @@ public class ImageJServerRunner extends AbstractImageJServerRunner implements
 	}
 
 	@Override
-	public ImageJServerRunner init(RunnerSettings settings) {
+	public ImageJServerRunner init(ImageJServerRunnerSettings settings) {
 		super.init(settings);
-		fijiExecutable = ((ImageJServerRunnerSettings) settings)
-			.getFijiExecutable();
+		fijiExecutable = settings.getFijiExecutable();
 		return this;
 	}
 

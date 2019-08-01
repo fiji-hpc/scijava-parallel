@@ -19,32 +19,35 @@ import cz.it4i.parallel.SciJavaParallelRuntimeException;
 import cz.it4i.parallel.imagej.server.ImageJServerParadigm;
 import cz.it4i.parallel.runners.ImageJServerRunner;
 import cz.it4i.parallel.runners.ImageJServerRunnerSettings;
+import cz.it4i.parallel.runners.RunnerSettings;
 import cz.it4i.parallel.runners.ServerRunner;
 
 
 public class TestParadigm implements ParallelizationParadigm
 {
 
-	private final ServerRunner runner;
+	private final ServerRunner<? extends RunnerSettings> runner;
 
 	private final ParallelizationParadigm paradigm;
 
 	private boolean closed = false;
 
 	protected TestParadigm(ParallelizationParadigm paradigm,
-		ServerRunner runner)
+		ServerRunner<? extends RunnerSettings> runner)
 	{
 		this.paradigm = paradigm;
 		this.runner = runner;
 	}
 
-	public TestParadigm(ServerRunner runner, Context context)
+	public TestParadigm(ServerRunner<? extends RunnerSettings> runner,
+		Context context)
 	{
 		this.paradigm = initParadigm( runner, context );
 		this.runner = runner;
 	}
 
-	public TestParadigm(ServerRunner runner, ParallelizationParadigm paradigm)
+	public TestParadigm(ServerRunner<? extends RunnerSettings> runner,
+		ParallelizationParadigm paradigm)
 	{
 		super();
 		this.runner = runner;
@@ -59,7 +62,8 @@ public class TestParadigm implements ParallelizationParadigm
 	}
 
 
-	private static ParallelizationParadigm initParadigm(ServerRunner runner,
+	private static ParallelizationParadigm initParadigm(
+		ServerRunner<? extends RunnerSettings> runner,
 		Context context)
 	{
 		runner.start();

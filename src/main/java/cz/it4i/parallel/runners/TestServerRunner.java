@@ -7,13 +7,14 @@ import org.scijava.parallel.Status;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
-public class TestServerRunner implements ServerRunner
+public class TestServerRunner<T extends RunnerSettings> implements
+	ServerRunner<T>
 {
 
-	private ServerRunner serverRunner;
+	private ServerRunner<T> serverRunner;
 
 	@Override
-	public TestServerRunner init(RunnerSettings settings) {
+	public TestServerRunner<T> init(T settings) {
 		throw new UnsupportedOperationException();
 	}
 

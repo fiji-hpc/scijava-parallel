@@ -12,7 +12,7 @@ import org.scijava.parallel.Status;
 import cz.it4i.parallel.AbstractBaseParadigm;
 
 
-public abstract class ParadigmManagerUsingRunner<T extends AbstractBaseParadigm>
+public abstract class ParadigmManagerUsingRunner<T extends AbstractBaseParadigm, S extends RunnerSettings>
 	implements
 	ParadigmManager
 {
@@ -31,16 +31,19 @@ public abstract class ParadigmManagerUsingRunner<T extends AbstractBaseParadigm>
 	}
 
 	@Override
-	final public ParallelizationParadigmProfile createProfile(String name) {
-		return new ParadigmProfileUsingRunner(getTypeOfRunner(),
+	public final ParallelizationParadigmProfile createProfile(String name) {
+		return new ParadigmProfileUsingRunner<>(getTypeOfRunner(),
 			getSupportedParadigmType(), name);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void editProfile(ParallelizationParadigmProfile profile) {
 		runForObjectIfOfTypeElseException(profile,
-			ParadigmProfileUsingRunner.class, typedProfile -> typedProfile
-				.setSettings(editSettings(typedProfile.getSettings())));
+			ParadigmProfileUsingRunner.class,
+			typedProfile -> ((ParadigmProfileUsingRunner<S>) typedProfile)
+				.setSettings(editSettings(((ParadigmProfileUsingRunner<S>) typedProfile)
+					.getSettings())));
 	}
 
 	@Override
@@ -48,14 +51,16 @@ public abstract class ParadigmManagerUsingRunner<T extends AbstractBaseParadigm>
 		if (getSupportedParadigmType().equals(profile.getParadigmType()) &&
 			profile instanceof ParadigmProfileUsingRunner)
 		{
-			ParadigmProfileUsingRunner typedProfile =
-				(ParadigmProfileUsingRunner) profile;
+			@SuppressWarnings("unchecked")
+			ParadigmProfileUsingRunner<S> typedProfile =
+				(ParadigmProfileUsingRunner<S>) profile;
 			return typedProfile.getTypeOfRunner().equals(getTypeOfRunner());
 		}
 		return false;
 	}
 
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void prepareParadigm(
 		ParallelizationParadigmProfile profile, ParallelizationParadigm paradigm)
@@ -72,7 +77,7 @@ public abstract class ParadigmManagerUsingRunner<T extends AbstractBaseParadigm>
 	{
 		runForObjectIfOfTypeElseException(profile,
 			ParadigmProfileUsingRunner.class, typedProfile -> {
-			ServerRunner runner = typedProfile.getAssociatedRunner();
+				ServerRunner<?> runner = typedProfile.getAssociatedRunner();
 			if (runner != null && runner.getStatus() == Status.ACTIVE) {
 				runner.letShutdownOnClose();
 			}
@@ -84,7 +89,7 @@ public abstract class ParadigmManagerUsingRunner<T extends AbstractBaseParadigm>
 		return "" + getTypeOfRunner().getSimpleName();
 	}
 
-	protected RunnerSettings editSettings(RunnerSettings settings) {
+	protected S editSettings(S settings) {
 		Map<String, Object> inputs = new HashMap<>();
 		if (settings != null) {
 			fillInputs(settings, inputs);
@@ -93,7 +98,7 @@ public abstract class ParadigmManagerUsingRunner<T extends AbstractBaseParadigm>
 	}
 
 	protected void initRunner(
-		@SuppressWarnings("unused") ServerRunner runner)
+		@SuppressWarnings("unused") ServerRunner<?> runner)
 	{
 		// initialy do nothing
 	}
@@ -101,7 +106,7 @@ public abstract class ParadigmManagerUsingRunner<T extends AbstractBaseParadigm>
 	/**
 	 * @param inputs
 	 */
-	protected RunnerSettings doEdit(Map<String, Object> inputs)
+	protected S doEdit(Map<String, Object> inputs)
 	{
 		return null;
 	}
@@ -110,25 +115,25 @@ public abstract class ParadigmManagerUsingRunner<T extends AbstractBaseParadigm>
 	 * @param settings
 	 * @param inputs
 	 */
-	protected void fillInputs(RunnerSettings settings,
+	protected void fillInputs(S settings,
 		Map<String, Object> inputs)
 	{
 		// no needed settings
 	}
 
-	protected abstract Class<? extends ServerRunner> getTypeOfRunner();
+	protected abstract Class<? extends ServerRunner<S>> getTypeOfRunner();
 
 	protected abstract void initParadigm(
-		ParadigmProfileUsingRunner typedProfile,
+		ParadigmProfileUsingRunner<S> typedProfile,
 		T paradigm);
 
 	@SuppressWarnings("unchecked")
 	private void prepareParadigmInternal(
-		ParadigmProfileUsingRunner typedProfile, AbstractBaseParadigm paradigm)
+		ParadigmProfileUsingRunner<S> typedProfile, AbstractBaseParadigm paradigm)
 	{
 		typedProfile.initRunnerIfNeeded(this::initRunner);
 
-		ServerRunner runner = typedProfile.getAssociatedRunner();
+		ServerRunner<?> runner = typedProfile.getAssociatedRunner();
 		paradigm.setInitCommand(() -> {
 			if (runner.getStatus() == Status.NON_ACTIVE) {
 				runner.start();

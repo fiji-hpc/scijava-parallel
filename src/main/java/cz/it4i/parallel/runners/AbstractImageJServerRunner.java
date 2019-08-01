@@ -9,8 +9,8 @@ import cz.it4i.parallel.SciJavaParallelRuntimeException;
 import lombok.AccessLevel;
 import lombok.Setter;
 
-public abstract class AbstractImageJServerRunner implements AutoCloseable,
-	ServerRunner
+public abstract class AbstractImageJServerRunner<T extends RunnerSettings>
+	implements AutoCloseable, ServerRunner<T>
 {
 
 	private static final List<String> IMAGEJ_SERVER_PARAMETERS = Arrays.asList(
@@ -24,7 +24,7 @@ public abstract class AbstractImageJServerRunner implements AutoCloseable,
 
 
 	@Override
-	public ServerRunner init(RunnerSettings settings) {
+	public ServerRunner<T> init(RunnerSettings settings) {
 		shutdownOnClose = settings.isShutdownOnClose();
 		return this;
 	}

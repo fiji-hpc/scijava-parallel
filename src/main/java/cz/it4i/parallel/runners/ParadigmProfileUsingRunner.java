@@ -10,11 +10,12 @@ import cz.it4i.parallel.SciJavaParallelRuntimeException;
 import lombok.Getter;
 import lombok.Setter;
 
-public class ParadigmProfileUsingRunner extends
+public class ParadigmProfileUsingRunner<T extends RunnerSettings> extends
 	ParallelizationParadigmProfile
 {
 
-	public ParadigmProfileUsingRunner(Class<? extends ServerRunner> typeOfRunner,
+	public ParadigmProfileUsingRunner(
+		Class<? extends ServerRunner<T>> typeOfRunner,
 		Class<? extends ParallelizationParadigm> paradigmType,
 		String profileName)
 	{
@@ -24,15 +25,15 @@ public class ParadigmProfileUsingRunner extends
 
 	@Getter
 	@Setter
-	private RunnerSettings settings;
+	private T settings;
 
 	@Getter
-	private final Class<? extends ServerRunner> typeOfRunner;
+	private final Class<? extends ServerRunner<T>> typeOfRunner;
 
 	@Getter
-	private transient ServerRunner associatedRunner;
+	private transient ServerRunner<T> associatedRunner;
 
-	void initRunnerIfNeeded(Consumer<ServerRunner> initializer) {
+	void initRunnerIfNeeded(Consumer<ServerRunner<T>> initializer) {
 		if (associatedRunner != null) {
 			return;
 		}

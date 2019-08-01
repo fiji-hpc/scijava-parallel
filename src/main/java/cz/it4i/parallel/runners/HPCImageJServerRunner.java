@@ -14,7 +14,8 @@ import cz.it4i.parallel.Routines;
 import cz.it4i.parallel.RunningRemoteServer;
 import cz.it4i.parallel.runners.ClusterJobLauncher.Job;
 
-public class HPCImageJServerRunner extends AbstractImageJServerRunner implements
+public class HPCImageJServerRunner extends
+	AbstractImageJServerRunner<HPCSettings> implements
 	RunningRemoteServer
 {
 
@@ -35,8 +36,8 @@ public class HPCImageJServerRunner extends AbstractImageJServerRunner implements
 	}
 
 	@Override
-	public HPCImageJServerRunner init(RunnerSettings aSettings) {
-		this.settings = (HPCSettings) aSettings;
+	public HPCImageJServerRunner init(HPCSettings aSettings) {
+		this.settings = aSettings;
 		super.init(aSettings);
 		if (settings.getJobID() != null) {
 			startOrReconnectServer(this::reconnectServerIfRunningOrDisconnect);

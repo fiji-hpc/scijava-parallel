@@ -10,13 +10,12 @@ import org.scijava.plugin.Plugin;
 import cz.it4i.parallel.runners.ImageJServerRunner;
 import cz.it4i.parallel.runners.ImageJServerRunnerSettings;
 import cz.it4i.parallel.runners.MultipleHostsParadigmManagerUsingRunner;
-import cz.it4i.parallel.runners.RunnerSettings;
 import cz.it4i.parallel.runners.ServerRunner;
 import cz.it4i.parallel.ui.ImageJSettingsGui;
 
 @Plugin(type = ParadigmManager.class)
 public class LocalImageJServerParadigmProfileManager extends
-	MultipleHostsParadigmManagerUsingRunner<ImageJServerParadigm>
+	MultipleHostsParadigmManagerUsingRunner<ImageJServerParadigm, ImageJServerRunnerSettings>
 {
 	@Parameter
 	private Context context;
@@ -27,20 +26,22 @@ public class LocalImageJServerParadigmProfileManager extends
 	}
 
 	@Override
-	protected RunnerSettings doEdit(Map<String, Object> inputs) {
+	protected ImageJServerRunnerSettings doEdit(Map<String, Object> inputs) {
 		return ImageJSettingsGui.showDialog(context, inputs);
 	}
 
 	@Override
-	protected void fillInputs(RunnerSettings settings,
+	protected void fillInputs(ImageJServerRunnerSettings settings,
 		Map<String, Object> inputs)
 	{
-		ImageJSettingsGui.fillInputs((ImageJServerRunnerSettings) settings, inputs);
+		ImageJSettingsGui.fillInputs(settings, inputs);
 	}
 
 
 	@Override
-	protected Class<? extends ServerRunner> getTypeOfRunner() {
+	protected Class<? extends ServerRunner<ImageJServerRunnerSettings>>
+		getTypeOfRunner()
+	{
 		return ImageJServerRunner.class;
 	}
 }

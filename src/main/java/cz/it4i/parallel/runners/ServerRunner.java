@@ -5,9 +5,13 @@ import java.util.List;
 
 import org.scijava.parallel.Status;
 
-public interface ServerRunner {
+public interface ServerRunner<T extends RunnerSettings> {
 
-	ServerRunner init(RunnerSettings settings);
+	ServerRunner<T> init(T settings);
+
+	default Class<T> getTypeOfSettings() {
+		return null;
+	}
 
 	void start();
 
