@@ -1,10 +1,6 @@
 package cz.it4i.parallel.imagej.server;
 
-import com.google.common.collect.Streams;
-
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.scijava.Context;
 import org.scijava.parallel.ParadigmManager;
@@ -12,19 +8,17 @@ import org.scijava.parallel.ParallelizationParadigmProfile;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
-import cz.it4i.parallel.Host;
 import cz.it4i.parallel.runners.HPCImageJServerRunner;
 import cz.it4i.parallel.runners.HPCSettings;
-import cz.it4i.parallel.runners.ParadigmManagerUsingRunner;
+import cz.it4i.parallel.runners.MultipleHostsParadigmManagerUsingRunner;
 import cz.it4i.parallel.runners.ParadigmProfileUsingRunner;
 import cz.it4i.parallel.runners.RunnerSettings;
-import cz.it4i.parallel.runners.ServerRunner;
 import cz.it4i.parallel.ui.HPCImageJServerRunnerWithUI;
 import cz.it4i.parallel.ui.HPCSettingsGui;
 
 @Plugin(type = ParadigmManager.class)
 public class HPCImageJServerParadigmProfileManager extends
-	ParadigmManagerUsingRunner<ImageJServerParadigm>
+	MultipleHostsParadigmManagerUsingRunner<ImageJServerParadigm>
 {
 
 	@Parameter
@@ -79,11 +73,7 @@ public class HPCImageJServerParadigmProfileManager extends
 	protected void initParadigm(ParadigmProfileUsingRunner typedProfile,
 		ImageJServerParadigm paradigm)
 	{
-		ServerRunner runner = typedProfile.getAssociatedRunner();
-		List<Host> hosts = Streams.zip(runner.getPorts().stream(), runner
-			.getNCores().stream(), (Integer port, Integer nCores) -> new Host(
-				"localhost:" + port, nCores)).collect(Collectors.toList());
-		paradigm.setHosts(hosts);
+		super.initParadigm(typedProfile, paradigm);
 		((HPCSettings) typedProfile.getSettings()).setJobID(
 			((HPCImageJServerRunner) typedProfile.getAssociatedRunner()).getJob()
 				.getID());
