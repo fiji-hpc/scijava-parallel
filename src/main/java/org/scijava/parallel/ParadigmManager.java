@@ -6,7 +6,7 @@ public interface ParadigmManager
 	extends SingletonPlugin
 {
 
-	Class<?> getSupportedParadigmType();
+	Class<? extends ParallelizationParadigm> getSupportedParadigmType();
 
 	boolean isProfileSupported(ParallelizationParadigmProfile profile);
 

@@ -4,7 +4,6 @@ import java.util.Map;
 
 import org.scijava.Context;
 import org.scijava.parallel.ParadigmManager;
-import org.scijava.parallel.ParallelizationParadigmProfile;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
@@ -13,6 +12,7 @@ import cz.it4i.parallel.runners.HPCSettings;
 import cz.it4i.parallel.runners.MultipleHostsParadigmManagerUsingRunner;
 import cz.it4i.parallel.runners.ParadigmProfileUsingRunner;
 import cz.it4i.parallel.runners.RunnerSettings;
+import cz.it4i.parallel.runners.ServerRunner;
 import cz.it4i.parallel.ui.HPCImageJServerRunnerWithUI;
 import cz.it4i.parallel.ui.HPCSettingsGui;
 
@@ -27,15 +27,6 @@ public class HPCImageJServerParadigmProfileManager extends
 	@Override
 	public Class<ImageJServerParadigm> getSupportedParadigmType() {
 		return ImageJServerParadigm.class;
-	}
-
-
-	@Override
-	public ParallelizationParadigmProfile createProfile(
-		String name)
-	{
-		return new ParadigmProfileUsingRunner(HPCImageJServerRunnerWithUI.class,
-			ImageJServerParadigm.class, name);
 	}
 
 	@Override
@@ -65,7 +56,7 @@ public class HPCImageJServerParadigmProfileManager extends
 
 
 	@Override
-	protected Class<?> getTypeOfRunner() {
+	protected Class<? extends ServerRunner> getTypeOfRunner() {
 		return HPCImageJServerRunnerWithUI.class;
 	}
 

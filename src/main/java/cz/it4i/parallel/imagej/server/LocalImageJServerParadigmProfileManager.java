@@ -4,15 +4,14 @@ import java.util.Map;
 
 import org.scijava.Context;
 import org.scijava.parallel.ParadigmManager;
-import org.scijava.parallel.ParallelizationParadigmProfile;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
 import cz.it4i.parallel.runners.ImageJServerRunner;
 import cz.it4i.parallel.runners.ImageJServerRunnerSettings;
 import cz.it4i.parallel.runners.MultipleHostsParadigmManagerUsingRunner;
-import cz.it4i.parallel.runners.ParadigmProfileUsingRunner;
 import cz.it4i.parallel.runners.RunnerSettings;
+import cz.it4i.parallel.runners.ServerRunner;
 import cz.it4i.parallel.ui.ImageJSettingsGui;
 
 @Plugin(type = ParadigmManager.class)
@@ -25,14 +24,6 @@ public class LocalImageJServerParadigmProfileManager extends
 	@Override
 	public Class<ImageJServerParadigm> getSupportedParadigmType() {
 		return ImageJServerParadigm.class;
-	}
-
-	@Override
-	public ParallelizationParadigmProfile createProfile(
-		String name)
-	{
-		return new ParadigmProfileUsingRunner(ImageJServerRunner.class,
-			ImageJServerParadigm.class, name);
 	}
 
 	@Override
@@ -49,7 +40,7 @@ public class LocalImageJServerParadigmProfileManager extends
 
 
 	@Override
-	protected Class<?> getTypeOfRunner() {
+	protected Class<? extends ServerRunner> getTypeOfRunner() {
 		return ImageJServerRunner.class;
 	}
 }

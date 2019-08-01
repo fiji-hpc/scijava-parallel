@@ -31,6 +31,12 @@ public abstract class ParadigmManagerUsingRunner<T extends AbstractBaseParadigm>
 	}
 
 	@Override
+	final public ParallelizationParadigmProfile createProfile(String name) {
+		return new ParadigmProfileUsingRunner(getTypeOfRunner(),
+			getSupportedParadigmType(), name);
+	}
+
+	@Override
 	public void editProfile(ParallelizationParadigmProfile profile) {
 		runForObjectIfOfTypeElseException(profile,
 			ParadigmProfileUsingRunner.class, typedProfile -> typedProfile
@@ -92,12 +98,25 @@ public abstract class ParadigmManagerUsingRunner<T extends AbstractBaseParadigm>
 		// initialy do nothing
 	}
 
-	protected abstract RunnerSettings doEdit(Map<String, Object> inputs);
+	/**
+	 * @param inputs
+	 */
+	protected RunnerSettings doEdit(Map<String, Object> inputs)
+	{
+		return null;
+	}
 
-	protected abstract void fillInputs(RunnerSettings settings,
-		Map<String, Object> inputs);
+	/**
+	 * @param settings
+	 * @param inputs
+	 */
+	protected void fillInputs(RunnerSettings settings,
+		Map<String, Object> inputs)
+	{
+		// no needed settings
+	}
 
-	protected abstract Class<?> getTypeOfRunner();
+	protected abstract Class<? extends ServerRunner> getTypeOfRunner();
 
 	protected abstract void initParadigm(
 		ParadigmProfileUsingRunner typedProfile,
