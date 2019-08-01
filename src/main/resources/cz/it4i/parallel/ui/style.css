@@ -15,3 +15,10 @@
 .bordered-titled-content {
   -fx-padding: 26 10 10 10;
 }
+
+
+.label:disabled {
+    -fx-opacity: 1;
+    -fx-text-fill: grey;
+}
+
