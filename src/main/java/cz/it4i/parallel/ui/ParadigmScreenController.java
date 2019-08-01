@@ -2,6 +2,7 @@ package cz.it4i.parallel.ui;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 import org.apache.commons.lang3.BooleanUtils;
 import org.scijava.parallel.ParadigmManager;
@@ -9,6 +10,7 @@ import org.scijava.parallel.ParadigmManagerService;
 import org.scijava.parallel.ParallelService;
 import org.scijava.parallel.ParallelizationParadigm;
 import org.scijava.parallel.ParallelizationParadigmProfile;
+import org.scijava.parallel.Status;
 import org.scijava.plugin.PluginInfo;
 
 import cz.it4i.swing_javafx_ui.CloseableControl;
@@ -18,6 +20,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.Pane;
+import javafx.scene.control.CheckBox;
 
 public class ParadigmScreenController extends Pane implements CloseableControl {
 
@@ -29,6 +32,9 @@ public class ParadigmScreenController extends Pane implements CloseableControl {
 
 	@FXML
 	private ComboBox<ParadigmManager> cmbParadigmManagers;
+
+	@FXML
+	private CheckBox chkActive;
 
 	@FXML
 	private Button btnCreate;
@@ -58,9 +64,21 @@ public class ParadigmScreenController extends Pane implements CloseableControl {
 		JavaFXRoutines.initRootAndController("paradigm-screen.fxml", this);
 		txtNameOfNewProfile.textProperty().addListener((a, b,
 			c) -> updateCreateNewProfileButton());
-		
 	}
 
+	public void activateDeactivate() {
+		this.setDisable(true);
+		CompletableFuture.runAsync(() -> {
+			if (chkActive.isSelected()) {
+				initProfile();
+			}
+			else {
+				closeProfile();
+			}
+			JavaFXRoutines.runOnFxThread(() -> this.setDisable(false));
+		});
+
+	}
 
 	public void initWithServices(ParallelService service,
 		ParadigmManagerService initParadigmManagerService)
@@ -78,18 +96,6 @@ public class ParadigmScreenController extends Pane implements CloseableControl {
 	public void close() {
 		// do nothing
 	}
-
-	public void closeProfile() {
-		try (ParallelizationParadigm paradigm = parallelService.getParadigm()) {
-			if (paradigm != null) {
-				ParadigmManager manager = findManager(activeProfile);
-				if (manager != null) {
-					manager.shutdownIfPossible(activeProfile);
-				}
-			}
-		}
-	}
-
 
 	public void createNewProfile() {
 		ParadigmManager manager = cmbParadigmManagers.getItems().isEmpty() ? null
@@ -137,20 +143,6 @@ public class ParadigmScreenController extends Pane implements CloseableControl {
 	}
 
 
-	public void initProfile() {
-		ParallelizationParadigm paradigm = parallelService.getParadigm();
-
-		if (paradigm != null) {
-			List<ParadigmManager> managers =
-				paradigmManagerService.getManagers(paradigm.getClass());
-			if (!managers.isEmpty()) {
-				managers.get(0).prepareParadigm(activeProfile, paradigm);
-			}
-			paradigm.init();
-			parallelService.saveProfiles();
-		}
-	}
-
 	public void paradigmSelected() {
 		cmbParadigmManagers.getItems().clear();
 		cmbParadigmManagers.getItems().addAll(paradigmManagerService.getManagers(
@@ -184,6 +176,18 @@ public class ParadigmScreenController extends Pane implements CloseableControl {
 		}
 	}
 
+	private void closeProfile() {
+		try (ParallelizationParadigm paradigm = parallelService.getParadigm()) {
+			if (paradigm != null) {
+				ParadigmManager manager = findManager(activeProfile);
+				if (manager != null) {
+					manager.shutdownIfPossible(activeProfile);
+				}
+			}
+		}
+	}
+
+
 	private ParadigmManager findManager(ParallelizationParadigmProfile profile) {
 		return paradigmManagerService.getManagers(profile.getParadigmType())
 			.stream().filter(m -> m.isProfileSupported(profile)).findAny().orElse(
@@ -207,6 +211,21 @@ public class ParadigmScreenController extends Pane implements CloseableControl {
 			}
 		});
 	}
+
+	private void initProfile() {
+		ParallelizationParadigm paradigm = parallelService.getParadigm();
+	
+		if (paradigm != null) {
+			List<ParadigmManager> managers =
+				paradigmManagerService.getManagers(paradigm.getClass());
+			if (!managers.isEmpty()) {
+				managers.get(0).prepareParadigm(activeProfile, paradigm);
+			}
+			paradigm.init();
+			parallelService.saveProfiles();
+		}
+	}
+
 
 	private void initProfiles() {
 		for (ParallelizationParadigmProfile profile : parallelService
@@ -234,11 +253,16 @@ public class ParadigmScreenController extends Pane implements CloseableControl {
 			txtActiveProfile.setText(profile.get().toString());
 			txtActiveProfileType.setText(profile.get().getParadigmType()
 				.getSimpleName());
+			boolean paradigmActive = parallelService.getParadigm()
+				.getStatus() == Status.ACTIVE;
+			chkActive.setSelected(paradigmActive);
+			chkActive.setDisable(false);
 		}
 		else {
 			activeProfile = null;
 			txtActiveProfile.setText("");
 			txtActiveProfileType.setText("");
+			chkActive.setDisable(true);
 		}
 	}
 }
