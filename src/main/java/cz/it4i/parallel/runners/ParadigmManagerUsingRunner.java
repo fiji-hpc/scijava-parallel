@@ -12,7 +12,7 @@ import org.scijava.parallel.Status;
 import cz.it4i.parallel.AbstractBaseParadigm;
 
 
-public abstract class ParadigmProfileManagerUsingRunner<T extends AbstractBaseParadigm>
+public abstract class ParadigmManagerUsingRunner<T extends AbstractBaseParadigm>
 	implements
 	ParadigmManager
 {

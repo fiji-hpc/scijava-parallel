@@ -15,7 +15,7 @@ import org.scijava.plugin.Plugin;
 import cz.it4i.parallel.Host;
 import cz.it4i.parallel.runners.HPCImageJServerRunner;
 import cz.it4i.parallel.runners.HPCSettings;
-import cz.it4i.parallel.runners.ParadigmProfileManagerUsingRunner;
+import cz.it4i.parallel.runners.ParadigmManagerUsingRunner;
 import cz.it4i.parallel.runners.ParadigmProfileUsingRunner;
 import cz.it4i.parallel.runners.RunnerSettings;
 import cz.it4i.parallel.runners.ServerRunner;
@@ -24,7 +24,7 @@ import cz.it4i.parallel.ui.HPCSettingsGui;
 
 @Plugin(type = ParadigmManager.class)
 public class HPCImageJServerParadigmProfileManager extends
-	ParadigmProfileManagerUsingRunner<ImageJServerParadigm>
+	ParadigmManagerUsingRunner<ImageJServerParadigm>
 {
 
 	@Parameter

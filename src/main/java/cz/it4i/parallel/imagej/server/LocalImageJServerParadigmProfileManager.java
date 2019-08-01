@@ -12,14 +12,14 @@ import org.scijava.plugin.Plugin;
 import cz.it4i.parallel.Host;
 import cz.it4i.parallel.runners.ImageJServerRunner;
 import cz.it4i.parallel.runners.ImageJServerRunnerSettings;
-import cz.it4i.parallel.runners.ParadigmProfileManagerUsingRunner;
+import cz.it4i.parallel.runners.ParadigmManagerUsingRunner;
 import cz.it4i.parallel.runners.ParadigmProfileUsingRunner;
 import cz.it4i.parallel.runners.RunnerSettings;
 import cz.it4i.parallel.ui.ImageJSettingsGui;
 
 @Plugin(type = ParadigmManager.class)
 public class LocalImageJServerParadigmProfileManager extends
-	ParadigmProfileManagerUsingRunner<ImageJServerParadigm>
+	ParadigmManagerUsingRunner<ImageJServerParadigm>
 {
 
 	@Parameter
