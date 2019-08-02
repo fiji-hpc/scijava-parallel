@@ -29,6 +29,7 @@ public class ParadigmProfilesManager implements Command {
 	public void run() {
 		ParadigmScreenWindow window = new ParadigmScreenWindow(parallelService,
 			managerService);
+		
 		window.setVisible(true);
 		window.addWindowListener(new WindowAdapter() {
 
