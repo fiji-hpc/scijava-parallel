@@ -17,15 +17,11 @@ import cz.it4i.swing_javafx_ui.CloseableControl;
 import cz.it4i.swing_javafx_ui.JavaFXRoutines;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.Pane;
-import javafx.scene.paint.Color;
-import javafx.util.Callback;
 import javafx.util.StringConverter;
-import javafx.scene.control.CheckBox;
 
 public class ParadigmScreenController extends Pane implements CloseableControl {
 
@@ -213,21 +209,12 @@ public class ParadigmScreenController extends Pane implements CloseableControl {
 			paradigms.setConverter(new StringConverter<Class<? extends ParallelizationParadigm>>() {
 				@Override
 				public String toString(Class<? extends ParallelizationParadigm> item) {
-					if (item == null) {
-						return "";
-					} else {
-						return "" + item.getSimpleName();
-					}
+					return (item == null) ? "" : item.getSimpleName();
 				}
 
 				@Override
 				public Class<? extends ParallelizationParadigm> fromString(String s) {
-					try {
-						Class<? extends ParallelizationParadigm> temp = (Class<? extends ParallelizationParadigm>) Class.forName(s);
-						return temp;
-					} catch (ClassNotFoundException e) {
-						return null;
-					}
+					throw new UnsupportedOperationException();
 				}
 			});
 			
