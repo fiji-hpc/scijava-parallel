@@ -28,7 +28,26 @@
 
 	<developers>
 		<developer>
-			<id>None</id>
+			<id>PatrBainar</id>
+			<name>Petr Bainar</name>
+			<url>https://www.kozusznik.cz</url>
+			<roles>
+				<role>founder</role>
+				<role>developer</role>
+			</roles>
+		</developer>
+		<developer>
+			<id>kozusznikj</id>
+			<name>Jan Kožusznik</name>
+			<url>https://www.kozusznik.cz</url>
+			<roles>
+				<role>lead</role>
+				<role>developer</role>
+				<role>debugger</role>
+				<role>reviewer</role>
+				<role>support</role>
+				<role>maintainer</role>
+			</roles>
 		</developer>
 	</developers>
 	<contributors>
@@ -46,18 +65,17 @@
 	</mailingLists>
 
 	<scm>
-		<connection>scm:git:git://github.com/imagej/imagej-server</connection>
-		<developerConnection>scm:git:git@github.com:imagej/imagej-server</developerConnection>
+		<connection>scm:git:git://github.com/fiji-hpc/scijava-parallel</connection>
+		<developerConnection>scm:git:git@github.com:fiji-hpc/scijava-paralle</developerConnection>
 		<tag>HEAD</tag>
-		<url>https://github.com/imagej/imagej-server</url>
+		<url>https://github.com/fiji-hpc/scijava-paralle</url>
 	</scm>
 	<issueManagement>
 		<system>GitHub Issues</system>
-		<url>https://github.com/imagej/imagej-server</url>
+		<url>https://github.com/fiji-hpc/scijava-paralle</url>
 	</issueManagement>
 	<ciManagement>
-		<system>Travis CI</system>
-		<url>https://travis-ci.org/imagej/imagej-server</url>
+		<system>none</system>
 	</ciManagement>
 
 	<!-- Add usual stuff as per SciJava projects -->
