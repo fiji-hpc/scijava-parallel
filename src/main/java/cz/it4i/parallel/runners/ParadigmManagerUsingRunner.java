@@ -89,31 +89,14 @@ public abstract class ParadigmManagerUsingRunner<T extends AbstractBaseParadigm,
 	}
 
 	protected S editSettings(S settings) {
-		return doEdit(settings);
+		RunnerSettingsEditor<S> editor = getEditor();
+		return editor.edit(settings);
 	}
 
 	protected void initRunner(
 		@SuppressWarnings("unused") ServerRunner<?> runner)
 	{
 		// initialy do nothing
-	}
-
-	/**
-	 * @param settings
-	 */
-	protected S doEdit(S settings)
-	{
-		return null;
-	}
-
-	/**
-	 * @param settings
-	 * @param inputs
-	 */
-	protected void fillInputs(S settings,
-		Map<String, Object> inputs)
-	{
-		// no needed settings
 	}
 
 	protected abstract Class<? extends ServerRunner<S>> getTypeOfRunner();
@@ -136,5 +119,41 @@ public abstract class ParadigmManagerUsingRunner<T extends AbstractBaseParadigm,
 			initParadigm(typedProfile, (T) paradigm);
 		});
 		paradigm.setCloseCommand(runner::close);
+	}
+
+// TODO: following code should be reimplemented
+	private RunnerSettingsEditor<S> getEditor() {
+
+		return new RunnerSettingsEditor<S>() {
+
+			@Override
+			public Class<S> getTypeOfSettings() {
+				return null;
+			}
+
+			@Override
+			public S edit(S settings) {
+				Map<String, Object> inputs = new HashMap<>();
+				if (settings != null) {
+					fillInputs(settings, inputs);
+				}
+				return doEdit(inputs);
+			}
+		};
+	}
+
+	/**
+	 * @param inputs
+	 */
+	protected S doEdit(Map<String, Object> inputs) {
+		return null;
+	}
+
+	/**
+	 * @param settings
+	 * @param inputs
+	 */
+	protected void fillInputs(S settings, Map<String, Object> inputs) {
+		// no needed settings
 	}
 }
