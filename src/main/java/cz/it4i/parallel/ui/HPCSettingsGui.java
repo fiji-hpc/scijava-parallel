@@ -25,12 +25,10 @@ import cz.it4i.parallel.runners.HPCSettings;
 
 @Plugin(type = Command.class, headless = false)
 public class HPCSettingsGui implements Command {
-	
+
 	public static void fillInputs(HPCSettings settings,
 		Map<String, Object> inputs)
 	{
-
-
 
 		inputs.put("host", settings.getHost());
 		inputs.put("port", settings.getPort());
@@ -60,7 +58,7 @@ public class HPCSettingsGui implements Command {
 			else {
 				module = command.run(HPCSettingsGui.class, true, inputs);
 			}
-	
+
 			return (HPCSettings) module.get().getOutput("settings");
 		}
 		catch (InterruptedException | ExecutionException e) {
@@ -79,16 +77,17 @@ public class HPCSettingsGui implements Command {
 	@Parameter(style = TextWidget.FIELD_STYLE, label = "Host name")
 	private String host;
 
-	@Parameter(style = NumberWidget.SPINNER_STYLE, label = "Port number", min = "1", max = "65535")
+	@Parameter(style = NumberWidget.SPINNER_STYLE, label = "Port number",
+		min = "1", max = "65535")
 	private int port = 22;
 
 	@Parameter(style = TextWidget.FIELD_STYLE, label = "User name")
 	private String userName;
-	
+
 	@Parameter(label = "Authentication method:",
-			style = ChoiceWidget.RADIO_BUTTON_HORIZONTAL_STYLE, choices = { "Key file",
-				"Password"})
-		private String authenticationChoice;	
+		style = ChoiceWidget.RADIO_BUTTON_HORIZONTAL_STYLE, choices = { "Key file",
+			"Password" })
+	private String authenticationChoice;
 
 	@Parameter(style = FileWidget.OPEN_STYLE, label = "Key file")
 	private File keyFile;
@@ -96,14 +95,14 @@ public class HPCSettingsGui implements Command {
 	@Parameter(style = TextWidget.PASSWORD_STYLE, label = "Key file password",
 		persist = false, required = false)
 	private String keyFilePassword;
-	
+
 	@Parameter(style = TextWidget.PASSWORD_STYLE, label = "Password",
-			persist = false, required = false)
-		private String password;
-	
+		persist = false, required = false)
+	private String password;
+
 	@Parameter(visibility = ItemVisibility.MESSAGE)
 	private final String labelHPC = "HPC Settings";
-	
+
 	@Parameter(choices = { "PBS", "Slurm" }, label = "HPC Scheduler type")
 	private String schedulerType = "PBS";
 
@@ -116,10 +115,12 @@ public class HPCSettingsGui implements Command {
 	private String command = "ImageJ-linux64";
 
 	// for salomon run-workers.sh
-	@Parameter(style = NumberWidget.SPINNER_STYLE, label = "Number of nodes", min = "1")
+	@Parameter(style = NumberWidget.SPINNER_STYLE, label = "Number of nodes",
+		min = "1")
 	private int nodes;
 
-	@Parameter(style = NumberWidget.SPINNER_STYLE, label = "Number of cpus per node", min = "1")
+	@Parameter(style = NumberWidget.SPINNER_STYLE,
+		label = "Number of cpus per node", min = "1")
 	private int ncpus;
 
 	@Parameter(style = TextWidget.FIELD_STYLE,
