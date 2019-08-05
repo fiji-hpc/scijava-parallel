@@ -1,6 +1,5 @@
 package cz.it4i.parallel.runners;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -90,11 +89,7 @@ public abstract class ParadigmManagerUsingRunner<T extends AbstractBaseParadigm,
 	}
 
 	protected S editSettings(S settings) {
-		Map<String, Object> inputs = new HashMap<>();
-		if (settings != null) {
-			fillInputs(settings, inputs);
-		}
-		return doEdit(inputs);
+		return doEdit(settings);
 	}
 
 	protected void initRunner(
@@ -104,9 +99,9 @@ public abstract class ParadigmManagerUsingRunner<T extends AbstractBaseParadigm,
 	}
 
 	/**
-	 * @param inputs
+	 * @param settings
 	 */
-	protected S doEdit(Map<String, Object> inputs)
+	protected S doEdit(S settings)
 	{
 		return null;
 	}

@@ -52,10 +52,10 @@ public class HPCImageJServerParadigmProfileManager extends
 		return result;
 	}
 
-	@Override
-	protected HPCSettings doEdit(Map<String, Object> inputs) {
-		return HPCSettingsGui.showDialog(context, inputs);
-	}
+//	@Override
+//	protected HPCSettings doEdit(Map<String, Object> inputs) {
+//		return HPCSettingsGui.showDialog(context, inputs);
+//	}
 
 	@Override
 	protected void fillInputs(HPCSettings settings,
