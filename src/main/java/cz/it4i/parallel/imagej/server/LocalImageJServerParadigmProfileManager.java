@@ -11,7 +11,6 @@ import cz.it4i.parallel.runners.ImageJServerRunner;
 import cz.it4i.parallel.runners.ImageJServerRunnerSettings;
 import cz.it4i.parallel.runners.MultipleHostsParadigmManagerUsingRunner;
 import cz.it4i.parallel.runners.ServerRunner;
-import cz.it4i.parallel.ui.ImageJSettingsGui;
 import cz.it4i.parallel.ui.LocalSettingsScreenController;
 
 @Plugin(type = ParadigmManager.class)
@@ -19,7 +18,7 @@ public class LocalImageJServerParadigmProfileManager extends
 	MultipleHostsParadigmManagerUsingRunner<ImageJServerParadigm, ImageJServerRunnerSettings>
 {
 	// Added this line bellow:
-	private LocalSettingsScreenController lssc = new LocalSettingsScreenController();
+	private LocalSettingsScreenController localSettingsScreenController = new LocalSettingsScreenController();
 	
 	@Parameter
 	private Context context;
@@ -31,16 +30,14 @@ public class LocalImageJServerParadigmProfileManager extends
 
 	@Override
 	protected ImageJServerRunnerSettings doEdit(Map<String, Object> inputs) {
-		//return ImageJSettingsGui.showDialog(context, inputs);
-		return lssc.showDialog(inputs);
+		return localSettingsScreenController.showDialog(inputs);
 	}
 
 	@Override
 	protected void fillInputs(ImageJServerRunnerSettings settings,
 		Map<String, Object> inputs)
 	{
-		//ImageJSettingsGui.fillInputs(settings, inputs);
-		lssc.fillInputs(settings, inputs);
+		localSettingsScreenController.fillInputs(settings, inputs);
 	}
 
 
