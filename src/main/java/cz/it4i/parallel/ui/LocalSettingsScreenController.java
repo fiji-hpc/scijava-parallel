@@ -12,26 +12,23 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
-import javafx.stage.DirectoryChooser;
+import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 public class LocalSettingsScreenController {
 
 	@FXML
-	private TextField localDirectoryTextField;
-
-	@FXML
-	private TextField commandTextField;
+	private TextField localFijiExecutablePathTextField;
 
 	@FXML
 	public Button okButton;
-	
-	private String command = "ImageJ-linux64";
 
-	private File localDirectory;
+	private File localFijiExecutablePath;
 
 	private ImageJServerRunnerSettings settings;
 
@@ -43,12 +40,19 @@ public class LocalSettingsScreenController {
 		inputs.put("command", fiji.getFileName().toString());
 	}
 
+	private ImageJServerRunnerSettings createSettings() {
+		Path fiji = localFijiExecutablePath.toPath();
+		settings = ImageJServerRunnerSettings.builder().fiji(fiji.toString())
+			.build();
+		return settings;
+	}
+
 	public void run(final Map<String, Object> inputs) {
-		// Reload settings from input if they already exist:
-		if (!inputs.isEmpty()) {
-			this.localDirectory = new File((String) inputs.get("localDirectory"));
-			this.command = (String) inputs.get("command");
-		}
+//		// Reload settings from input if they already exist:
+//		if (!inputs.isEmpty()) {
+//			this.localDirectory = new File((String) inputs.get("localDirectory"));
+//			this.command = (String) inputs.get("command");
+//		}
 	}
 
 	public ImageJServerRunnerSettings showDialog(
@@ -61,46 +65,65 @@ public class LocalSettingsScreenController {
 
 	@FXML
 	private void browseAction() {
-		DirectoryChooser directoryChooser = new DirectoryChooser();
-		directoryChooser.setTitle("Open Resource File");
+		FileChooser fileChooser = new FileChooser();
+		fileChooser.setTitle("Open Fiji Executable File");
 		Stage stage = new Stage();
-		File selectedDirectory = directoryChooser.showDialog(stage);
-		if(selectedDirectory != null) {
-			this.localDirectory = selectedDirectory;
-			this.localDirectoryTextField.setText(selectedDirectory.getAbsolutePath());
+		File selectedFile = fileChooser.showOpenDialog(stage);
+		if (selectedFile != null) {
+			this.localFijiExecutablePath = selectedFile;
+			this.localFijiExecutablePathTextField.setText(selectedFile
+				.getAbsolutePath());
 		}
 	}
-	
+
 	@FXML
 	private void okAction() {
-		// Set settings:
-		this.localDirectory = new File(localDirectoryTextField.getText());
-		this.command = commandTextField.getText();
-		
 		// Save the settings:
-		final Path fiji = localDirectory.toPath().resolve(command);
-		this.settings = ImageJServerRunnerSettings.builder().fiji(fiji.toString())
-			.build();
-		
+		this.settings = createSettings();
+
 		// Close the modal window:
 		Stage stage = (Stage) okButton.getScene().getWindow();
 		stage.close();
 	}
-	
+
+	@FXML
+	public void initialize() {
+		localFijiExecutablePathTextField.setText("");
+	}
+
 	private void openWindow() {
 		FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(
 			"local-settings-screen.fxml"));
 		try {
 			Parent fxmlFile = fxmlLoader.load();
+			fxmlLoader.getController();
 			Stage stage = new Stage();
 			stage.initModality(Modality.APPLICATION_MODAL);
 			stage.setResizable(false);
 			stage.setTitle("Local ImageJ Server Settings");
 			stage.setScene(new Scene(fxmlFile));
-			stage.show();
+			stage.showAndWait();
 		}
 		catch (IOException exc) {
-			System.out.println(exc);
+			showErrorDialog(exc.toString());
+		}
+	}
+	
+	private void showErrorDialog(String message) {
+		Alert alert = new Alert(AlertType.ERROR);
+		alert.setTitle("Error Dialog");
+		alert.setHeaderText(message);
+		alert.setContentText("Ooops, there was an error!");
+		alert.showAndWait();
+	}
+
+	private void setInitialTextFieldText() {
+		if (this.localFijiExecutablePath == null) {
+			this.localFijiExecutablePathTextField.setText("");
+		}
+		else {
+			this.localFijiExecutablePathTextField.setText(this.localFijiExecutablePath
+				.getAbsolutePath());
 		}
 	}
 
