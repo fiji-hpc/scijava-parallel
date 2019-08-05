@@ -65,12 +65,12 @@ public class LocalSettingsScreenWindow {
 	}
 
 	private void setInitialTextFieldText() {
-		if (controller.localFijiExecutablePath == null) {
-			controller.localFijiExecutablePathTextField.setText("");
+		if (settings == null) {
+			controller.localFijiExecutablePathTextField.setText("Empty");
 		}
 		else {
 			controller.localFijiExecutablePathTextField.setText(
-				controller.localFijiExecutablePath.getAbsolutePath());
+				settings.getFijiExecutable());
 		}
 	}
 }
