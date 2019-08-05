@@ -28,9 +28,15 @@ public class LocalSettingsScreenWindow {
 
 		// Request new settings:
 		this.openWindow();
-
-		// Return the new settings:
-		return controller.settings;
+		
+		// If the user did not provide new settings:
+		if(controller.getSettings() == null)
+		{
+			// Return old settings.
+			return this.settings;
+		}
+		// Return the new settings.
+		return controller.getSettings();		
 	}
 
 	private void openWindow() {

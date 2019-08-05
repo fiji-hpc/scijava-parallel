@@ -12,6 +12,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import lombok.Getter;
+import lombok.Setter;
 
 public class LocalSettingsScreenController {
 
@@ -20,12 +22,14 @@ public class LocalSettingsScreenController {
 
 	@FXML
 	public Button okButton;
-
-	private Stage parentStage;
 	
-	public File localFijiExecutablePath;
+	@Getter
+	@Setter
+	private File localFijiExecutablePath;
 	
-	public ImageJServerRunnerSettings settings;
+	@Getter
+	@Setter
+	private ImageJServerRunnerSettings settings;
 
 	private ImageJServerRunnerSettings createSettings() {
 		Path fijiPath = localFijiExecutablePath.toPath();
@@ -36,7 +40,7 @@ public class LocalSettingsScreenController {
 	private void browseAction() {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle("Open Fiji Executable File");
-		File selectedFile = fileChooser.showOpenDialog(this.parentStage);
+		File selectedFile = fileChooser.showOpenDialog(null);
 		if (selectedFile != null) {			
 			this.localFijiExecutablePathTextField.setText(selectedFile
 				.getAbsolutePath());
