@@ -62,10 +62,29 @@ public class HPCSettingsScreenWindow {
 	}
 	
 	private void setInitialTextFieldText() {
-//		if (settings == null) {			
-//		}
-//		else {
-//		}
+		if (settings != null) {
+			controller.hostTextField.setText(settings.getHost());
+			controller.portSpinner.getValueFactory().setValue(settings.getPort());
+			controller.userNameTextField.setText(settings.getUserName());
+			//Get authentication choice:
+			if(settings.getAuthenticationChoice().equals("Key file")) {
+				controller.authenticationChoiceKeyRadioButton.setSelected(true);
+				controller.authenticationChoicePasswordRadioButton.setSelected(false);
+			} else {
+				controller.authenticationChoiceKeyRadioButton.setSelected(false);
+				controller.authenticationChoicePasswordRadioButton.setSelected(true);
+			}			
+			controller.keyFileTextField.setText(settings.getKeyFile().getAbsolutePath());
+			controller.keyFilePasswordPasswordField.setText(settings.getKeyFilePassword());
+			controller.passwordPasswordField.setText(settings.getPassword());
+			controller.schedulerTypeComboBox.getSelectionModel().select(settings.getAdapterType().toString());
+			controller.remoteDirectoryTextField.setText(settings.getRemoteDirectory());
+			controller.commandTextField.setText(settings.getCommand());
+			controller.nodesSpinner.getValueFactory().setValue(settings.getNodes());
+			controller.ncpusSpinner.getValueFactory().setValue(settings.getNcpus());
+			controller.shutdownJobAfterCloseCheckBox.setSelected(settings.isShutdownOnClose());
+			controller.redirectStdOutErrCheckBox.setSelected(settings.isRedirectStdInErr());
+		}
 	}
 	
 	private void showErrorDialog(String header, String message) {

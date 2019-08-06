@@ -17,58 +17,59 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleGroup;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.util.StringConverter;
 import lombok.Getter;
 import lombok.Setter;
 
 public class HPCSettingsScreenController {
 
 	@FXML
-	private TextField hostTextField;
+	public TextField hostTextField;
 
 	@FXML
-	private Spinner<Integer> portSpinner;
+	public Spinner<Integer> portSpinner;
 
 	@FXML
-	private TextField userNameTextField;
+	public TextField userNameTextField;
 
 	@FXML
-	private ToggleGroup authenticationMethod;
+	public ToggleGroup authenticationMethod;
 
 	@FXML
-	private RadioButton authenticationChoiceKeyRadioButton;
+	public RadioButton authenticationChoiceKeyRadioButton;
 
 	@FXML
-	private RadioButton authenticationChoicePasswordRadioButton;
+	public RadioButton authenticationChoicePasswordRadioButton;
 
 	@FXML
-	private TextField keyFileTextField;
+	public TextField keyFileTextField;
 
 	@FXML
-	private PasswordField keyFilePasswordPasswordField;
+	public PasswordField keyFilePasswordPasswordField;
 
 	@FXML
-	private PasswordField passwordPasswordField;
+	public PasswordField passwordPasswordField;
 
 	@FXML
-	private ComboBox<String> schedulerTypeComboBox;
+	public ComboBox<String> schedulerTypeComboBox;
 
 	@FXML
-	private TextField remoteDirectoryTextField;
+	public TextField remoteDirectoryTextField;
 
 	@FXML
-	private TextField commandTextField;
+	public TextField commandTextField;
 
 	@FXML
-	private Spinner<Integer> nodesSpinner;
+	public Spinner<Integer> nodesSpinner;
 
 	@FXML
-	private Spinner<Integer> ncpusSpinner;
+	public Spinner<Integer> ncpusSpinner;
 
 	@FXML
-	private CheckBox shutdownJobAfterCloseCheckBox;
+	public CheckBox shutdownJobAfterCloseCheckBox;
 
 	@FXML
-	private CheckBox redirectStdOutErrCheckBox;
+	public CheckBox redirectStdOutErrCheckBox;
 	
 	@FXML
 	private Button okButton;
@@ -140,6 +141,7 @@ public class HPCSettingsScreenController {
 	@FXML
 	private void okAction() {
 		host = hostTextField.getText();
+		commitSpinnerValue(portSpinner);
 		port = portSpinner.getValue();
 		// authenticationChoice
 		if (authenticationChoiceKeyRadioButton.isSelected()) {
@@ -150,10 +152,13 @@ public class HPCSettingsScreenController {
 		}
 		userName = userNameTextField.getText();
 		password = passwordPasswordField.getText();
-		keyFile = new File(keyFilePasswordPasswordField.getText());
+		keyFile = new File(keyFileTextField.getText());
+		keyFilePassword = keyFilePasswordPasswordField.getText();
 		remoteDirectory = remoteDirectoryTextField.getText();
 		command = commandTextField.getText();
+		commitSpinnerValue(nodesSpinner);
 		nodes = nodesSpinner.getValue();
+		commitSpinnerValue(ncpusSpinner);
 		ncpus = ncpusSpinner.getValue();
 		shutdownJobAfterClose = shutdownJobAfterCloseCheckBox.isSelected();
 		redirectStdOutErr = redirectStdOutErrCheckBox.isSelected();
@@ -175,4 +180,16 @@ public class HPCSettingsScreenController {
 					schedulerType)).build();
 	}
 
+	private <T> void commitSpinnerValue(Spinner<T> spinner) {
+    if (!spinner.isEditable()) return;
+    String text = spinner.getEditor().getText();
+    SpinnerValueFactory<T> valueFactory = spinner.getValueFactory();
+    if (valueFactory != null) {
+        StringConverter<T> converter = valueFactory.getConverter();
+        if (converter != null) {
+            T value = converter.fromString(text);
+            valueFactory.setValue(value);
+        }
+    }
+}
 }
