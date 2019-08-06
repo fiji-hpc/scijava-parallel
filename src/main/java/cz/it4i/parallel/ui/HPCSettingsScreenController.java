@@ -5,6 +5,8 @@ import java.io.File;
 
 import cz.it4i.parallel.runners.HPCSchedulerType;
 import cz.it4i.parallel.runners.HPCSettings;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -70,9 +72,12 @@ public class HPCSettingsScreenController {
 
 	@FXML
 	public CheckBox redirectStdOutErrCheckBox;
-	
+
 	@FXML
 	private Button okButton;
+
+	@FXML
+	private Button browseButton;
 
 	@Getter
 	@Setter
@@ -103,7 +108,7 @@ public class HPCSettingsScreenController {
 	public void initialize() {
 		// RadioButtons:
 		authenticationChoiceKeyRadioButton.setSelected(true);
-		
+
 		// ComboBoxes:
 		schedulerTypeComboBox.getItems().removeAll(schedulerTypeComboBox
 			.getItems());
@@ -126,6 +131,18 @@ public class HPCSettingsScreenController {
 				SPINER_INITIAL_VALUE);
 		ncpusSpinner.setValueFactory(ncpusValueFactory);
 
+		// Disable fields that are not relevant to authentication method selection:
+		authenticationChoiceKeyRadioButton.selectedProperty().addListener(
+			new ChangeListener<Boolean>()
+			{
+
+				@Override
+				public void changed(ObservableValue<? extends Boolean> obs,
+					Boolean wasPreviouslySelected, Boolean isNowSelected)
+			{
+					disableIrrelevantFileds(isNowSelected);
+				}
+			});
 	}
 
 	@FXML
@@ -165,7 +182,7 @@ public class HPCSettingsScreenController {
 		schedulerType = schedulerTypeComboBox.getSelectionModel().getSelectedItem();
 
 		this.settings = createSettings();
-		
+
 		Stage stage = (Stage) okButton.getScene().getWindow();
 		stage.close();
 	}
@@ -179,17 +196,32 @@ public class HPCSettingsScreenController {
 				redirectStdOutErr).adapterType(HPCSchedulerType.getByString(
 					schedulerType)).build();
 	}
-
+	
 	private <T> void commitSpinnerValue(Spinner<T> spinner) {
-    if (!spinner.isEditable()) return;
-    String text = spinner.getEditor().getText();
-    SpinnerValueFactory<T> valueFactory = spinner.getValueFactory();
-    if (valueFactory != null) {
-        StringConverter<T> converter = valueFactory.getConverter();
-        if (converter != null) {
-            T value = converter.fromString(text);
-            valueFactory.setValue(value);
-        }
-    }
-}
+		if (!spinner.isEditable()) return;
+		String text = spinner.getEditor().getText();
+		SpinnerValueFactory<T> valueFactory = spinner.getValueFactory();
+		if (valueFactory != null) {
+			StringConverter<T> converter = valueFactory.getConverter();
+			if (converter != null) {
+				T value = converter.fromString(text);
+				valueFactory.setValue(value);
+			}
+		}
+	}
+	
+	public void disableIrrelevantFileds(Boolean isSelected) {
+		if (isSelected) {
+			passwordPasswordField.setDisable(true);
+			keyFileTextField.setDisable(false);
+			keyFilePasswordPasswordField.setDisable(false);
+			browseButton.setDisable(false);
+		}
+		else {
+			keyFileTextField.setDisable(true);
+			keyFilePasswordPasswordField.setDisable(true);
+			browseButton.setDisable(true);
+			passwordPasswordField.setDisable(false);
+		}
+	}
 }

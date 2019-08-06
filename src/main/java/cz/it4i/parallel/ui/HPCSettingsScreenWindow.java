@@ -70,9 +70,11 @@ public class HPCSettingsScreenWindow {
 			if(settings.getAuthenticationChoice().equals("Key file")) {
 				controller.authenticationChoiceKeyRadioButton.setSelected(true);
 				controller.authenticationChoicePasswordRadioButton.setSelected(false);
+				controller.disableIrrelevantFileds(true);
 			} else {
 				controller.authenticationChoiceKeyRadioButton.setSelected(false);
 				controller.authenticationChoicePasswordRadioButton.setSelected(true);
+				controller.disableIrrelevantFileds(false);
 			}			
 			controller.keyFileTextField.setText(settings.getKeyFile().getAbsolutePath());
 			controller.keyFilePasswordPasswordField.setText(settings.getKeyFilePassword());
