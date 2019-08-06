@@ -25,7 +25,7 @@ public class HPCSettings extends RunnerSettings
 	
 	private String authenticationChoice;
 	
-	private transient String password;
+	private final String password;
 
 	private final String remoteDirectory;
 
