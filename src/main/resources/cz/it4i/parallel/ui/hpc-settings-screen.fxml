@@ -58,7 +58,7 @@
                <padding>
                   <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                </padding></Label>
-            <Spinner fx:id="portSpinner" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.halignment="LEFT" GridPane.rowIndex="2" />
+            <Spinner fx:id="portSpinner" editable="true" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.halignment="LEFT" GridPane.rowIndex="2" />
             <Label text="User name" GridPane.halignment="RIGHT" GridPane.rowIndex="3">
                <padding>
                   <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
@@ -122,12 +122,18 @@
                <padding>
                   <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                </padding></Label>
-            <Spinner fx:id="nodesSpinner" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.halignment="LEFT" GridPane.rowIndex="12" />
+            <TextField fx:id="commandTextField" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.rowIndex="11" />
+            <Label text="Number of nodes" GridPane.halignment="RIGHT" GridPane.rowIndex="12">
+               <padding>
+                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+               </padding>
+            </Label>
+            <Spinner fx:id="nodesSpinner" editable="true" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.halignment="LEFT" GridPane.rowIndex="12" />
             <Label text="Number of cpus per node" GridPane.halignment="RIGHT" GridPane.rowIndex="13">
                <padding>
                   <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                </padding></Label>
-            <Spinner fx:id="ncpusSpinner" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.halignment="LEFT" GridPane.rowIndex="13" />
+            <Spinner fx:id="ncpusSpinner" editable="true" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.halignment="LEFT" GridPane.rowIndex="13" />
             <CheckBox fx:id="shutdownJobAfterCloseCheckBox" mnemonicParsing="false" nodeOrientation="RIGHT_TO_LEFT" text="Shutdown job when application finishes" GridPane.halignment="RIGHT" GridPane.rowIndex="14">
                <GridPane.margin>
                   <Insets />
@@ -142,13 +148,7 @@
                <padding>
                   <Insets top="10.0" />
                </padding></CheckBox>
-            <Button mnemonicParsing="false" onAction="#okAction" text="OK" GridPane.columnSpan="2147483647" GridPane.halignment="CENTER" GridPane.rowIndex="16" />
-            <TextField fx:id="commandTextField" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.rowIndex="11" />
-            <Label text="Number of nodes" GridPane.halignment="RIGHT" GridPane.rowIndex="12">
-               <padding>
-                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-               </padding>
-            </Label>
+            <Button fx:id="okButton" mnemonicParsing="false" onAction="#okAction" text="OK" GridPane.columnSpan="2147483647" GridPane.halignment="CENTER" GridPane.rowIndex="16" />
          </children>
          <padding>
             <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />

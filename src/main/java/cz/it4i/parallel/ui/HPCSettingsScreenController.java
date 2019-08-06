@@ -6,14 +6,19 @@ import java.io.File;
 import cz.it4i.parallel.runners.HPCSchedulerType;
 import cz.it4i.parallel.runners.HPCSettings;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleGroup;
 import javafx.stage.FileChooser;
+import javafx.stage.Stage;
+import lombok.Getter;
+import lombok.Setter;
 
 public class HPCSettingsScreenController {
 
@@ -64,13 +69,20 @@ public class HPCSettingsScreenController {
 
 	@FXML
 	private CheckBox redirectStdOutErrCheckBox;
+	
+	@FXML
+	private Button okButton;
 
+	@Getter
+	@Setter
 	private HPCSettings settings;
 
-	private static final String KEY_FILE_OPTION = "KeyFile";
-	
-	private static final String PASSWORLD_OPTION = "Password";
-	
+	private static final String PBS_OPTION = "PBS";
+
+	private static final String SLURM_OPTION = "Slurm";
+
+	private static final Integer SPINER_INITIAL_VALUE = 1;
+
 	String host;
 	int port;
 	String authenticationChoice;
@@ -88,31 +100,53 @@ public class HPCSettingsScreenController {
 
 	@FXML
 	public void initialize() {
-		schedulerTypeComboBox.getItems().removeAll(schedulerTypeComboBox.getItems());
-		schedulerTypeComboBox.getItems().addAll(KEY_FILE_OPTION, PASSWORLD_OPTION);
-		schedulerTypeComboBox.getSelectionModel().select(KEY_FILE_OPTION);
+		// RadioButtons:
+		authenticationChoiceKeyRadioButton.setSelected(true);
+		
+		// ComboBoxes:
+		schedulerTypeComboBox.getItems().removeAll(schedulerTypeComboBox
+			.getItems());
+		schedulerTypeComboBox.getItems().addAll(PBS_OPTION, SLURM_OPTION);
+		schedulerTypeComboBox.getSelectionModel().select(PBS_OPTION);
+
+		// Spinners:
+		SpinnerValueFactory<Integer> portValueFactory =
+			new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 65535,
+				SPINER_INITIAL_VALUE);
+		portSpinner.setValueFactory(portValueFactory);
+
+		SpinnerValueFactory<Integer> nodesValueFactory =
+			new SpinnerValueFactory.IntegerSpinnerValueFactory(1, Integer.MAX_VALUE,
+				SPINER_INITIAL_VALUE);
+		nodesSpinner.setValueFactory(nodesValueFactory);
+
+		SpinnerValueFactory<Integer> ncpusValueFactory =
+			new SpinnerValueFactory.IntegerSpinnerValueFactory(1, Integer.MAX_VALUE,
+				SPINER_INITIAL_VALUE);
+		ncpusSpinner.setValueFactory(ncpusValueFactory);
+
 	}
-	
+
 	@FXML
 	private void browseAction() {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle("Open Fiji Executable File");
 		File selectedFile = fileChooser.showOpenDialog(null);
-		if (selectedFile != null) {			
-			this.keyFilePasswordPasswordField.setText(selectedFile
-				.getAbsolutePath());
+		if (selectedFile != null) {
+			this.keyFileTextField.setText(selectedFile.getAbsolutePath());
 		}
 	}
-	
+
+	@FXML
 	private void okAction() {
 		host = hostTextField.getText();
 		port = portSpinner.getValue();
 		// authenticationChoice
 		if (authenticationChoiceKeyRadioButton.isSelected()) {
-			authenticationChoice = KEY_FILE_OPTION;
+			authenticationChoice = "Key file";
 		}
 		else {
-			authenticationChoice = PASSWORLD_OPTION;
+			authenticationChoice = "Password";
 		}
 		userName = userNameTextField.getText();
 		password = passwordPasswordField.getText();
@@ -124,6 +158,11 @@ public class HPCSettingsScreenController {
 		shutdownJobAfterClose = shutdownJobAfterCloseCheckBox.isSelected();
 		redirectStdOutErr = redirectStdOutErrCheckBox.isSelected();
 		schedulerType = schedulerTypeComboBox.getSelectionModel().getSelectedItem();
+
+		this.settings = createSettings();
+		
+		Stage stage = (Stage) okButton.getScene().getWindow();
+		stage.close();
 	}
 
 	private HPCSettings createSettings() {
