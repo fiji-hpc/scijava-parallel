@@ -16,6 +16,7 @@ import cz.it4i.parallel.runners.ParadigmProfileUsingRunner;
 import cz.it4i.parallel.runners.ServerRunner;
 import cz.it4i.parallel.ui.HPCImageJServerRunnerWithUI;
 import cz.it4i.parallel.ui.HPCSettingsGui;
+import cz.it4i.parallel.ui.HPCSettingsScreenWindow;
 
 
 @Plugin(type = ParadigmManager.class)
@@ -24,6 +25,8 @@ public class HPCImageJServerParadigmProfileManager extends
 	implements HavingParentWindows<Window>
 {
 
+	private HPCSettingsScreenWindow hpcSettingsScreenWindow = new HPCSettingsScreenWindow(); 
+	
 	@Parameter
 	private Context context;
 	private Window parent;
@@ -52,10 +55,10 @@ public class HPCImageJServerParadigmProfileManager extends
 		return result;
 	}
 
-//	@Override
-//	protected HPCSettings doEdit(Map<String, Object> inputs) {
-//		return HPCSettingsGui.showDialog(context, inputs);
-//	}
+	@Override
+	protected HPCSettings doEdit(HPCSettings settings) {
+		return hpcSettingsScreenWindow.showDialog(settings);
+	}
 
 	@Override
 	protected void fillInputs(HPCSettings settings,
