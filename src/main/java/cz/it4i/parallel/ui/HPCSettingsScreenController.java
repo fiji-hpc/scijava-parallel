@@ -5,7 +5,6 @@ import java.io.File;
 
 import cz.it4i.parallel.runners.HPCSchedulerType;
 import cz.it4i.parallel.runners.HPCSettings;
-import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -132,17 +131,9 @@ public class HPCSettingsScreenController {
 		ncpusSpinner.setValueFactory(ncpusValueFactory);
 
 		// Disable fields that are not relevant to authentication method selection:
-		authenticationChoiceKeyRadioButton.selectedProperty().addListener(
-			new ChangeListener<Boolean>()
-			{
-
-				@Override
-				public void changed(ObservableValue<? extends Boolean> obs,
-					Boolean wasPreviouslySelected, Boolean isNowSelected)
-			{
-					disableIrrelevantFileds(isNowSelected);
-				}
-			});
+		authenticationChoiceKeyRadioButton.selectedProperty().addListener((
+			ObservableValue<? extends Boolean> obs, Boolean wasPreviouslySelected,
+			Boolean isNowSelected) -> disableIrrelevantFileds(isNowSelected));
 	}
 
 	@FXML
@@ -196,7 +187,7 @@ public class HPCSettingsScreenController {
 				redirectStdOutErr).adapterType(HPCSchedulerType.getByString(
 					schedulerType)).build();
 	}
-	
+
 	private <T> void commitSpinnerValue(Spinner<T> spinner) {
 		if (!spinner.isEditable()) return;
 		String text = spinner.getEditor().getText();
@@ -209,7 +200,7 @@ public class HPCSettingsScreenController {
 			}
 		}
 	}
-	
+
 	public void disableIrrelevantFileds(Boolean isSelected) {
 		if (isSelected) {
 			passwordPasswordField.setDisable(true);
