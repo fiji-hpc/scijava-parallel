@@ -23,6 +23,9 @@ public class LocalSettingsScreenController {
 	@FXML
 	public Button okButton;
 	
+	@FXML
+	public Button browseButton;
+	
 	@Getter
 	@Setter
 	private File localFijiExecutablePath;
@@ -40,7 +43,8 @@ public class LocalSettingsScreenController {
 	private void browseAction() {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle("Open Fiji Executable File");
-		File selectedFile = fileChooser.showOpenDialog(null);
+		Stage stage = (Stage) browseButton.getScene().getWindow();
+		File selectedFile = fileChooser.showOpenDialog(stage);
 		if (selectedFile != null) {			
 			this.localFijiExecutablePathTextField.setText(selectedFile
 				.getAbsolutePath());
