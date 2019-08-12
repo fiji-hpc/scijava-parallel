@@ -90,20 +90,7 @@ public class HPCSettingsScreenController extends AnchorPane {
 
 	private static final Integer SPINER_INITIAL_VALUE = 1;
 
-	String host;
-	int port;
-	String authenticationChoice;
-	String userName;
-	String password;
-	File keyFile;
-	String keyFilePassword;
-	String remoteDirectory;
-	String command;
-	int nodes;
-	int ncpus;
-	boolean shutdownJobAfterClose;
-	boolean redirectStdOutErr;
-	String schedulerType;
+
 
 	public HPCSettingsScreenController() {
 		JavaFXRoutines.initRootAndController("hpc-settings-screen.fxml", this);
@@ -170,6 +157,26 @@ public class HPCSettingsScreenController extends AnchorPane {
 
 	@FXML
 	private void okAction() {
+		createSettings();
+		((Stage) getScene().getWindow()).close();
+	}
+
+	private HPCSettings createSettings() {
+		String host;
+		int port;
+		String authenticationChoice;
+		String userName;
+		String password;
+		File keyFile;
+		String keyFilePassword;
+		String remoteDirectory;
+		String command;
+		int nodes;
+		int ncpus;
+		boolean shutdownJobAfterClose;
+		boolean redirectStdOutErr;
+		String schedulerType;
+
 		host = hostTextField.getText();
 		commitSpinnerValue(portSpinner);
 		port = portSpinner.getValue();
@@ -194,15 +201,10 @@ public class HPCSettingsScreenController extends AnchorPane {
 		redirectStdOutErr = redirectStdOutErrCheckBox.isSelected();
 		schedulerType = schedulerTypeComboBox.getSelectionModel().getSelectedItem();
 
-		this.settings = createSettings();
-		((Stage) getScene().getWindow()).close();
-	}
-
-	private HPCSettings createSettings() {
-		return HPCSettings.builder().host(host).portNumber(port).userName(userName)
-			.authenticationChoice(authenticationChoice).password(password).keyFile(
-				keyFile).keyFilePassword(keyFilePassword).remoteDirectory(
-					remoteDirectory).command(command).nodes(nodes).ncpus(ncpus)
+		return HPCSettings.builder().host(host).portNumber(port).userName(
+			userName).authenticationChoice(authenticationChoice).password(password)
+			.keyFile(keyFile).keyFilePassword(keyFilePassword).remoteDirectory(
+				remoteDirectory).command(command).nodes(nodes).ncpus(ncpus)
 			.shutdownOnClose(shutdownJobAfterClose).redirectStdInErr(
 				redirectStdOutErr).adapterType(HPCSchedulerType.getByString(
 					schedulerType)).build();
