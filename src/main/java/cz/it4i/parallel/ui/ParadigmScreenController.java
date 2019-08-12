@@ -1,7 +1,6 @@
 package cz.it4i.parallel.ui;
 
 import java.awt.Window;
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -202,10 +201,23 @@ public class ParadigmScreenController extends Pane implements CloseableControl,
 
 
 	private ParadigmManager findManager(ParallelizationParadigmProfile profile) {
-		return paradigmManagerService.getManagers(profile.getParadigmType())
+		ParadigmManager result = paradigmManagerService.getManagers(profile
+			.getParadigmType())
 			.stream().filter(m -> m.isProfileSupported(profile)).findAny().orElse(
 				null);
+		if (result instanceof HavingParentWindows<?>) {
+			HavingParentWindows<?> havingParent = (HavingParentWindows<?>) result;
+			if (havingParent.getType().isInstance(parentWindow)) {
+				@SuppressWarnings("unchecked")
+				HavingParentWindows<Window> typed =
+					(HavingParentWindows<Window>) havingParent;
+				typed.initParent(parentWindow);
+			}
+		}
+
+		return result;
 	}
+
 
 	private void initActiveProfile() {
 		JavaFXRoutines.runOnFxThread(this::updateActiveProfile);
@@ -242,10 +254,9 @@ public class ParadigmScreenController extends Pane implements CloseableControl,
 		ParallelizationParadigm paradigm = parallelService.getParadigm();
 	
 		if (paradigm != null) {
-			List<ParadigmManager> managers =
-				paradigmManagerService.getManagers(paradigm.getClass());
-			if (!managers.isEmpty()) {
-				managers.get(0).prepareParadigm(activeProfile, paradigm);
+			ParadigmManager manager = findManager(activeProfile);
+			if (manager != null) {
+				manager.prepareParadigm(activeProfile, paradigm);
 			}
 			paradigm.init();
 			parallelService.saveProfiles();

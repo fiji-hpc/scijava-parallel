@@ -1,8 +1,10 @@
 package cz.it4i.parallel.imagej.server;
 
+import java.awt.Window;
 import java.util.Map;
 
 import org.scijava.Context;
+import org.scijava.parallel.HavingParentWindows;
 import org.scijava.parallel.ParadigmManager;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
@@ -15,17 +17,30 @@ import cz.it4i.parallel.runners.ServerRunner;
 import cz.it4i.parallel.ui.HPCImageJServerRunnerWithUI;
 import cz.it4i.parallel.ui.HPCSettingsGui;
 
+
 @Plugin(type = ParadigmManager.class)
 public class HPCImageJServerParadigmProfileManager extends
 	MultipleHostsParadigmManagerUsingRunner<ImageJServerParadigm, HPCSettings>
+	implements HavingParentWindows<Window>
 {
 
 	@Parameter
 	private Context context;
+	private Window parent;
 
 	@Override
 	public Class<ImageJServerParadigm> getSupportedParadigmType() {
 		return ImageJServerParadigm.class;
+	}
+
+	@Override
+	public void initParent(Window aParent) {
+		this.parent = aParent;
+	}
+
+	@Override
+	public Class<Window> getType() {
+		return Window.class;
 	}
 
 	@Override
