@@ -1,10 +1,12 @@
 package cz.it4i.parallel.ui;
 
+import java.awt.Window;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 import org.apache.commons.lang3.BooleanUtils;
+import org.scijava.parallel.HavingParentWindows;
 import org.scijava.parallel.ParadigmManager;
 import org.scijava.parallel.ParadigmManagerService;
 import org.scijava.parallel.ParallelService;
@@ -14,6 +16,7 @@ import org.scijava.parallel.Status;
 import org.scijava.plugin.PluginInfo;
 
 import cz.it4i.swing_javafx_ui.CloseableControl;
+import cz.it4i.swing_javafx_ui.InitiableControl;
 import cz.it4i.swing_javafx_ui.JavaFXRoutines;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -23,7 +26,9 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.Pane;
 import javafx.util.StringConverter;
 
-public class ParadigmScreenController extends Pane implements CloseableControl {
+public class ParadigmScreenController extends Pane implements CloseableControl,
+	InitiableControl
+{
 
 	@FXML
 	private ComboBox<Class<? extends ParallelizationParadigm>> paradigms;
@@ -61,6 +66,8 @@ public class ParadigmScreenController extends Pane implements CloseableControl {
 
 	private ParallelizationParadigmProfile activeProfile;
 
+	private Window parentWindow;
+
 	public ParadigmScreenController() {
 		JavaFXRoutines.initRootAndController("paradigm-screen.fxml", this);
 		txtNameOfNewProfile.textProperty().addListener((a, b,
@@ -79,6 +86,11 @@ public class ParadigmScreenController extends Pane implements CloseableControl {
 			JavaFXRoutines.runOnFxThread(() -> this.setDisable(false));
 		});
 
+	}
+
+	@Override
+	public void init(Window parameter) {
+		parentWindow = parameter;
 	}
 
 	public void initWithServices(ParallelService service,
