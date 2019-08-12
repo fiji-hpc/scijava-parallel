@@ -1,51 +1,36 @@
 
 package cz.it4i.parallel.ui;
 
-import java.io.IOException;
+import java.awt.Window;
 
 import cz.it4i.parallel.runners.HPCSettings;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
+import cz.it4i.swing_javafx_ui.FXFrame;
+import cz.it4i.swing_javafx_ui.JavaFXRoutines;
 
-public class HPCSettingsScreenWindow {
+public class HPCSettingsScreenWindow extends
+	FXFrame<HPCSettingsScreenController>
+{
 
-	private HPCSettingsScreenController controller;
+	public HPCSettingsScreenWindow(final Window parent,
+		final HPCSettings oldSettings)
+	{
+		super(parent, HPCSettingsScreenController::new);
+		controller = getFxPanel().getControl();
+		JavaFXRoutines.runOnFxThread(() -> {
+			setResizable(false);
+			// Get the old settings:
+			if (oldSettings != null) {
+				this.settings = oldSettings;
+			}
+			setInitialTextFieldText();
+		});
+	}
+
+	private transient HPCSettingsScreenController controller;
 
 	private HPCSettings settings;
 
-	private void openWindow() {
-		final FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(
-			"hpc-settings-screen.fxml"));
-		try {
-			final Parent fxmlFile = fxmlLoader.load();
-			this.controller = fxmlLoader.getController();
-			final Scene fileSelectionScene = new Scene(fxmlFile);
-			final Stage parentStage = new Stage();
-			parentStage.initModality(Modality.APPLICATION_MODAL);
-			parentStage.setResizable(false);
-			parentStage.setTitle("HPC Settings");
-			parentStage.setScene(fileSelectionScene);
-
-			// Set the text fields to the old settings:
-			setInitialTextFieldText();
-
-			parentStage.showAndWait();
-		}
-		catch (final IOException exc) {
-			showErrorDialog(exc.toString(), "FXML file is missing!");
-		}
-	}
-
-	public HPCSettings showDialog(final HPCSettings oldSettings) {
-		// Get the old settings:
-		if (oldSettings != null) {
-			this.settings = oldSettings;
-		}
+	public HPCSettings showDialog() {
 
 		// Request new settings:
 		this.openWindow();
@@ -57,6 +42,12 @@ public class HPCSettingsScreenWindow {
 		}
 		// Return the new settings.
 		return controller.getSettings();
+	}
+
+	private void openWindow() {
+		setModal(true);
+		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+		setVisible(true);
 	}
 
 	private void setInitialTextFieldText() {
@@ -92,13 +83,5 @@ public class HPCSettingsScreenWindow {
 			controller.redirectStdOutErrCheckBox.setSelected(settings
 				.isRedirectStdInErr());
 		}
-	}
-
-	private void showErrorDialog(final String header, final String message) {
-		final Alert alert = new Alert(AlertType.ERROR);
-		alert.setTitle("Error Dialog");
-		alert.setHeaderText(header);
-		alert.setContentText(message);
-		alert.showAndWait();
 	}
 }

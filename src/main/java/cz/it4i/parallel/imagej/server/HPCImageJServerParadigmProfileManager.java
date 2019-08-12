@@ -25,7 +25,7 @@ public class HPCImageJServerParadigmProfileManager extends
 	implements HavingParentWindows<Window>
 {
 
-	private HPCSettingsScreenWindow hpcSettingsScreenWindow = new HPCSettingsScreenWindow(); 
+
 	
 	@Parameter
 	private Context context;
@@ -57,7 +57,9 @@ public class HPCImageJServerParadigmProfileManager extends
 
 	@Override
 	protected HPCSettings doEdit(HPCSettings settings) {
-		return hpcSettingsScreenWindow.showDialog(settings);
+		HPCSettingsScreenWindow hpcSettingsScreenWindow =
+			new HPCSettingsScreenWindow(parent, settings);
+		return hpcSettingsScreenWindow.showDialog();
 	}
 
 	@Override

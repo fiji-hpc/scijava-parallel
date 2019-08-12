@@ -146,11 +146,7 @@ public class ParadigmScreenController extends Pane implements CloseableControl,
 	public void editProfile() {
 		if (!cmbProfiles.getSelectionModel().isEmpty()) {
 			ParallelizationParadigmProfile profile = cmbProfiles.getSelectionModel().getSelectedItem();
-			ParadigmManager manager = findManager(profile);
-			if (manager != null) {
-				manager.editProfile(profile);
-			}
-			parallelService.saveProfiles();
+			CompletableFuture.runAsync(() -> runEditProfile(profile));
 		}
 	}
 
@@ -275,6 +271,14 @@ public class ParadigmScreenController extends Pane implements CloseableControl,
 				cmbProfiles.getSelectionModel().select(0);
 			}
 		});
+	}
+
+	private void runEditProfile(ParallelizationParadigmProfile profile) {
+		ParadigmManager manager = findManager(profile);
+		if (manager != null) {
+			manager.editProfile(profile);
+		}
+		parallelService.saveProfiles();
 	}
 
 	private void updateCreateNewProfileButton() {

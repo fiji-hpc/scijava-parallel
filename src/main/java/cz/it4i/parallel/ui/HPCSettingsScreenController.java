@@ -1,10 +1,15 @@
 
 package cz.it4i.parallel.ui;
 
+import java.awt.Window;
 import java.io.File;
 
 import cz.it4i.parallel.runners.HPCSchedulerType;
 import cz.it4i.parallel.runners.HPCSettings;
+import cz.it4i.swing_javafx_ui.CloseableControl;
+import cz.it4i.swing_javafx_ui.FXFrame;
+import cz.it4i.swing_javafx_ui.InitiableControl;
+import cz.it4i.swing_javafx_ui.JavaFXRoutines;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -16,13 +21,16 @@ import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleGroup;
+import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
 import lombok.Getter;
 import lombok.Setter;
 
-public class HPCSettingsScreenController {
+public class HPCSettingsScreenController extends AnchorPane implements
+	CloseableControl, InitiableControl
+{
 
 	@FXML
 	public TextField hostTextField;
@@ -103,6 +111,17 @@ public class HPCSettingsScreenController {
 	boolean redirectStdOutErr;
 	String schedulerType;
 
+	private Window parent;
+
+	public HPCSettingsScreenController() {
+		JavaFXRoutines.initRootAndController("hpc-settings-screen.fxml", this);
+	}
+
+	@Override
+	public void init(Window parameter) {
+		this.parent = parameter;
+	}
+
 	@FXML
 	public void initialize() {
 		// RadioButtons:
@@ -134,6 +153,27 @@ public class HPCSettingsScreenController {
 		authenticationChoiceKeyRadioButton.selectedProperty().addListener((
 			ObservableValue<? extends Boolean> obs, Boolean wasPreviouslySelected,
 			Boolean isNowSelected) -> disableIrrelevantFileds(isNowSelected));
+	}
+
+	public void disableIrrelevantFileds(Boolean isSelected) {
+		if (isSelected) {
+			passwordPasswordField.setDisable(true);
+			keyFileTextField.setDisable(false);
+			keyFilePasswordPasswordField.setDisable(false);
+			browseButton.setDisable(false);
+		}
+		else {
+			keyFileTextField.setDisable(true);
+			keyFilePasswordPasswordField.setDisable(true);
+			browseButton.setDisable(true);
+			passwordPasswordField.setDisable(false);
+		}
+	}
+
+	@Override
+	public void close() {
+		// TODO Auto-generated method stub
+	
 	}
 
 	@FXML
@@ -174,9 +214,7 @@ public class HPCSettingsScreenController {
 		schedulerType = schedulerTypeComboBox.getSelectionModel().getSelectedItem();
 
 		this.settings = createSettings();
-
-		Stage stage = (Stage) okButton.getScene().getWindow();
-		stage.close();
+		((FXFrame<?>) this.parent).dispose();
 	}
 
 	private HPCSettings createSettings() {
@@ -199,21 +237,6 @@ public class HPCSettingsScreenController {
 				T value = converter.fromString(text);
 				valueFactory.setValue(value);
 			}
-		}
-	}
-
-	public void disableIrrelevantFileds(Boolean isSelected) {
-		if (isSelected) {
-			passwordPasswordField.setDisable(true);
-			keyFileTextField.setDisable(false);
-			keyFilePasswordPasswordField.setDisable(false);
-			browseButton.setDisable(false);
-		}
-		else {
-			keyFileTextField.setDisable(true);
-			keyFilePasswordPasswordField.setDisable(true);
-			browseButton.setDisable(true);
-			passwordPasswordField.setDisable(false);
 		}
 	}
 }
