@@ -1,6 +1,7 @@
 package cz.it4i.parallel.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.io.Closeable;
 
 import javax.swing.JDialog;
@@ -16,9 +17,9 @@ class HPCStatusDialog implements Closeable {
 	private JLabel label;
 	private String serverName;
 
-	HPCStatusDialog(String serverName) {
+	HPCStatusDialog(Component parent, String serverName) {
 		this.serverName = serverName;
-		this.dialog = new JOptionPane().createDialog("Waiting");
+		this.dialog = new JOptionPane().createDialog(parent, "Waiting");
 		JPanel panel = new JPanel(new BorderLayout());
 		dialog.setContentPane(panel);
 		this.label = new JLabel("Waiting for job schedule.");

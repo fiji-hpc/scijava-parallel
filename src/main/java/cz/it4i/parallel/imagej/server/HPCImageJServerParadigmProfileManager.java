@@ -80,4 +80,11 @@ public class HPCImageJServerParadigmProfileManager extends
 			((HPCImageJServerRunner) typedProfile.getAssociatedRunner()).getJob()
 				.getID());
 	}
+
+	@Override
+	protected void initRunner(ServerRunner<?> runner) {
+		HPCImageJServerRunnerWithUI typedRunner =
+			(HPCImageJServerRunnerWithUI) runner;
+		typedRunner.initParentWindow(parent);
+	}
 }
