@@ -1,8 +1,5 @@
 package cz.it4i.command;
 
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-
 import net.imagej.ImageJ;
 
 import org.scijava.Context;

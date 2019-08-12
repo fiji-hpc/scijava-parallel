@@ -38,6 +38,10 @@ public class HPCSettingsScreenWindow
 		return controller.getSettings();
 	}
 
+	public void setOwner(Window aOwner) {
+		this.owner = aOwner;
+	}
+
 	private void openWindow() {
 		final Scene fileSelectionScene = new Scene(controller);
 		final Stage parentStage = new Stage();
@@ -84,9 +88,5 @@ public class HPCSettingsScreenWindow
 			controller.redirectStdOutErrCheckBox.setSelected(settings
 				.isRedirectStdInErr());
 		}
-	}
-
-	public void setOwner(Window aOwner) {
-		this.owner = aOwner;
 	}
 }

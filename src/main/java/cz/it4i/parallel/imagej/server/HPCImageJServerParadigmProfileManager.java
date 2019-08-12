@@ -32,14 +32,17 @@ public class HPCImageJServerParadigmProfileManager extends
 	private HPCSettingsScreenWindow hpcSettingsScreenWindow =
 		new HPCSettingsScreenWindow();
 
+	private Window ownerWindow;
+
 	@Override
 	public Class<ImageJServerParadigm> getSupportedParadigmType() {
 		return ImageJServerParadigm.class;
 	}
 
 	@Override
-	public void setOwner(Window aParent) {
-		hpcSettingsScreenWindow.setOwner(aParent);
+	public void setOwner(Window aOwner) {
+		hpcSettingsScreenWindow.setOwner(aOwner);
+		this.ownerWindow = aOwner;
 	}
 
 	@Override
@@ -89,6 +92,6 @@ public class HPCImageJServerParadigmProfileManager extends
 	protected void initRunner(ServerRunner<?> runner) {
 		HPCImageJServerRunnerWithUI typedRunner =
 			(HPCImageJServerRunnerWithUI) runner;
-
+		typedRunner.initOwnerWindow(ownerWindow);
 	}
 }
