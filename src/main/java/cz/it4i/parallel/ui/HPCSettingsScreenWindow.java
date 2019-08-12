@@ -1,37 +1,31 @@
 
 package cz.it4i.parallel.ui;
 
-import java.awt.Window;
+
 
 import cz.it4i.parallel.runners.HPCSettings;
-import cz.it4i.swing_javafx_ui.FXFrame;
-import cz.it4i.swing_javafx_ui.JavaFXRoutines;
+import javafx.scene.Scene;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.stage.Window;
 
-public class HPCSettingsScreenWindow extends
-	FXFrame<HPCSettingsScreenController>
+public class HPCSettingsScreenWindow 
 {
 
-	public HPCSettingsScreenWindow(final Window parent,
-		final HPCSettings oldSettings)
-	{
-		super(parent, HPCSettingsScreenController::new);
-		controller = getFxPanel().getControl();
-		JavaFXRoutines.runOnFxThread(() -> {
-			setResizable(false);
-			// Get the old settings:
-			if (oldSettings != null) {
-				this.settings = oldSettings;
-			}
-			setInitialTextFieldText();
-		});
-	}
-
-	private transient HPCSettingsScreenController controller;
+	private HPCSettingsScreenController controller;
 
 	private HPCSettings settings;
 
-	public HPCSettings showDialog() {
+	private Window owner;
 
+	public HPCSettings showDialog(final HPCSettings oldSettings) {
+		// Get the old settings:
+
+		if (oldSettings != null) {
+			this.settings = oldSettings;
+		}
+		this.controller = new HPCSettingsScreenController();
+		setInitialTextFieldText();
 		// Request new settings:
 		this.openWindow();
 
@@ -45,9 +39,16 @@ public class HPCSettingsScreenWindow extends
 	}
 
 	private void openWindow() {
-		setModal(true);
-		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-		setVisible(true);
+		final Scene fileSelectionScene = new Scene(controller);
+		final Stage parentStage = new Stage();
+		parentStage.initModality(Modality.APPLICATION_MODAL);
+		parentStage.setResizable(false);
+		parentStage.setTitle("HPC Settings");
+		parentStage.setScene(fileSelectionScene);
+		parentStage.initOwner(owner);
+		// Set the text fields to the old settings:
+
+		parentStage.showAndWait();
 	}
 
 	private void setInitialTextFieldText() {
@@ -83,5 +84,9 @@ public class HPCSettingsScreenWindow extends
 			controller.redirectStdOutErrCheckBox.setSelected(settings
 				.isRedirectStdInErr());
 		}
+	}
+
+	public void setOwner(Window aOwner) {
+		this.owner = aOwner;
 	}
 }

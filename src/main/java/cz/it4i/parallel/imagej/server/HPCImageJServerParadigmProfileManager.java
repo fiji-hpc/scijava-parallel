@@ -1,10 +1,10 @@
 package cz.it4i.parallel.imagej.server;
 
-import java.awt.Window;
+
 import java.util.Map;
 
 import org.scijava.Context;
-import org.scijava.parallel.HavingParentWindows;
+import org.scijava.parallel.HavingOwnerWindow;
 import org.scijava.parallel.ParadigmManager;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
@@ -17,19 +17,20 @@ import cz.it4i.parallel.runners.ServerRunner;
 import cz.it4i.parallel.ui.HPCImageJServerRunnerWithUI;
 import cz.it4i.parallel.ui.HPCSettingsGui;
 import cz.it4i.parallel.ui.HPCSettingsScreenWindow;
+import javafx.stage.Window;
 
 
 @Plugin(type = ParadigmManager.class)
 public class HPCImageJServerParadigmProfileManager extends
 	MultipleHostsParadigmManagerUsingRunner<ImageJServerParadigm, HPCSettings>
-	implements HavingParentWindows<Window>
+	implements HavingOwnerWindow<Window>
 {
-
-
 	
 	@Parameter
 	private Context context;
-	private Window parent;
+
+	private HPCSettingsScreenWindow hpcSettingsScreenWindow =
+		new HPCSettingsScreenWindow();
 
 	@Override
 	public Class<ImageJServerParadigm> getSupportedParadigmType() {
@@ -37,8 +38,8 @@ public class HPCImageJServerParadigmProfileManager extends
 	}
 
 	@Override
-	public void initParent(Window aParent) {
-		this.parent = aParent;
+	public void setOwner(Window aParent) {
+		hpcSettingsScreenWindow.setOwner(aParent);
 	}
 
 	@Override
@@ -57,9 +58,7 @@ public class HPCImageJServerParadigmProfileManager extends
 
 	@Override
 	protected HPCSettings doEdit(HPCSettings settings) {
-		HPCSettingsScreenWindow hpcSettingsScreenWindow =
-			new HPCSettingsScreenWindow(parent, settings);
-		return hpcSettingsScreenWindow.showDialog();
+		return hpcSettingsScreenWindow.showDialog(settings);
 	}
 
 	@Override
@@ -90,6 +89,6 @@ public class HPCImageJServerParadigmProfileManager extends
 	protected void initRunner(ServerRunner<?> runner) {
 		HPCImageJServerRunnerWithUI typedRunner =
 			(HPCImageJServerRunnerWithUI) runner;
-		typedRunner.initParentWindow(parent);
+
 	}
 }

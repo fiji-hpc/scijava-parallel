@@ -1,14 +1,10 @@
 
 package cz.it4i.parallel.ui;
 
-import java.awt.Window;
 import java.io.File;
 
 import cz.it4i.parallel.runners.HPCSchedulerType;
 import cz.it4i.parallel.runners.HPCSettings;
-import cz.it4i.swing_javafx_ui.CloseableControl;
-import cz.it4i.swing_javafx_ui.FXFrame;
-import cz.it4i.swing_javafx_ui.InitiableControl;
 import cz.it4i.swing_javafx_ui.JavaFXRoutines;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
@@ -28,9 +24,7 @@ import javafx.util.StringConverter;
 import lombok.Getter;
 import lombok.Setter;
 
-public class HPCSettingsScreenController extends AnchorPane implements
-	CloseableControl, InitiableControl
-{
+public class HPCSettingsScreenController extends AnchorPane {
 
 	@FXML
 	public TextField hostTextField;
@@ -111,15 +105,8 @@ public class HPCSettingsScreenController extends AnchorPane implements
 	boolean redirectStdOutErr;
 	String schedulerType;
 
-	private Window parent;
-
 	public HPCSettingsScreenController() {
 		JavaFXRoutines.initRootAndController("hpc-settings-screen.fxml", this);
-	}
-
-	@Override
-	public void init(Window parameter) {
-		this.parent = parameter;
 	}
 
 	@FXML
@@ -170,12 +157,6 @@ public class HPCSettingsScreenController extends AnchorPane implements
 		}
 	}
 
-	@Override
-	public void close() {
-		// TODO Auto-generated method stub
-	
-	}
-
 	@FXML
 	private void browseAction() {
 		FileChooser fileChooser = new FileChooser();
@@ -214,7 +195,7 @@ public class HPCSettingsScreenController extends AnchorPane implements
 		schedulerType = schedulerTypeComboBox.getSelectionModel().getSelectedItem();
 
 		this.settings = createSettings();
-		((FXFrame<?>) this.parent).dispose();
+		((Stage) getScene().getWindow()).close();
 	}
 
 	private HPCSettings createSettings() {

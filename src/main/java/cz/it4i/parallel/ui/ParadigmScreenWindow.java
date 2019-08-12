@@ -4,19 +4,33 @@ package cz.it4i.parallel.ui;
 import org.scijava.parallel.ParadigmManagerService;
 import org.scijava.parallel.ParallelService;
 
-import cz.it4i.swing_javafx_ui.FXFrame;
+import cz.it4i.swing_javafx_ui.JavaFXRoutines;
+import javafx.scene.Scene;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 
-public class ParadigmScreenWindow extends FXFrame<ParadigmScreenController> {
+public class ParadigmScreenWindow {
 
-	private static final long serialVersionUID = 1L;
+	private ParadigmScreenController controller;
 
 	public ParadigmScreenWindow(ParallelService service,
 		ParadigmManagerService paradigmManagerService)
 	{
-		super(null, ParadigmScreenController::new);
-		getFxPanel().getControl().initWithServices(service,
-			paradigmManagerService);
-		setResizable(false);
+		this.controller = new ParadigmScreenController();
+		controller.initWithServices(service, paradigmManagerService);
+
+	}
+
+	public void openWindow() {
+		JavaFXRoutines.runOnFxThread(() -> {
+			final Scene fileSelectionScene = new Scene(controller);
+			final Stage parentStage = new Stage();
+			parentStage.initModality(Modality.APPLICATION_MODAL);
+			parentStage.setResizable(false);
+			parentStage.setTitle("Pradigm Profiles Manager");
+			parentStage.setScene(fileSelectionScene);
+			parentStage.showAndWait();
+		});
 	}
 
 

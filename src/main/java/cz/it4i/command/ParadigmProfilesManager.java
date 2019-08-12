@@ -29,16 +29,7 @@ public class ParadigmProfilesManager implements Command {
 	public void run() {
 		ParadigmScreenWindow window = new ParadigmScreenWindow(parallelService,
 			managerService);
-		
-		window.setVisible(true);
-		window.addWindowListener(new WindowAdapter() {
-
-			@Override
-			public void windowClosing(WindowEvent e) {
-				super.windowClosing(e);
-				window.dispose();
-			}
-		});
+		window.openWindow();
 	}
 
 	public static void main(String[] args) {
