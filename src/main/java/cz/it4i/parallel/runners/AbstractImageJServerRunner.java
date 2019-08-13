@@ -22,9 +22,8 @@ public abstract class AbstractImageJServerRunner<T extends RunnerSettings>
 
 	private boolean shutdownOnNextClose;
 
-
 	@Override
-	public ServerRunner<T> init(RunnerSettings settings) {
+	public ServerRunner<T> init(T settings) {
 		shutdownOnClose = settings.isShutdownOnClose();
 		return this;
 	}
