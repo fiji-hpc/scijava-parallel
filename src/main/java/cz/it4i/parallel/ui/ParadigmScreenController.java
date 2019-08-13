@@ -1,10 +1,11 @@
 package cz.it4i.parallel.ui;
 
-import java.util.List;
+
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 import org.apache.commons.lang3.BooleanUtils;
+import org.scijava.parallel.HavingOwnerWindow;
 import org.scijava.parallel.ParadigmManager;
 import org.scijava.parallel.ParadigmManagerService;
 import org.scijava.parallel.ParallelService;
@@ -21,9 +22,11 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.Pane;
+import javafx.stage.Window;
 import javafx.util.StringConverter;
 
-public class ParadigmScreenController extends Pane implements CloseableControl {
+public class ParadigmScreenController extends Pane implements CloseableControl
+{
 
 	@FXML
 	private ComboBox<Class<? extends ParallelizationParadigm>> paradigms;
@@ -135,11 +138,7 @@ public class ParadigmScreenController extends Pane implements CloseableControl {
 	public void editProfile() {
 		if (!cmbProfiles.getSelectionModel().isEmpty()) {
 			ParallelizationParadigmProfile profile = cmbProfiles.getSelectionModel().getSelectedItem();
-			ParadigmManager manager = findManager(profile);
-			if (manager != null) {
-				manager.editProfile(profile);
-			}
-			parallelService.saveProfiles();
+			runEditProfile(profile);
 		}
 	}
 
@@ -190,9 +189,26 @@ public class ParadigmScreenController extends Pane implements CloseableControl {
 
 
 	private ParadigmManager findManager(ParallelizationParadigmProfile profile) {
-		return paradigmManagerService.getManagers(profile.getParadigmType())
+		ParadigmManager result = paradigmManagerService.getManagers(profile
+			.getParadigmType())
 			.stream().filter(m -> m.isProfileSupported(profile)).findAny().orElse(
 				null);
+		if (result instanceof HavingOwnerWindow<?>) {
+			HavingOwnerWindow<?> havingParent = (HavingOwnerWindow<?>) result;
+			if (havingParent.getType().isInstance(getOwnerWindow())) {
+				@SuppressWarnings("unchecked")
+				HavingOwnerWindow<Window> typed =
+					(HavingOwnerWindow<Window>) havingParent;
+				typed.setOwner(getOwnerWindow());
+			}
+		}
+
+		return result;
+	}
+
+
+	private Window getOwnerWindow() {
+		return getScene().getWindow();
 	}
 
 	private void initActiveProfile() {
@@ -230,10 +246,9 @@ public class ParadigmScreenController extends Pane implements CloseableControl {
 		ParallelizationParadigm paradigm = parallelService.getParadigm();
 	
 		if (paradigm != null) {
-			List<ParadigmManager> managers =
-				paradigmManagerService.getManagers(paradigm.getClass());
-			if (!managers.isEmpty()) {
-				managers.get(0).prepareParadigm(activeProfile, paradigm);
+			ParadigmManager manager = findManager(activeProfile);
+			if (manager != null) {
+				manager.prepareParadigm(activeProfile, paradigm);
 			}
 			paradigm.init();
 			parallelService.saveProfiles();
@@ -252,6 +267,14 @@ public class ParadigmScreenController extends Pane implements CloseableControl {
 				cmbProfiles.getSelectionModel().select(0);
 			}
 		});
+	}
+
+	private void runEditProfile(ParallelizationParadigmProfile profile) {
+		ParadigmManager manager = findManager(profile);
+		if (manager != null) {
+			manager.editProfile(profile);
+		}
+		parallelService.saveProfiles();
 	}
 
 	private void updateCreateNewProfileButton() {

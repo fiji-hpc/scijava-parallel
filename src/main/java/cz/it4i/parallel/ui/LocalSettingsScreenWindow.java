@@ -11,12 +11,15 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.Window;
 
 public class LocalSettingsScreenWindow {
 
 	private LocalSettingsScreenController controller;
 
 	private ImageJServerRunnerSettings settings;
+
+	private Window owner;
 
 	public ImageJServerRunnerSettings showDialog(
 		final ImageJServerRunnerSettings oldSettings)
@@ -51,7 +54,7 @@ public class LocalSettingsScreenWindow {
 			parentStage.setResizable(false);
 			parentStage.setTitle("Local ImageJ Server Settings");
 			parentStage.setScene(fileSelectionScene);
-
+			parentStage.initOwner(owner);
 			// Set the text fields to the old settings:
 			setInitialTextFieldText();
 
@@ -78,5 +81,9 @@ public class LocalSettingsScreenWindow {
 			controller.localFijiExecutablePathTextField.setText(
 				settings.getFijiExecutable());
 		}
+	}
+
+	public void setOwner(Window aOwner) {
+		owner = aOwner;
 	}
 }

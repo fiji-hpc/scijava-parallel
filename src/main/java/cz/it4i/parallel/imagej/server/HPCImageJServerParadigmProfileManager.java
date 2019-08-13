@@ -1,8 +1,10 @@
 package cz.it4i.parallel.imagej.server;
 
+
 import java.util.Map;
 
 import org.scijava.Context;
+import org.scijava.parallel.HavingOwnerWindow;
 import org.scijava.parallel.ParadigmManager;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
@@ -15,20 +17,37 @@ import cz.it4i.parallel.runners.ServerRunner;
 import cz.it4i.parallel.ui.HPCImageJServerRunnerWithUI;
 import cz.it4i.parallel.ui.HPCSettingsGui;
 import cz.it4i.parallel.ui.HPCSettingsScreenWindow;
+import javafx.stage.Window;
+
 
 @Plugin(type = ParadigmManager.class)
 public class HPCImageJServerParadigmProfileManager extends
 	MultipleHostsParadigmManagerUsingRunner<ImageJServerParadigm, HPCSettings>
+	implements HavingOwnerWindow<Window>
 {
-
-	private HPCSettingsScreenWindow hpcSettingsScreenWindow = new HPCSettingsScreenWindow(); 
 	
 	@Parameter
 	private Context context;
 
+	private HPCSettingsScreenWindow hpcSettingsScreenWindow =
+		new HPCSettingsScreenWindow();
+
+	private Window ownerWindow;
+
 	@Override
 	public Class<ImageJServerParadigm> getSupportedParadigmType() {
 		return ImageJServerParadigm.class;
+	}
+
+	@Override
+	public void setOwner(Window aOwner) {
+		hpcSettingsScreenWindow.setOwner(aOwner);
+		this.ownerWindow = aOwner;
+	}
+
+	@Override
+	public Class<Window> getType() {
+		return Window.class;
 	}
 
 	@Override
@@ -67,5 +86,12 @@ public class HPCImageJServerParadigmProfileManager extends
 		typedProfile.getSettings().setJobID(
 			((HPCImageJServerRunner) typedProfile.getAssociatedRunner()).getJob()
 				.getID());
+	}
+
+	@Override
+	protected void initRunner(ServerRunner<?> runner) {
+		HPCImageJServerRunnerWithUI typedRunner =
+			(HPCImageJServerRunnerWithUI) runner;
+		typedRunner.initOwnerWindow(ownerWindow);
 	}
 }

@@ -1,16 +1,19 @@
 
 package cz.it4i.parallel.ui;
 
+
+
 import org.scijava.Context;
 
 import cz.it4i.parallel.runners.HPCImageJServerRunner;
 import cz.it4i.parallel.runners.HPCSettings;
+import javafx.stage.Window;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class HPCImageJServerRunnerWithUI extends HPCImageJServerRunner {
 
-
+	private Window owner;
 
 	public HPCImageJServerRunnerWithUI() {
 	}
@@ -19,9 +22,15 @@ public class HPCImageJServerRunnerWithUI extends HPCImageJServerRunner {
 		super(settings);
 	}
 
+	public void initOwnerWindow(Window aOwner) {
+		this.owner = aOwner;
+	}
+
 	@Override
 	public void start() {
-		try (HPCStatusDialog dialog = new HPCStatusDialog(getServerName())) {
+		try (HPCStatusDialog dialog = new HPCStatusDialog(owner,
+			getServerName()))
+		{
 			dialog.imageJServerStarting();
 			super.start();
 			imageJServerRunning();
@@ -31,7 +40,9 @@ public class HPCImageJServerRunnerWithUI extends HPCImageJServerRunner {
 	@Override
 	protected void doCloseInternally(boolean shutdown) {
 
-		try (HPCStatusDialog dialog = new HPCStatusDialog(getServerName())) {
+		try (HPCStatusDialog dialog = new HPCStatusDialog(owner,
+			getServerName()))
+		{
 			log.debug("close");
 			dialog.imageJServerStopping();
 			super.doCloseInternally(shutdown);
@@ -53,6 +64,5 @@ public class HPCImageJServerRunnerWithUI extends HPCImageJServerRunner {
 			HPCSettingsGui.showDialog(context));
 		return result;
 	}
-
 
 }

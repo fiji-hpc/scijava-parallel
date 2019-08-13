@@ -5,6 +5,7 @@ import java.io.File;
 
 import cz.it4i.parallel.runners.HPCSchedulerType;
 import cz.it4i.parallel.runners.HPCSettings;
+import cz.it4i.swing_javafx_ui.JavaFXRoutines;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -16,13 +17,14 @@ import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleGroup;
+import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
 import lombok.Getter;
 import lombok.Setter;
 
-public class HPCSettingsScreenController {
+public class HPCSettingsScreenController extends AnchorPane {
 
 	@FXML
 	public TextField hostTextField;
@@ -88,20 +90,11 @@ public class HPCSettingsScreenController {
 
 	private static final Integer SPINER_INITIAL_VALUE = 1;
 
-	String host;
-	int port;
-	String authenticationChoice;
-	String userName;
-	String password;
-	File keyFile;
-	String keyFilePassword;
-	String remoteDirectory;
-	String command;
-	int nodes;
-	int ncpus;
-	boolean shutdownJobAfterClose;
-	boolean redirectStdOutErr;
-	String schedulerType;
+
+
+	public HPCSettingsScreenController() {
+		JavaFXRoutines.initRootAndController("hpc-settings-screen.fxml", this);
+	}
 
 	@FXML
 	public void initialize() {
@@ -136,6 +129,21 @@ public class HPCSettingsScreenController {
 			Boolean isNowSelected) -> disableIrrelevantFileds(isNowSelected));
 	}
 
+	public void disableIrrelevantFileds(Boolean isSelected) {
+		if (isSelected) {
+			passwordPasswordField.setDisable(true);
+			keyFileTextField.setDisable(false);
+			keyFilePasswordPasswordField.setDisable(false);
+			browseButton.setDisable(false);
+		}
+		else {
+			keyFileTextField.setDisable(true);
+			keyFilePasswordPasswordField.setDisable(true);
+			browseButton.setDisable(true);
+			passwordPasswordField.setDisable(false);
+		}
+	}
+
 	@FXML
 	private void browseAction() {
 		FileChooser fileChooser = new FileChooser();
@@ -149,6 +157,26 @@ public class HPCSettingsScreenController {
 
 	@FXML
 	private void okAction() {
+		createSettings();
+		((Stage) getScene().getWindow()).close();
+	}
+
+	private HPCSettings createSettings() {
+		String host;
+		int port;
+		String authenticationChoice;
+		String userName;
+		String password;
+		File keyFile;
+		String keyFilePassword;
+		String remoteDirectory;
+		String command;
+		int nodes;
+		int ncpus;
+		boolean shutdownJobAfterClose;
+		boolean redirectStdOutErr;
+		String schedulerType;
+
 		host = hostTextField.getText();
 		commitSpinnerValue(portSpinner);
 		port = portSpinner.getValue();
@@ -173,17 +201,10 @@ public class HPCSettingsScreenController {
 		redirectStdOutErr = redirectStdOutErrCheckBox.isSelected();
 		schedulerType = schedulerTypeComboBox.getSelectionModel().getSelectedItem();
 
-		this.settings = createSettings();
-
-		Stage stage = (Stage) okButton.getScene().getWindow();
-		stage.close();
-	}
-
-	private HPCSettings createSettings() {
-		return HPCSettings.builder().host(host).portNumber(port).userName(userName)
-			.authenticationChoice(authenticationChoice).password(password).keyFile(
-				keyFile).keyFilePassword(keyFilePassword).remoteDirectory(
-					remoteDirectory).command(command).nodes(nodes).ncpus(ncpus)
+		return HPCSettings.builder().host(host).portNumber(port).userName(
+			userName).authenticationChoice(authenticationChoice).password(password)
+			.keyFile(keyFile).keyFilePassword(keyFilePassword).remoteDirectory(
+				remoteDirectory).command(command).nodes(nodes).ncpus(ncpus)
 			.shutdownOnClose(shutdownJobAfterClose).redirectStdInErr(
 				redirectStdOutErr).adapterType(HPCSchedulerType.getByString(
 					schedulerType)).build();
@@ -199,21 +220,6 @@ public class HPCSettingsScreenController {
 				T value = converter.fromString(text);
 				valueFactory.setValue(value);
 			}
-		}
-	}
-
-	public void disableIrrelevantFileds(Boolean isSelected) {
-		if (isSelected) {
-			passwordPasswordField.setDisable(true);
-			keyFileTextField.setDisable(false);
-			keyFilePasswordPasswordField.setDisable(false);
-			browseButton.setDisable(false);
-		}
-		else {
-			keyFileTextField.setDisable(true);
-			keyFilePasswordPasswordField.setDisable(true);
-			browseButton.setDisable(true);
-			passwordPasswordField.setDisable(false);
 		}
 	}
 }

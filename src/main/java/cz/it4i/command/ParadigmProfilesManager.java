@@ -1,8 +1,5 @@
 package cz.it4i.command;
 
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-
 import net.imagej.ImageJ;
 
 import org.scijava.Context;
@@ -29,16 +26,7 @@ public class ParadigmProfilesManager implements Command {
 	public void run() {
 		ParadigmScreenWindow window = new ParadigmScreenWindow(parallelService,
 			managerService);
-		
-		window.setVisible(true);
-		window.addWindowListener(new WindowAdapter() {
-
-			@Override
-			public void windowClosing(WindowEvent e) {
-				super.windowClosing(e);
-				window.dispose();
-			}
-		});
+		window.openWindow();
 	}
 
 	public static void main(String[] args) {
