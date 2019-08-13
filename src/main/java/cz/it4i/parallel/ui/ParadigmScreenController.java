@@ -1,11 +1,11 @@
 package cz.it4i.parallel.ui;
 
-import java.awt.Window;
+
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 import org.apache.commons.lang3.BooleanUtils;
-import org.scijava.parallel.HavingParentWindows;
+import org.scijava.parallel.HavingOwnerWindow;
 import org.scijava.parallel.ParadigmManager;
 import org.scijava.parallel.ParadigmManagerService;
 import org.scijava.parallel.ParallelService;
@@ -15,7 +15,6 @@ import org.scijava.parallel.Status;
 import org.scijava.plugin.PluginInfo;
 
 import cz.it4i.swing_javafx_ui.CloseableControl;
-import cz.it4i.swing_javafx_ui.InitiableControl;
 import cz.it4i.swing_javafx_ui.JavaFXRoutines;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -23,10 +22,10 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.Pane;
+import javafx.stage.Window;
 import javafx.util.StringConverter;
 
-public class ParadigmScreenController extends Pane implements CloseableControl,
-	InitiableControl
+public class ParadigmScreenController extends Pane implements CloseableControl
 {
 
 	@FXML
@@ -65,8 +64,6 @@ public class ParadigmScreenController extends Pane implements CloseableControl,
 
 	private ParallelizationParadigmProfile activeProfile;
 
-	private Window parentWindow;
-
 	public ParadigmScreenController() {
 		JavaFXRoutines.initRootAndController("paradigm-screen.fxml", this);
 		txtNameOfNewProfile.textProperty().addListener((a, b,
@@ -85,11 +82,6 @@ public class ParadigmScreenController extends Pane implements CloseableControl,
 			JavaFXRoutines.runOnFxThread(() -> this.setDisable(false));
 		});
 
-	}
-
-	@Override
-	public void init(Window parameter) {
-		parentWindow = parameter;
 	}
 
 	public void initWithServices(ParallelService service,
@@ -146,11 +138,7 @@ public class ParadigmScreenController extends Pane implements CloseableControl,
 	public void editProfile() {
 		if (!cmbProfiles.getSelectionModel().isEmpty()) {
 			ParallelizationParadigmProfile profile = cmbProfiles.getSelectionModel().getSelectedItem();
-			ParadigmManager manager = findManager(profile);
-			if (manager != null) {
-				manager.editProfile(profile);
-			}
-			parallelService.saveProfiles();
+			runEditProfile(profile);
 		}
 	}
 
@@ -205,19 +193,23 @@ public class ParadigmScreenController extends Pane implements CloseableControl,
 			.getParadigmType())
 			.stream().filter(m -> m.isProfileSupported(profile)).findAny().orElse(
 				null);
-		if (result instanceof HavingParentWindows<?>) {
-			HavingParentWindows<?> havingParent = (HavingParentWindows<?>) result;
-			if (havingParent.getType().isInstance(parentWindow)) {
+		if (result instanceof HavingOwnerWindow<?>) {
+			HavingOwnerWindow<?> havingParent = (HavingOwnerWindow<?>) result;
+			if (havingParent.getType().isInstance(getOwnerWindow())) {
 				@SuppressWarnings("unchecked")
-				HavingParentWindows<Window> typed =
-					(HavingParentWindows<Window>) havingParent;
-				typed.initParent(parentWindow);
+				HavingOwnerWindow<Window> typed =
+					(HavingOwnerWindow<Window>) havingParent;
+				typed.setOwner(getOwnerWindow());
 			}
 		}
 
 		return result;
 	}
 
+
+	private Window getOwnerWindow() {
+		return getScene().getWindow();
+	}
 
 	private void initActiveProfile() {
 		JavaFXRoutines.runOnFxThread(this::updateActiveProfile);
@@ -275,6 +267,14 @@ public class ParadigmScreenController extends Pane implements CloseableControl,
 				cmbProfiles.getSelectionModel().select(0);
 			}
 		});
+	}
+
+	private void runEditProfile(ParallelizationParadigmProfile profile) {
+		ParadigmManager manager = findManager(profile);
+		if (manager != null) {
+			manager.editProfile(profile);
+		}
+		parallelService.saveProfiles();
 	}
 
 	private void updateCreateNewProfileButton() {

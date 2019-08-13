@@ -1,65 +1,62 @@
 package cz.it4i.parallel.ui;
 
-import java.awt.BorderLayout;
-import java.awt.Component;
 import java.io.Closeable;
 
-import javax.swing.JDialog;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
+import cz.it4i.swing_javafx_ui.JavaFXRoutines;
+import javafx.scene.Scene;
+import javafx.scene.control.Label;
+import javafx.scene.layout.BorderPane;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
+import javafx.stage.Window;
 
 class HPCStatusDialog implements Closeable {
 
-	private JDialog dialog;
-	private JLabel label;
+	private Stage dialog;
+	private Label label;
 	private String serverName;
 
-	HPCStatusDialog(Component parent, String serverName) {
+	HPCStatusDialog(Window parent, String serverName) {
 		this.serverName = serverName;
-		this.dialog = new JOptionPane().createDialog(parent, "Waiting");
-		JPanel panel = new JPanel(new BorderLayout());
-		dialog.setContentPane(panel);
-		this.label = new JLabel("Waiting for job schedule.");
-		label.setHorizontalAlignment(SwingConstants.CENTER);
-		panel.add(label, BorderLayout.CENTER);
-		dialog.setModal(false);
-		dialog.setVisible(true);
+		Runnable runner = () -> {
+			BorderPane panel = new BorderPane();
+			this.dialog = new Stage(StageStyle.UNDECORATED);
+			Scene scene = new Scene(panel, 240, 80);
+			dialog.initOwner(parent);
+			dialog.setScene(scene);
+			this.label = new Label("Waiting for job schedule.");
+			panel.setCenter(label);
+			dialog.setResizable(false);
+		};
+		runInternally(runner);
 	}
 
 	void imageJServerStarting() {
-		dialog.setVisible(false);
-		this.label.setText("Waiting for a " + serverName + " start.");
-		dialog.setVisible(true);
+		Runnable runner = () -> {
+			this.label.setText("Waiting for a " + serverName + " start.");
+			dialog.show();
+		};
+		runInternally(runner);
 	}
 
 	void imageJServerStopping() {
 		Runnable runner = () -> {
 			label.setText("Waiting for stop.");
-			dialog.setVisible(true);
+			dialog.show();
 		};
 
-		if (!SwingUtilities.isEventDispatchThread()) {
-			SwingUtilities.invokeLater(runner);
-		}
-		else {
-			runner.run();
-		}
+		runInternally(runner);
 	}
 
 	@Override
 	public void close() {
 		Runnable runner = () -> {
-			dialog.setVisible(false);
-			dialog.dispose();
+			dialog.hide();
 		};
-		if (!SwingUtilities.isEventDispatchThread()) {
-			SwingUtilities.invokeLater(runner);
-		}
-		else {
-			runner.run();
-		}
+		runInternally(runner);
+	}
+
+	private void runInternally(Runnable run) {
+		JavaFXRoutines.runOnFxThread(run);
 	}
 }
