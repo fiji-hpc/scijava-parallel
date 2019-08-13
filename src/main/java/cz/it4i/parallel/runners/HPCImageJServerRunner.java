@@ -78,6 +78,11 @@ public class HPCImageJServerRunner extends
 	}
 
 	@Override
+	public Class<HPCSettings> getTypeOfSettings() {
+		return HPCSettings.class;
+	}
+
+	@Override
 	protected void doCloseInternally(boolean shutdown) {
 		super.doCloseInternally(shutdown);
 		launcher.close();

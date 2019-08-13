@@ -49,6 +49,11 @@ public class ImageJServerRunner extends
 	}
 
 	@Override
+	public Class<ImageJServerRunnerSettings> getTypeOfSettings() {
+		return ImageJServerRunnerSettings.class;
+	}
+
+	@Override
 	public ImageJServerRunner init(ImageJServerRunnerSettings settings) {
 		super.init(settings);
 		fijiExecutable = settings.getFijiExecutable();
