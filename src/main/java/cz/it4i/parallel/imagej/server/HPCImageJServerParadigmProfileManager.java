@@ -1,14 +1,11 @@
 package cz.it4i.parallel.imagej.server;
 
 
-import java.util.Map;
-
 import org.scijava.Context;
 import org.scijava.parallel.HavingOwnerWindow;
 import org.scijava.parallel.ParadigmManager;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
-import org.scijava.prefs.PrefService;
 
 import cz.it4i.parallel.runners.HPCImageJServerRunner;
 import cz.it4i.parallel.runners.HPCSettings;
@@ -16,7 +13,6 @@ import cz.it4i.parallel.runners.MultipleHostsParadigmManagerUsingRunner;
 import cz.it4i.parallel.runners.ParadigmProfileUsingRunner;
 import cz.it4i.parallel.runners.ServerRunner;
 import cz.it4i.parallel.ui.HPCImageJServerRunnerWithUI;
-import cz.it4i.parallel.ui.HPCSettingsGui;
 import cz.it4i.parallel.ui.HPCSettingsScreenWindow;
 import javafx.stage.Window;
 
@@ -30,9 +26,6 @@ public class HPCImageJServerParadigmProfileManager extends
 	@Parameter
 	private Context context;
 
-	private HPCSettingsScreenWindow hpcSettingsScreenWindow =
-		new HPCSettingsScreenWindow();
-
 	private Window ownerWindow;
 
 	@Override
@@ -42,7 +35,6 @@ public class HPCImageJServerParadigmProfileManager extends
 
 	@Override
 	public void setOwner(Window aOwner) {
-		hpcSettingsScreenWindow.setOwner(aOwner);
 		this.ownerWindow = aOwner;
 	}
 
@@ -52,27 +44,15 @@ public class HPCImageJServerParadigmProfileManager extends
 	}
 
 	@Override
-	protected HPCSettings editSettings(HPCSettings settings) {
-		HPCSettings result = super.editSettings(settings);
-		if (settings != null) {
-			result.setJobID(settings.getJobID());
-		}
-		return result;
-	}
-
-	@Override
-	protected HPCSettings doEdit(HPCSettings settings) {
-		hpcSettingsScreenWindow.initialize(context.getService(PrefService.class));
-		return hpcSettingsScreenWindow.showDialog(settings);
-	}
-
-	@Override
-	protected void fillInputs(HPCSettings settings,
-		Map<String, Object> inputs)
+	protected void editSettings(
+		ParadigmProfileUsingRunner<HPCSettings> typedProfile)
 	{
-		HPCSettingsGui.fillInputs(settings, inputs);
+		HPCSettings settings = typedProfile.getSettings();
+		super.editSettings(typedProfile);
+		if (settings != null) {
+			typedProfile.getSettings().setJobID(settings.getJobID());
+		}
 	}
-
 
 	@Override
 	protected Class<? extends ServerRunner<HPCSettings>> getTypeOfRunner() {

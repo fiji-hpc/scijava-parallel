@@ -14,15 +14,6 @@ public class ParadigmProfileUsingRunner<T extends RunnerSettings> extends
 	ParallelizationParadigmProfile
 {
 
-	public ParadigmProfileUsingRunner(
-		Class<? extends ServerRunner<T>> typeOfRunner,
-		Class<? extends ParallelizationParadigm> paradigmType,
-		String profileName)
-	{
-		super(paradigmType, profileName);
-		this.typeOfRunner = typeOfRunner;
-	}
-
 	@Getter
 	@Setter
 	private T settings;
@@ -33,14 +24,41 @@ public class ParadigmProfileUsingRunner<T extends RunnerSettings> extends
 	@Getter
 	private transient ServerRunner<T> associatedRunner;
 
+	public ParadigmProfileUsingRunner(
+		Class<? extends ServerRunner<T>> typeOfRunner,
+		Class<? extends ParallelizationParadigm> paradigmType,
+		String profileName)
+	{
+		super(paradigmType, profileName);
+		this.typeOfRunner = typeOfRunner;
+	}
+
+	Class<T> getTypeOfSettings() {
+		if (associatedRunner != null) {
+			return associatedRunner.getTypeOfSettings();
+		}
+		else if (settings != null) {
+			@SuppressWarnings("unchecked")
+			Class<T> result = (Class<T>) settings.getClass();
+			return result;
+		}
+
+		return createInstanceOfRunner().getTypeOfSettings();
+	}
+
 	void initRunnerIfNeeded(Consumer<ServerRunner<T>> initializer) {
 		if (associatedRunner != null) {
 			return;
 		}
+		associatedRunner = createInstanceOfRunner();
+		initializer.accept(associatedRunner);
+		associatedRunner.init(settings);
+
+	}
+
+	private ServerRunner<T> createInstanceOfRunner() {
 		try {
-			associatedRunner = typeOfRunner.getConstructor().newInstance();
-			initializer.accept(associatedRunner);
-			associatedRunner.init(settings);
+			return typeOfRunner.getConstructor().newInstance();
 		}
 		catch (InstantiationException | IllegalAccessException
 				| IllegalArgumentException | InvocationTargetException

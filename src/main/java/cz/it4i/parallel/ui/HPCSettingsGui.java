@@ -2,6 +2,7 @@
 package cz.it4i.parallel.ui;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -22,9 +23,32 @@ import org.scijava.widget.TextWidget;
 import cz.it4i.parallel.SciJavaParallelRuntimeException;
 import cz.it4i.parallel.runners.HPCSchedulerType;
 import cz.it4i.parallel.runners.HPCSettings;
+import cz.it4i.parallel.runners.RunnerSettingsEditor;
 
 @Plugin(type = Command.class, headless = false)
-public class HPCSettingsGui implements Command {
+public class HPCSettingsGui implements Command
+{
+	
+	@Plugin(type = RunnerSettingsEditor.class)
+	public static class Editor implements RunnerSettingsEditor<HPCSettings> {
+
+		@Parameter
+		private Context context;
+
+		@Override
+		public Class<HPCSettings> getTypeOfSettings() {
+			return HPCSettings.class;
+		}
+
+		@Override
+		public HPCSettings edit(HPCSettings aSettings) {
+			Map<String, Object> inputs = new HashMap<>();
+			if (aSettings != null) {
+				fillInputs(aSettings, inputs);
+			}
+			return showDialog(context, inputs);
+		}
+	}
 
 	public static void fillInputs(HPCSettings settings,
 		Map<String, Object> inputs)

@@ -1,12 +1,13 @@
 package cz.it4i.parallel.runners;
 
-import java.util.Map;
 import java.util.function.Consumer;
 
 import org.scijava.parallel.ParadigmManager;
 import org.scijava.parallel.ParallelizationParadigm;
 import org.scijava.parallel.ParallelizationParadigmProfile;
 import org.scijava.parallel.Status;
+import org.scijava.plugin.Parameter;
+import org.scijava.plugin.PluginService;
 
 import cz.it4i.parallel.AbstractBaseParadigm;
 
@@ -15,6 +16,9 @@ public abstract class ParadigmManagerUsingRunner<T extends AbstractBaseParadigm,
 	implements
 	ParadigmManager
 {
+
+	@Parameter
+	private PluginService pluginService;
 
 	@SuppressWarnings("unchecked")
 	protected static <C> void runForObjectIfOfTypeElseException(Object profile,
@@ -35,14 +39,11 @@ public abstract class ParadigmManagerUsingRunner<T extends AbstractBaseParadigm,
 			getSupportedParadigmType(), name);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public void editProfile(ParallelizationParadigmProfile profile) {
 		runForObjectIfOfTypeElseException(profile,
 			ParadigmProfileUsingRunner.class,
-			typedProfile -> ((ParadigmProfileUsingRunner<S>) typedProfile)
-				.setSettings(editSettings(((ParadigmProfileUsingRunner<S>) typedProfile)
-					.getSettings())));
+			this::editSettings);
 	}
 
 	@Override
@@ -88,9 +89,12 @@ public abstract class ParadigmManagerUsingRunner<T extends AbstractBaseParadigm,
 		return "" + getTypeOfRunner().getSimpleName();
 	}
 
-	protected S editSettings(S settings) {
-		RunnerSettingsEditor<S> editor = getEditor();
-		return editor.edit(settings);
+	protected void editSettings(
+		ParadigmProfileUsingRunner<S> typedProfile)
+	{
+		RunnerSettingsEditor<S> editor = getEditor(typedProfile
+			.getTypeOfSettings());
+		typedProfile.setSettings(editor.edit(typedProfile.getSettings()));
 	}
 
 	protected void initRunner(
@@ -110,7 +114,6 @@ public abstract class ParadigmManagerUsingRunner<T extends AbstractBaseParadigm,
 		ParadigmProfileUsingRunner<S> typedProfile, AbstractBaseParadigm paradigm)
 	{
 		typedProfile.initRunnerIfNeeded(this::initRunner);
-
 		ServerRunner<?> runner = typedProfile.getAssociatedRunner();
 		paradigm.setInitCommand(() -> {
 			if (runner.getStatus() == Status.NON_ACTIVE) {
@@ -121,39 +124,27 @@ public abstract class ParadigmManagerUsingRunner<T extends AbstractBaseParadigm,
 		paradigm.setCloseCommand(runner::close);
 	}
 
-// TODO: following code should be reimplemented
-	private RunnerSettingsEditor<S> getEditor() {
+	private RunnerSettingsEditor<S> getEditor(
+		Class<S> clazz)
+	{
 
-		return new RunnerSettingsEditor<S>() {
+		@SuppressWarnings("unchecked")
+		RunnerSettingsEditor<S> result = pluginService.createInstancesOfType(
+			RunnerSettingsEditor.class).stream().filter(rse -> rse.getTypeOfSettings()
+				.equals(clazz)).findFirst().orElse(
+					new RunnerSettingsEditor<S>()
+					{
+						@Override
+						public RunnerSettings edit(RunnerSettings aSettings) {
+							return aSettings;
+						}
 
-			@Override
-			public Class<S> getTypeOfSettings() {
-				return null;
-			}
+						@Override
+						public Class<S> getTypeOfSettings() {
+							return clazz;
+						}
+					});
 
-			@Override
-			public S edit(S settings) {
-				Map<String, Object> inputs = new HashMap<>();
-				if (settings != null) {
-					fillInputs(settings, inputs);
-				}
-				return doEdit(inputs);
-			}
-		};
-	}
-
-	/**
-	 * @param inputs
-	 */
-	protected S doEdit(Map<String, Object> inputs) {
-		return null;
-	}
-
-	/**
-	 * @param settings
-	 * @param inputs
-	 */
-	protected void fillInputs(S settings, Map<String, Object> inputs) {
-		// no needed settings
+		return result;
 	}
 }
