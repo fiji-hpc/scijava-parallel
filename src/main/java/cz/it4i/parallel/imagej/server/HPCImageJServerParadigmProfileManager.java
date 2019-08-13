@@ -8,6 +8,7 @@ import org.scijava.parallel.HavingOwnerWindow;
 import org.scijava.parallel.ParadigmManager;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
+import org.scijava.prefs.PrefService;
 
 import cz.it4i.parallel.runners.HPCImageJServerRunner;
 import cz.it4i.parallel.runners.HPCSettings;
@@ -61,6 +62,7 @@ public class HPCImageJServerParadigmProfileManager extends
 
 	@Override
 	protected HPCSettings doEdit(HPCSettings settings) {
+		hpcSettingsScreenWindow.initialize(context.getService(PrefService.class));
 		return hpcSettingsScreenWindow.showDialog(settings);
 	}
 

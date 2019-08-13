@@ -27,52 +27,52 @@ import lombok.Setter;
 public class HPCSettingsScreenController extends AnchorPane {
 
 	@FXML
-	public TextField hostTextField;
+	private TextField hostTextField;
 
 	@FXML
-	public Spinner<Integer> portSpinner;
+	private Spinner<Integer> portSpinner;
 
 	@FXML
-	public TextField userNameTextField;
+	private TextField userNameTextField;
 
 	@FXML
-	public ToggleGroup authenticationMethod;
+	private ToggleGroup authenticationMethod;
 
 	@FXML
-	public RadioButton authenticationChoiceKeyRadioButton;
+	private RadioButton authenticationChoiceKeyRadioButton;
 
 	@FXML
-	public RadioButton authenticationChoicePasswordRadioButton;
+	private RadioButton authenticationChoicePasswordRadioButton;
 
 	@FXML
-	public TextField keyFileTextField;
+	private TextField keyFileTextField;
 
 	@FXML
-	public PasswordField keyFilePasswordPasswordField;
+	private PasswordField keyFilePasswordPasswordField;
 
 	@FXML
-	public PasswordField passwordPasswordField;
+	private PasswordField passwordPasswordField;
 
 	@FXML
-	public ComboBox<String> schedulerTypeComboBox;
+	private ComboBox<String> schedulerTypeComboBox;
 
 	@FXML
-	public TextField remoteDirectoryTextField;
+	private TextField remoteDirectoryTextField;
 
 	@FXML
-	public TextField commandTextField;
+	private TextField commandTextField;
 
 	@FXML
-	public Spinner<Integer> nodesSpinner;
+	private Spinner<Integer> nodesSpinner;
 
 	@FXML
-	public Spinner<Integer> ncpusSpinner;
+	private Spinner<Integer> ncpusSpinner;
 
 	@FXML
-	public CheckBox shutdownJobAfterCloseCheckBox;
+	private CheckBox shutdownJobAfterCloseCheckBox;
 
 	@FXML
-	public CheckBox redirectStdOutErrCheckBox;
+	private CheckBox redirectStdOutErrCheckBox;
 
 	@FXML
 	private Button okButton;
@@ -89,8 +89,6 @@ public class HPCSettingsScreenController extends AnchorPane {
 	private static final String SLURM_OPTION = "Slurm";
 
 	private static final Integer SPINER_INITIAL_VALUE = 1;
-
-
 
 	public HPCSettingsScreenController() {
 		JavaFXRoutines.initRootAndController("hpc-settings-screen.fxml", this);
@@ -201,10 +199,10 @@ public class HPCSettingsScreenController extends AnchorPane {
 		redirectStdOutErr = redirectStdOutErrCheckBox.isSelected();
 		schedulerType = schedulerTypeComboBox.getSelectionModel().getSelectedItem();
 
-		return HPCSettings.builder().host(host).portNumber(port).userName(
-			userName).authenticationChoice(authenticationChoice).password(password)
-			.keyFile(keyFile).keyFilePassword(keyFilePassword).remoteDirectory(
-				remoteDirectory).command(command).nodes(nodes).ncpus(ncpus)
+		return HPCSettings.builder().host(host).portNumber(port).userName(userName)
+			.authenticationChoice(authenticationChoice).password(password).keyFile(
+				keyFile).keyFilePassword(keyFilePassword).remoteDirectory(
+					remoteDirectory).command(command).nodes(nodes).ncpus(ncpus)
 			.shutdownOnClose(shutdownJobAfterClose).redirectStdInErr(
 				redirectStdOutErr).adapterType(HPCSchedulerType.getByString(
 					schedulerType)).build();
@@ -220,6 +218,46 @@ public class HPCSettingsScreenController extends AnchorPane {
 				T value = converter.fromString(text);
 				valueFactory.setValue(value);
 			}
+		}
+	}
+
+	public void setInitialFormValues(HPCSettings oldSettings) {
+		if (oldSettings == null) {
+			hostTextField.setText("localhost");
+			portSpinner.getValueFactory().setValue(22);
+		} else {
+			hostTextField.setText(oldSettings.getHost());
+			portSpinner.getValueFactory().setValue(oldSettings.getPort());
+			userNameTextField.setText(oldSettings.getUserName());
+			// Get authentication choice:
+			if (oldSettings.getAuthenticationChoice().equals("Key file")) {
+				authenticationChoiceKeyRadioButton.setSelected(true);
+				authenticationChoicePasswordRadioButton.setSelected(false);
+				disableIrrelevantFileds(true);
+			}
+			else {
+				authenticationChoiceKeyRadioButton.setSelected(false);
+				authenticationChoicePasswordRadioButton.setSelected(true);
+				disableIrrelevantFileds(false);
+			}
+			keyFileTextField.setText(oldSettings.getKeyFile()
+				.getAbsolutePath());
+			keyFilePasswordPasswordField.setText(oldSettings
+				.getKeyFilePassword());
+			passwordPasswordField.setText(oldSettings.getPassword());
+			schedulerTypeComboBox.getSelectionModel().select(oldSettings
+				.getAdapterType().toString());
+			remoteDirectoryTextField.setText(oldSettings
+				.getRemoteDirectory());
+			commandTextField.setText(oldSettings.getCommand());
+			nodesSpinner.getValueFactory().setValue(oldSettings
+				.getNodes());
+			ncpusSpinner.getValueFactory().setValue(oldSettings
+				.getNcpus());
+			shutdownJobAfterCloseCheckBox.setSelected(oldSettings
+				.isShutdownOnClose());
+			redirectStdOutErrCheckBox.setSelected(oldSettings
+				.isRedirectStdInErr());
 		}
 	}
 }

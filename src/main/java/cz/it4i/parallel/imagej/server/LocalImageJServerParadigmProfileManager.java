@@ -5,6 +5,7 @@ import org.scijava.parallel.HavingOwnerWindow;
 import org.scijava.parallel.ParadigmManager;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
+import org.scijava.prefs.PrefService;
 
 import cz.it4i.parallel.runners.ImageJServerRunner;
 import cz.it4i.parallel.runners.ImageJServerRunnerSettings;
@@ -18,7 +19,6 @@ public class LocalImageJServerParadigmProfileManager extends
 	MultipleHostsParadigmManagerUsingRunner<ImageJServerParadigm, ImageJServerRunnerSettings>
 	implements HavingOwnerWindow<Window>
 {
-	// Added this line bellow:
 	private LocalSettingsScreenWindow localSettingsScreenWindow = new LocalSettingsScreenWindow();
 	
 	@Parameter
@@ -41,6 +41,7 @@ public class LocalImageJServerParadigmProfileManager extends
 
 	@Override
 	protected ImageJServerRunnerSettings doEdit(ImageJServerRunnerSettings settings) {
+		localSettingsScreenWindow.initialize(context.getService(PrefService.class));
 		return localSettingsScreenWindow.showDialog(settings);
 	}
 
