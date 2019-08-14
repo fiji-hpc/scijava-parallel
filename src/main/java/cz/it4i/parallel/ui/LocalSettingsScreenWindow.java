@@ -3,6 +3,7 @@ package cz.it4i.parallel.ui;
 
 import org.scijava.Context;
 import org.scijava.Priority;
+import org.scijava.parallel.HavingOwnerWindow;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import org.scijava.prefs.PrefService;
@@ -15,6 +16,43 @@ import javafx.stage.Stage;
 import javafx.stage.Window;
 
 public class LocalSettingsScreenWindow {
+
+	@Plugin(type = RunnerSettingsEditor.class, priority = Priority.HIGH)
+	public static class Editor implements
+		RunnerSettingsEditor<ImageJServerRunnerSettings>, HavingOwnerWindow<Window>
+	{
+		
+		@Parameter
+		private Context context;
+		private Window owner;
+		
+		@Override
+		public Class<ImageJServerRunnerSettings> getTypeOfSettings() {
+			return ImageJServerRunnerSettings.class;
+		}
+		
+		@Override
+		public ImageJServerRunnerSettings edit(
+			ImageJServerRunnerSettings settings)
+		{
+			LocalSettingsScreenWindow localSettingsScreenWindow =
+				new LocalSettingsScreenWindow();
+			localSettingsScreenWindow.setOwner(owner);
+			localSettingsScreenWindow.initialize(context.getService(
+				PrefService.class));
+			return localSettingsScreenWindow.showDialog(settings);
+		}
+	
+		@Override
+		public Class<Window> getType() {
+			return Window.class;
+		}
+	
+		@Override
+		public void setOwner(Window parent) {
+			this.owner = parent;
+		}
+	}
 
 	private LocalSettingsScreenController controller;
 
@@ -76,31 +114,6 @@ public class LocalSettingsScreenWindow {
 	public void initialize(PrefService newPrefService) {
 		if (this.prefService == null) {
 			this.prefService = newPrefService;
-		}
-	}
-
-	@Plugin(type = RunnerSettingsEditor.class, priority = Priority.HIGH)
-	public static class Editor implements
-		RunnerSettingsEditor<ImageJServerRunnerSettings>
-	{
-		
-		@Parameter
-		private Context context;
-		
-		@Override
-		public Class<ImageJServerRunnerSettings> getTypeOfSettings() {
-			return ImageJServerRunnerSettings.class;
-		}
-		
-		@Override
-		public ImageJServerRunnerSettings edit(
-			ImageJServerRunnerSettings settings)
-		{
-			LocalSettingsScreenWindow localSettingsScreenWindow =
-				new LocalSettingsScreenWindow();
-			localSettingsScreenWindow.initialize(context.getService(
-				PrefService.class));
-			return localSettingsScreenWindow.showDialog(settings);
 		}
 	}
 }

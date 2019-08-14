@@ -16,6 +16,27 @@ import javafx.stage.Window;
 
 public class HPCSettingsScreenWindow {
 
+	@Plugin(type = RunnerSettingsEditor.class, priority = Priority.HIGH)
+	public static class Editor implements RunnerSettingsEditor<HPCSettings> {
+	
+		@Parameter
+		private Context context;
+	
+		@Override
+		public Class<HPCSettings> getTypeOfSettings() {
+			return HPCSettings.class;
+		}
+	
+		@Override
+		public HPCSettings edit(HPCSettings settings) {
+			HPCSettingsScreenWindow hpcSettingsScreenWindow =
+				new HPCSettingsScreenWindow();
+			hpcSettingsScreenWindow.initialize(context.getService(
+				PrefService.class));
+			return hpcSettingsScreenWindow.showDialog(settings);
+		}
+	}
+
 	private HPCSettingsScreenController controller;
 
 	private Window owner;
@@ -74,27 +95,6 @@ public class HPCSettingsScreenWindow {
 	public void initialize(PrefService newPrefService) {
 		if (this.prefService == null) {
 			this.prefService = newPrefService;
-		}
-	}
-
-	@Plugin(type = RunnerSettingsEditor.class, priority = Priority.HIGH)
-	public static class Editor implements RunnerSettingsEditor<HPCSettings> {
-
-		@Parameter
-		private Context context;
-
-		@Override
-		public Class<HPCSettings> getTypeOfSettings() {
-			return HPCSettings.class;
-		}
-
-		@Override
-		public HPCSettings edit(HPCSettings settings) {
-			HPCSettingsScreenWindow hpcSettingsScreenWindow =
-				new HPCSettingsScreenWindow();
-			hpcSettingsScreenWindow.initialize(context.getService(
-				PrefService.class));
-			return hpcSettingsScreenWindow.showDialog(settings);
 		}
 	}
 }
