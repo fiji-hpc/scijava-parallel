@@ -1,9 +1,14 @@
 
 package cz.it4i.parallel.ui;
 
+import org.scijava.Context;
+import org.scijava.Priority;
+import org.scijava.plugin.Parameter;
+import org.scijava.plugin.Plugin;
 import org.scijava.prefs.PrefService;
 
 import cz.it4i.parallel.runners.HPCSettings;
+import cz.it4i.parallel.runners.RunnerSettingsEditor;
 import javafx.scene.Scene;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -26,8 +31,7 @@ public class HPCSettingsScreenWindow {
 		// if the old settings are null set the last time's
 		// settings of this form.
 		LastFormLoader<HPCSettings> storeLastForm = new LastFormLoader<>(
-			prefService,
-			"hpcSettingsForm", this.getClass());
+			prefService, "hpcSettingsForm", this.getClass());
 		if (settings == null) {
 			settings = storeLastForm.loadLastForm();
 		}
@@ -66,10 +70,31 @@ public class HPCSettingsScreenWindow {
 
 		parentStage.showAndWait();
 	}
-	
+
 	public void initialize(PrefService newPrefService) {
-		if(this.prefService == null) {
+		if (this.prefService == null) {
 			this.prefService = newPrefService;
+		}
+	}
+
+	@Plugin(type = RunnerSettingsEditor.class, priority = Priority.HIGH)
+	public static class Editor implements RunnerSettingsEditor<HPCSettings> {
+
+		@Parameter
+		private Context context;
+
+		@Override
+		public Class<HPCSettings> getTypeOfSettings() {
+			return HPCSettings.class;
+		}
+
+		@Override
+		public HPCSettings edit(HPCSettings settings) {
+			HPCSettingsScreenWindow hpcSettingsScreenWindow =
+				new HPCSettingsScreenWindow();
+			hpcSettingsScreenWindow.initialize(context.getService(
+				PrefService.class));
+			return hpcSettingsScreenWindow.showDialog(settings);
 		}
 	}
 }
