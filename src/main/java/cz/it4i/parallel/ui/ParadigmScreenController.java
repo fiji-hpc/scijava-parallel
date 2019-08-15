@@ -17,6 +17,8 @@ import org.scijava.plugin.PluginInfo;
 import cz.it4i.swing_javafx_ui.CloseableControl;
 import cz.it4i.swing_javafx_ui.JavaFXRoutines;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
@@ -105,6 +107,10 @@ public class ParadigmScreenController extends Pane implements CloseableControl
 		ParadigmManager manager = cmbParadigmManagers.getItems().isEmpty() ? null
 			: cmbParadigmManagers.getSelectionModel().getSelectedItem();
 		ParallelizationParadigmProfile profile;
+		
+		// If paradigm has not been configured it should not be created:
+		Boolean paradigmIsCorrect = false;
+		
 		if (manager != null) {
 			profile = manager.createProfile(txtNameOfNewProfile.getText());
 		}
@@ -112,9 +118,28 @@ public class ParadigmScreenController extends Pane implements CloseableControl
 			profile = new ParallelizationParadigmProfile(paradigms.getValue(),
 				txtNameOfNewProfile.getText());
 		}
-		parallelService.addProfile(profile);
-		cmbProfiles.getItems().add(profile);
-		cmbProfiles.getSelectionModel().select(profile);
+		
+		try {
+			parallelService.addProfile(profile);
+			if(manager != null) {
+				paradigmIsCorrect = manager.editProfile(profile);
+			}
+			
+			if(manager == null || paradigmIsCorrect) {
+				cmbProfiles.getItems().add(profile);
+				cmbProfiles.getSelectionModel().select(profile);	
+			}
+		} catch (IllegalArgumentException exc) {
+			Alert alert = new Alert(AlertType.ERROR);
+			alert.setTitle("Error Dialog");
+			alert.setHeaderText("There is already a profile with the same name!");
+			alert.setContentText(exc.getMessage());
+
+			alert.showAndWait();
+		}
+		if(!paradigmIsCorrect) {
+			parallelService.deleteProfile(profile.toString());
+		}
 	}
 
 	public void deleteProfile() {
@@ -254,7 +279,6 @@ public class ParadigmScreenController extends Pane implements CloseableControl
 			parallelService.saveProfiles();
 		}
 	}
-
 
 	private void initProfiles() {
 		for (ParallelizationParadigmProfile profile : parallelService

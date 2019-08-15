@@ -31,14 +31,18 @@ public class HPCImageJServerParadigmProfileManager extends
 	}
 
 	@Override
-	protected void editSettings(
+	protected Boolean editSettings(
 		ParadigmProfileUsingRunner<HPCSettings> typedProfile)
 	{
+		Boolean correct = false;
+		
 		HPCSettings settings = typedProfile.getSettings();
-		super.editSettings(typedProfile);
+		correct = super.editSettings(typedProfile);
 		if (settings != null) {
 			typedProfile.getSettings().setJobID(settings.getJobID());
 		}
+		
+		return correct;
 	}
 
 	@Override

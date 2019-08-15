@@ -21,16 +21,16 @@ public class LocalSettingsScreenWindow {
 	public static class Editor implements
 		RunnerSettingsEditor<ImageJServerRunnerSettings>, HavingOwnerWindow<Window>
 	{
-		
+
 		@Parameter
 		private Context context;
 		private Window owner;
-		
+
 		@Override
 		public Class<ImageJServerRunnerSettings> getTypeOfSettings() {
 			return ImageJServerRunnerSettings.class;
 		}
-		
+
 		@Override
 		public ImageJServerRunnerSettings edit(
 			ImageJServerRunnerSettings settings)
@@ -42,12 +42,12 @@ public class LocalSettingsScreenWindow {
 				PrefService.class));
 			return localSettingsScreenWindow.showDialog(settings);
 		}
-	
+
 		@Override
 		public Class<Window> getType() {
 			return Window.class;
 		}
-	
+
 		@Override
 		public void setOwner(Window parent) {
 			this.owner = parent;
@@ -69,7 +69,7 @@ public class LocalSettingsScreenWindow {
 		settings = oldSettings;
 
 		// if the old settings are null set the last time's
-		// settings of this form.
+		// user approved settings of this form.
 		LastFormLoader<ImageJServerRunnerSettings> storeLastForm =
 			new LastFormLoader<>(prefService, "localSettingsForm", this.getClass());
 		if (settings == null) {
@@ -78,18 +78,28 @@ public class LocalSettingsScreenWindow {
 
 		// Create controller:
 		this.controller = new LocalSettingsScreenController();
-		// Initialize form values with default or old settings:
+		// Initialize form values with old settings, last approved or default :
 		this.controller.setInitialFormValues(settings);
-		// Request new settings:
+		// Request new settings from the user:
 		this.openWindow();
 
 		// If the user did provide new settings:
 		if (this.controller.getSettings() != null) {
 			// Set the new settings.
 			settings = this.controller.getSettings();
+			// Store the settings for this form.
+			storeLastForm.storeLastForm(settings);
 		}
-
-		storeLastForm.storeLastForm(settings);
+		else {
+			// The user has not accepted any settings and therefore they should be
+			// empty or the old ones.
+			if (oldSettings != null) {
+				settings = oldSettings;
+			}
+			else {
+				settings = null;
+			}
+		}
 
 		// Return the settings.
 		return settings;

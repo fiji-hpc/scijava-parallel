@@ -18,21 +18,20 @@ public class HPCSettingsScreenWindow {
 
 	@Plugin(type = RunnerSettingsEditor.class, priority = Priority.HIGH)
 	public static class Editor implements RunnerSettingsEditor<HPCSettings> {
-	
+
 		@Parameter
 		private Context context;
-	
+
 		@Override
 		public Class<HPCSettings> getTypeOfSettings() {
 			return HPCSettings.class;
 		}
-	
+
 		@Override
 		public HPCSettings edit(HPCSettings settings) {
 			HPCSettingsScreenWindow hpcSettingsScreenWindow =
 				new HPCSettingsScreenWindow();
-			hpcSettingsScreenWindow.initialize(context.getService(
-				PrefService.class));
+			hpcSettingsScreenWindow.initialize(context.getService(PrefService.class));
 			return hpcSettingsScreenWindow.showDialog(settings);
 		}
 	}
@@ -50,7 +49,7 @@ public class HPCSettingsScreenWindow {
 		settings = oldSettings;
 
 		// if the old settings are null set the last time's
-		// settings of this form.
+		// user approved settings of this form.
 		LastFormLoader<HPCSettings> storeLastForm = new LastFormLoader<>(
 			prefService, "hpcSettingsForm", this.getClass());
 		if (settings == null) {
@@ -59,20 +58,30 @@ public class HPCSettingsScreenWindow {
 
 		// Create controller:
 		this.controller = new HPCSettingsScreenController();
-		// Initialize form values with default or old settings:
+		// Initialize form values with old settings, last approved or default :
 		this.controller.setInitialFormValues(settings);
-		// Request new settings:
+		// Request new settings from the user:
 		this.openWindow();
 
-		// If the user did not provide new settings:
+		// If the user did provide new settings:
 		if (this.controller.getSettings() != null) {
-			// Return old settings.
+			// Set the new settings.
 			settings = this.controller.getSettings();
+			// Store the settings for this form.
+			storeLastForm.storeLastForm(settings);
+		}
+		else {
+			// The user has not accepted any settings and therefore they should be
+			// empty or the old ones.
+			if (oldSettings != null) {
+				settings = oldSettings;
+			}
+			else {
+				settings = null;
+			}
 		}
 
-		storeLastForm.storeLastForm(settings);
-
-		// Return the new settings.
+		// Return the settings.
 		return settings;
 	}
 
