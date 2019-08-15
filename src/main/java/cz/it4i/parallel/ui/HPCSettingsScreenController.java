@@ -3,6 +3,7 @@ package cz.it4i.parallel.ui;
 
 import java.io.File;
 
+import cz.it4i.parallel.runners.AuthenticationChoice;
 import cz.it4i.parallel.runners.HPCSchedulerType;
 import cz.it4i.parallel.runners.HPCSettings;
 import cz.it4i.swing_javafx_ui.JavaFXRoutines;
@@ -162,7 +163,7 @@ public class HPCSettingsScreenController extends AnchorPane {
 	private HPCSettings createSettings() {
 		String host;
 		int port;
-		String authenticationChoice;
+		AuthenticationChoice authenticationChoice;
 		String userName;
 		String password;
 		File keyFile;
@@ -180,10 +181,10 @@ public class HPCSettingsScreenController extends AnchorPane {
 		port = portSpinner.getValue();
 		// authenticationChoice
 		if (authenticationChoiceKeyRadioButton.isSelected()) {
-			authenticationChoice = "Key file";
+			authenticationChoice = AuthenticationChoice.KEY_FILE;
 		}
 		else {
-			authenticationChoice = "Password";
+			authenticationChoice = AuthenticationChoice.PASSWORD;
 		}
 		userName = userNameTextField.getText();
 		password = passwordPasswordField.getText();
@@ -225,12 +226,15 @@ public class HPCSettingsScreenController extends AnchorPane {
 		if (oldSettings == null) {
 			hostTextField.setText("localhost");
 			portSpinner.getValueFactory().setValue(22);
-		} else {
+		}
+		else {
 			hostTextField.setText(oldSettings.getHost());
 			portSpinner.getValueFactory().setValue(oldSettings.getPort());
 			userNameTextField.setText(oldSettings.getUserName());
 			// Get authentication choice:
-			if (oldSettings.getAuthenticationChoice().equals("Key file")) {
+			if (oldSettings
+				.getAuthenticationChoice() == AuthenticationChoice.KEY_FILE)
+			{
 				authenticationChoiceKeyRadioButton.setSelected(true);
 				authenticationChoicePasswordRadioButton.setSelected(false);
 				disableIrrelevantFileds(true);
@@ -240,24 +244,18 @@ public class HPCSettingsScreenController extends AnchorPane {
 				authenticationChoicePasswordRadioButton.setSelected(true);
 				disableIrrelevantFileds(false);
 			}
-			keyFileTextField.setText(oldSettings.getKeyFile()
-				.getAbsolutePath());
-			keyFilePasswordPasswordField.setText(oldSettings
-				.getKeyFilePassword());
+			keyFileTextField.setText(oldSettings.getKeyFile().getAbsolutePath());
+			keyFilePasswordPasswordField.setText(oldSettings.getKeyFilePassword());
 			passwordPasswordField.setText(oldSettings.getPassword());
 			schedulerTypeComboBox.getSelectionModel().select(oldSettings
 				.getAdapterType().toString());
-			remoteDirectoryTextField.setText(oldSettings
-				.getRemoteDirectory());
+			remoteDirectoryTextField.setText(oldSettings.getRemoteDirectory());
 			commandTextField.setText(oldSettings.getCommand());
-			nodesSpinner.getValueFactory().setValue(oldSettings
-				.getNodes());
-			ncpusSpinner.getValueFactory().setValue(oldSettings
-				.getNcpus());
+			nodesSpinner.getValueFactory().setValue(oldSettings.getNodes());
+			ncpusSpinner.getValueFactory().setValue(oldSettings.getNcpus());
 			shutdownJobAfterCloseCheckBox.setSelected(oldSettings
 				.isShutdownOnClose());
-			redirectStdOutErrCheckBox.setSelected(oldSettings
-				.isRedirectStdInErr());
+			redirectStdOutErrCheckBox.setSelected(oldSettings.isRedirectStdInErr());
 		}
 	}
 }

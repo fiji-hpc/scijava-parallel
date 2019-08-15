@@ -21,6 +21,7 @@ import org.scijava.widget.NumberWidget;
 import org.scijava.widget.TextWidget;
 
 import cz.it4i.parallel.SciJavaParallelRuntimeException;
+import cz.it4i.parallel.runners.AuthenticationChoice;
 import cz.it4i.parallel.runners.HPCSchedulerType;
 import cz.it4i.parallel.runners.HPCSettings;
 import cz.it4i.parallel.runners.RunnerSettingsEditor;
@@ -53,7 +54,6 @@ public class HPCSettingsGui implements Command
 	public static void fillInputs(HPCSettings settings,
 		Map<String, Object> inputs)
 	{
-
 		inputs.put("host", settings.getHost());
 		inputs.put("port", settings.getPort());
 		inputs.put("userName", settings.getUserName());
@@ -160,8 +160,17 @@ public class HPCSettingsGui implements Command
 
 	@Override
 	public void run() {
+		// Convert the authentication choice from String to Enum:
+		AuthenticationChoice authenticationChoiceEnum;
+		if (authenticationChoice.equals("Key file")) {
+			authenticationChoiceEnum = AuthenticationChoice.KEY_FILE;
+		}
+		else {
+			authenticationChoiceEnum = AuthenticationChoice.PASSWORD;
+		}
+		
 		settings = HPCSettings.builder().host(host).portNumber(port).userName(
-			userName).authenticationChoice(authenticationChoice).password(password)
+			userName).authenticationChoice(authenticationChoiceEnum).password(password)
 			.keyFile(keyFile).keyFilePassword(keyFilePassword).remoteDirectory(
 				remoteDirectory).command(command).nodes(nodes).ncpus(ncpus)
 			.shutdownOnClose(shutdownJobAfterClose).redirectStdInErr(

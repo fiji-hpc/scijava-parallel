@@ -108,11 +108,11 @@ public class HPCImageJServerRunner extends
 	}
 
 	private ClusterJobLauncher createClusterJobLauncher(String host, Integer port,
-		String userName, String authenticationChoice, String password,
+		String userName, AuthenticationChoice authenticationChoice, String password,
 		String keyFile, String keyFilePassword, HPCSchedulerType adapterType,
 		boolean redirectStdInErr) throws JSchException
 	{
-		if (authenticationChoice.equals("Password")) {
+		if (authenticationChoice == AuthenticationChoice.PASSWORD) {
 			return ClusterJobLauncher.createWithPasswordAuthentication(host, port,
 				userName, password, adapterType, redirectStdInErr);
 		}

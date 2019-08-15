@@ -23,7 +23,7 @@ public class HPCSettings extends RunnerSettings
 
 	private final String keyFilePassword;
 	
-	private String authenticationChoice;
+	private AuthenticationChoice authenticationChoice;
 	
 	private transient String password;
 
@@ -45,7 +45,7 @@ public class HPCSettings extends RunnerSettings
 
 	@Builder
 	private HPCSettings(String host, Integer portNumber, String userName,
-		String authenticationChoice, String password, File keyFile,
+		AuthenticationChoice authenticationChoice, String password, File keyFile,
 		String keyFilePassword, String remoteDirectory, String command, int nodes,
 		int ncpus, String jobID, HPCSchedulerType adapterType,
 		boolean shutdownOnClose, boolean redirectStdInErr)
