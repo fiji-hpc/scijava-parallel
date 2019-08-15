@@ -1,6 +1,8 @@
 package cz.it4i.parallel.ui;
 
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -14,6 +16,7 @@ import org.scijava.parallel.ParallelizationParadigmProfile;
 import org.scijava.parallel.Status;
 import org.scijava.plugin.PluginInfo;
 
+import cz.it4i.parallel.runners.ParadigmProfileUsingRunner;
 import cz.it4i.swing_javafx_ui.CloseableControl;
 import cz.it4i.swing_javafx_ui.JavaFXRoutines;
 import javafx.fxml.FXML;
@@ -65,25 +68,59 @@ public class ParadigmScreenController extends Pane implements CloseableControl
 	private ParadigmManagerService paradigmManagerService;
 
 	private ParallelizationParadigmProfile activeProfile;
+	
+	private Map<String, Boolean> userCheckedProfiles;
 
 	public ParadigmScreenController() {
 		JavaFXRoutines.initRootAndController("paradigm-screen.fxml", this);
 		txtNameOfNewProfile.textProperty().addListener((a, b,
 			c) -> updateCreateNewProfileButton());
+		
+		userCheckedProfiles = new HashMap<>();
 	}
 
 	public void activateDeactivate() {
 		this.setDisable(true);
-		CompletableFuture.runAsync(() -> {
-			if (chkActive.isSelected()) {
-				initProfile();
-			}
-			else {
-				closeProfile();
-			}
-			JavaFXRoutines.runOnFxThread(() -> this.setDisable(false));
+		haveUserCheckSettings();
+		CompletableFuture<Void> cf = CompletableFuture.runAsync(() -> {
+			try {
+				if (chkActive.isSelected()) {
+					initProfile();
+				}
+				else {
+					closeProfile();
+				}
+			} finally {
+				JavaFXRoutines.runOnFxThread(() -> this.setDisable(false));
+			}			
 		});
+		
+		cf.exceptionally(t -> {
+			chkActive.setSelected(false);
+			userCheckedProfiles.put(activeProfile.toString(), false);
+			return null;
+		});		
+	}
 
+	private void haveUserCheckSettings() {
+		if (chkActive.isSelected()) {
+			boolean userHasCheckedSettings = false;
+			
+			ParadigmProfileUsingRunner<?> profile =
+				(ParadigmProfileUsingRunner<?>) activeProfile;
+
+			String name = activeProfile.toString();
+			if(!userCheckedProfiles.containsKey(name)) {
+				userCheckedProfiles.put(name, false);
+			}
+			
+			userHasCheckedSettings = userCheckedProfiles.get(activeProfile.toString());
+			
+			if (!userHasCheckedSettings) {
+				runEditProfile(profile);
+				userCheckedProfiles.put(name, true);
+			}
+		}
 	}
 
 	public void initWithServices(ParallelService service,
@@ -268,9 +305,9 @@ public class ParadigmScreenController extends Pane implements CloseableControl
 		});
 	}
 
-	private void initProfile() {
+	private void initProfile() {		
 		ParallelizationParadigm paradigm = parallelService.getParadigm();
-	
+		
 		if (paradigm != null) {
 			ParadigmManager manager = findManager(activeProfile);
 			if (manager != null) {
