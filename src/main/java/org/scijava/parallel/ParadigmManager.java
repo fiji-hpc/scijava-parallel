@@ -14,7 +14,7 @@ public interface ParadigmManager
 	ParallelizationParadigmProfile createProfile(
 		String name);
 
-	Boolean editProfile(ParallelizationParadigmProfile profile);
+	boolean editProfile(ParallelizationParadigmProfile profile);
 
 	void prepareParadigm(ParallelizationParadigmProfile profile,
 		ParallelizationParadigm paradigm);

@@ -109,7 +109,7 @@ public class ParadigmScreenController extends Pane implements CloseableControl
 		ParallelizationParadigmProfile profile;
 		
 		// If paradigm has not been configured it should not be created:
-		Boolean paradigmIsCorrect = false;
+		boolean paradigmIsCorrect = false;
 		
 		if (manager != null) {
 			profile = manager.createProfile(txtNameOfNewProfile.getText());
@@ -124,7 +124,7 @@ public class ParadigmScreenController extends Pane implements CloseableControl
 			if(manager != null) {
 				paradigmIsCorrect = manager.editProfile(profile);
 			}
-			
+
 			if(manager == null || paradigmIsCorrect) {
 				cmbProfiles.getItems().add(profile);
 				cmbProfiles.getSelectionModel().select(profile);	
@@ -137,7 +137,7 @@ public class ParadigmScreenController extends Pane implements CloseableControl
 
 			alert.showAndWait();
 		}
-		if(!paradigmIsCorrect) {
+		if (!paradigmIsCorrect) {
 			parallelService.deleteProfile(profile.toString());
 		}
 	}

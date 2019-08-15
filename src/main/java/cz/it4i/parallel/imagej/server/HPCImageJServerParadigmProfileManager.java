@@ -31,7 +31,7 @@ public class HPCImageJServerParadigmProfileManager extends
 	}
 
 	@Override
-	protected Boolean editSettings(
+	protected boolean editSettings(
 		ParadigmProfileUsingRunner<HPCSettings> typedProfile)
 	{
 		Boolean correct = false;

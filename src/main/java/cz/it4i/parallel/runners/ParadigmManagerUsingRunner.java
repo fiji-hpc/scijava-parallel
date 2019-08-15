@@ -1,7 +1,7 @@
 package cz.it4i.parallel.runners;
 
 import java.util.function.Consumer;
-import java.util.function.Predicate;
+import java.util.function.Function;
 
 import org.scijava.parallel.ParadigmManager;
 import org.scijava.parallel.ParallelizationParadigm;
@@ -21,21 +21,25 @@ public abstract class ParadigmManagerUsingRunner<T extends AbstractBaseParadigm,
 	@Parameter
 	private PluginService pluginService;
 
-	@SuppressWarnings("unchecked")
-	protected static <C> Boolean runForObjectIfOfTypeElseException(Object profile,
-		Class<C> type, Predicate<C> predicate)
+	protected static <C> void runForObjectIfOfTypeElseException(
+		ParallelizationParadigmProfile profile,
+		Class<C> clazz, Consumer<C> consumer)
 	{
-		Boolean correct = false;
-		
+		runWithResultForObjectIfOfTypeElseException(profile, clazz, c -> {
+			consumer.accept(c);
+			return null;
+		});
+	}
+
+	@SuppressWarnings("unchecked")
+	protected static <C, R> R runWithResultForObjectIfOfTypeElseException(
+		Object profile, Class<C> type, Function<C, R> predicate)
+	{
 		if (type.isInstance(profile)) {
-			correct = predicate.test((C) profile);
+			return predicate.apply((C) profile);
 		}
-		else {
-			throw new UnsupportedOperationException("Not supported for profile: " +
-				profile);
-		}
-		
-		return correct;
+		throw new UnsupportedOperationException("Not supported for profile: " +
+			profile);
 	}
 
 	@Override
@@ -45,13 +49,9 @@ public abstract class ParadigmManagerUsingRunner<T extends AbstractBaseParadigm,
 	}
 
 	@Override
-	public Boolean editProfile(ParallelizationParadigmProfile profile) {
-		Boolean correct = false;
-		correct = runForObjectIfOfTypeElseException(profile, 
-			ParadigmProfileUsingRunner.class,
-			this::editSettings);
-		
-		return correct;
+	public boolean editProfile(ParallelizationParadigmProfile profile) {
+		return runWithResultForObjectIfOfTypeElseException(profile,
+			ParadigmProfileUsingRunner.class, this::editSettings);
 	}
 
 	@Override
@@ -75,8 +75,7 @@ public abstract class ParadigmManagerUsingRunner<T extends AbstractBaseParadigm,
 	{
 		runForObjectIfOfTypeElseException(profile,
 			ParadigmProfileUsingRunner.class,
-			typedProfile -> prepareParadigmInternal(
-				typedProfile,
+			typedProfile -> prepareParadigmInternal(typedProfile,
 				(AbstractBaseParadigm) paradigm));
 	}
 
@@ -88,9 +87,7 @@ public abstract class ParadigmManagerUsingRunner<T extends AbstractBaseParadigm,
 				ServerRunner<?> runner = typedProfile.getAssociatedRunner();
 			if (runner != null && runner.getStatus() == Status.ACTIVE) {
 				runner.letShutdownOnClose();
-				return false;
 			}
-			return false;
 		});
 	}
 
@@ -99,18 +96,14 @@ public abstract class ParadigmManagerUsingRunner<T extends AbstractBaseParadigm,
 		return "" + getTypeOfRunner().getSimpleName();
 	}
 
-	protected Boolean editSettings(
+	protected boolean editSettings(
 		ParadigmProfileUsingRunner<S> typedProfile)
 	{
-		Boolean correct = false;
 		RunnerSettingsEditor<S> editor = getEditor(typedProfile
 			.getTypeOfSettings());
 		typedProfile.setSettings(editor.edit(typedProfile.getSettings()));
 		
-		if(typedProfile.getSettings() != null) {
-			correct = true;
-		}
-		return correct;
+		return typedProfile.getSettings() != null;
 	}
 
 	protected void initRunner(
@@ -126,7 +119,7 @@ public abstract class ParadigmManagerUsingRunner<T extends AbstractBaseParadigm,
 		T paradigm);
 
 	@SuppressWarnings("unchecked")
-	private Boolean prepareParadigmInternal(
+	private void prepareParadigmInternal(
 		ParadigmProfileUsingRunner<S> typedProfile, AbstractBaseParadigm paradigm)
 	{
 		typedProfile.initRunnerIfNeeded(this::initRunner);
@@ -138,7 +131,6 @@ public abstract class ParadigmManagerUsingRunner<T extends AbstractBaseParadigm,
 			initParadigm(typedProfile, (T) paradigm);
 		});
 		paradigm.setCloseCommand(runner::close);
-		return false;		
 	}
 
 	private RunnerSettingsEditor<S> getEditor(
