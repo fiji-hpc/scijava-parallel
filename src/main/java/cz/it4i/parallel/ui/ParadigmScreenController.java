@@ -263,6 +263,7 @@ public class ParadigmScreenController extends Pane implements CloseableControl
 		JavaFXRoutines.runOnFxThread(() -> {
 			if (!paradigms.getItems().isEmpty()) {
 				paradigms.getSelectionModel().select(0);
+				paradigmSelected();
 			}
 		});
 	}
