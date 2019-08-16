@@ -11,6 +11,8 @@ import lombok.Getter;
 @AllArgsConstructor
 @EqualsAndHashCode(of = { "commandName", "id" }) class InternalCompletableFutureID implements CompletableFutureID {
 
+	private static final long serialVersionUID = -7325751118474311860L;
+
 	@Getter
 	final String commandName;
 

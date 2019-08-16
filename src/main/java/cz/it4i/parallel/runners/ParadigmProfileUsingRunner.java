@@ -14,6 +14,8 @@ public class ParadigmProfileUsingRunner<T extends RunnerSettings> extends
 	ParallelizationParadigmProfile
 {
 
+	private static final long serialVersionUID = -3983910892928520135L;
+
 	@Getter
 	@Setter
 	private T settings;

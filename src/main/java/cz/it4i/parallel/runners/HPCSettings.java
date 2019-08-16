@@ -13,6 +13,8 @@ import lombok.EqualsAndHashCode;
 public class HPCSettings extends RunnerSettings
 {
 
+	private static final long serialVersionUID = -8319966157995929827L;
+
 	private final String host;
 
 	private final Integer port;

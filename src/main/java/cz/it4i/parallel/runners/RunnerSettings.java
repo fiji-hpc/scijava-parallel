@@ -14,6 +14,8 @@ public abstract class RunnerSettings
 	implements Serializable, Cloneable
 {
 
+	private static final long serialVersionUID = 6198010915299848014L;
+
 	@Getter
 	@Setter
 	private boolean shutdownOnClose;

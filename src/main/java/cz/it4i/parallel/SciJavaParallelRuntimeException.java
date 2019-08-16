@@ -3,6 +3,8 @@ package cz.it4i.parallel;
 
 public class SciJavaParallelRuntimeException extends RuntimeException {
 
+	private static final long serialVersionUID = -2924025307487207524L;
+
 	public SciJavaParallelRuntimeException() {
 		super();
 	}

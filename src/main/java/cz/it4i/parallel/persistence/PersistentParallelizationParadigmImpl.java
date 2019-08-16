@@ -246,6 +246,8 @@ public class PersistentParallelizationParadigmImpl implements
 	@AllArgsConstructor
 	private static class PComletableFutureID implements CompletableFutureID {
 
+		private static final long serialVersionUID = 8803701279839445101L;
+
 		final Serializable innerId;
 
 		static CompletableFutureID getFutureID(Serializable id) {
