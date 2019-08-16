@@ -102,6 +102,9 @@ public class ParadigmScreenController extends Pane implements CloseableControl
 	}
 
 	private void haveUserCheckSettings() {
+		if (!(activeProfile instanceof ParadigmProfileUsingRunner)) {
+			return;
+		}
 		if (chkActive.isSelected()) {
 			boolean userHasCheckedSettings = false;
 			
@@ -160,8 +163,11 @@ public class ParadigmScreenController extends Pane implements CloseableControl
 			if(manager != null) {
 				paradigmIsCorrect = manager.editProfile(profile);
 			}
+			else {
+				paradigmIsCorrect = true;
+			}
 
-			if(manager == null || paradigmIsCorrect) {
+			if (paradigmIsCorrect) {
 				cmbProfiles.getItems().add(profile);
 				cmbProfiles.getSelectionModel().select(profile);	
 			}
