@@ -94,7 +94,9 @@ public class DefaultParallelService extends
 		ParallelizationParadigm oldActiveParadigm = getParadigm();
 		profiles.stream().filter(Objects::nonNull).forEach(p -> p.setSelected(p
 			.getName().equals(name)));
-		if (oldActiveParadigm != null && oldActiveParadigm != getParadigm()) {
+		if (oldActiveParadigm != null && oldActiveParadigm != getParadigm() &&
+			oldActiveParadigm.getStatus() == Status.ACTIVE)
+		{
 			oldActiveParadigm.close();
 		}
 		saveProfiles();
