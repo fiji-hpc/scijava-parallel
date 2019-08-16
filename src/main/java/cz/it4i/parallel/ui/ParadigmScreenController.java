@@ -20,8 +20,6 @@ import cz.it4i.parallel.runners.ParadigmProfileUsingRunner;
 import cz.it4i.swing_javafx_ui.CloseableControl;
 import cz.it4i.swing_javafx_ui.JavaFXRoutines;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
@@ -98,7 +96,7 @@ public class ParadigmScreenController extends Pane implements CloseableControl
 		cf.exceptionally(t -> {
 			chkActive.setSelected(false);
 			userCheckedProfiles.put(activeProfile.toString(), false);
-			JavaFXRoutines.runOnFxThread(() -> showError("Connection error!", t.getMessage()));
+			JavaFXRoutines.runOnFxThread(() -> SimpleDialog.showError("Connection error!", t.getMessage()));
 			return null;
 		});		
 	}
@@ -168,20 +166,11 @@ public class ParadigmScreenController extends Pane implements CloseableControl
 				cmbProfiles.getSelectionModel().select(profile);	
 			}
 		} catch (IllegalArgumentException exc) {
-				showError("There is already a profile with the same name!", exc.getMessage());
+				SimpleDialog.showError("There is already a profile with the same name!", exc.getMessage());
 		}
 		if (!paradigmIsCorrect) {
 			parallelService.deleteProfile(profile.toString());
 		}
-	}
-
-	private void showError(String header, String message) {
-		Alert alert = new Alert(AlertType.ERROR);
-		alert.setTitle("Error Dialog");
-		alert.setHeaderText(header);
-		alert.setContentText(message);
-
-		alert.showAndWait();		
 	}
 
 	public void deleteProfile() {

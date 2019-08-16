@@ -3,16 +3,12 @@ package cz.it4i.parallel.ui;
 
 import java.io.File;
 import java.nio.file.Path;
-
 import cz.it4i.parallel.runners.ImageJServerRunnerSettings;
 import cz.it4i.swing_javafx_ui.JavaFXRoutines;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
-import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import lombok.Getter;
 import lombok.Setter;
@@ -46,10 +42,8 @@ public class LocalSettingsScreenController extends AnchorPane {
 
 	@FXML
 	private void browseAction() {
-		FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle("Open Fiji Executable File");
 		Stage stage = (Stage) browseButton.getScene().getWindow();
-		File selectedFile = fileChooser.showOpenDialog(stage);
+		File selectedFile = SimpleDialog.fileChooser(stage, "Open Fiji Executable File");
 		if (selectedFile != null) {
 			this.localFijiExecutablePathTextField.setText(selectedFile
 				.getAbsolutePath());
@@ -64,7 +58,7 @@ public class LocalSettingsScreenController extends AnchorPane {
 		if (!this.localFijiExecutablePath.exists() || this.localFijiExecutablePath
 			.isDirectory())
 		{
-			showErrorDialog("File selected does not exits!",
+			SimpleDialog.showError("File selected does not exits!",
 				"Select the fiji executable file!");
 			return;
 		}
@@ -78,17 +72,9 @@ public class LocalSettingsScreenController extends AnchorPane {
 			stage.close();
 		}
 		catch (Exception exc) {
-			showErrorDialog("Exception", exc.toString());
+			SimpleDialog.showError("Exception", exc.toString());
 		}
 
-	}
-
-	private void showErrorDialog(String header, String message) {
-		Alert alert = new Alert(AlertType.ERROR);
-		alert.setTitle("Error Dialog");
-		alert.setHeaderText(header);
-		alert.setContentText(message);
-		alert.showAndWait();
 	}
 
 	public void setInitialFormValues(ImageJServerRunnerSettings oldSettings) {

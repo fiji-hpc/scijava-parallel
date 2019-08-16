@@ -19,7 +19,6 @@ import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.AnchorPane;
-import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
 import lombok.Getter;
@@ -145,10 +144,8 @@ public class HPCSettingsScreenController extends AnchorPane {
 
 	@FXML
 	private void browseAction() {
-		FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle("Open Fiji Executable File");
 		Stage stage = (Stage) browseButton.getScene().getWindow();
-		File selectedFile = fileChooser.showOpenDialog(stage);
+		File selectedFile = SimpleDialog.fileChooser(stage, "Open SSH Public Key file");
 		if (selectedFile != null) {
 			this.keyFileTextField.setText(selectedFile.getAbsolutePath());
 		}
