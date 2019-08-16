@@ -15,7 +15,10 @@ public class ParallelizationParadigmProfile
 	implements Serializable
 {
 
-	private static final long serialVersionUID = 1L;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 5198616777775710034L;
 
 	/** Profile name */
 	private final String profileName;
