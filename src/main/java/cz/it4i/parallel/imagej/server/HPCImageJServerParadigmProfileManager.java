@@ -2,6 +2,7 @@ package cz.it4i.parallel.imagej.server;
 
 
 import org.scijava.Context;
+import org.scijava.parallel.HavingOwnerWindow;
 import org.scijava.parallel.ParadigmManager;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
@@ -18,12 +19,23 @@ import javafx.stage.Window;
 @Plugin(type = ParadigmManager.class)
 public class HPCImageJServerParadigmProfileManager extends
 	MultipleHostsParadigmManagerUsingRunner<ImageJServerParadigm, HPCSettings>
+	implements HavingOwnerWindow<Window>
 {
 	
 	@Parameter
 	private Context context;
 
 	private Window ownerWindow;
+
+	@Override
+	public Class<Window> getType() {
+		return Window.class;
+	}
+
+	@Override
+	public void setOwner(Window parent) {
+		ownerWindow = parent;
+	}
 
 	@Override
 	public Class<ImageJServerParadigm> getSupportedParadigmType() {
