@@ -1,4 +1,10 @@
-// TODO: Add copyright stuff
+/*******************************************************************************
+ * IT4Innovations - National Supercomputing Center
+ * Copyright (c) 2017 - 2019 All Right Reserved, https://www.it4i.cz
+ *
+ * This file is subject to the terms and conditions defined in
+ * file 'LICENSE.txt', which is part of this project.
+ ******************************************************************************/
 
 package org.scijava.parallel;
 
@@ -11,7 +17,7 @@ import org.scijava.service.SciJavaService;
 /**
  * A service providing parallelization capabilities
  *
- * @author TODO: Add authors
+ * @author Petr Bainar, Jan Kožusznik
  */
 public interface ParallelService extends
 	SingletonService<ParallelizationParadigm>, SciJavaService

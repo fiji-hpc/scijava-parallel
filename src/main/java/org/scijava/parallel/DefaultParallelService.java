@@ -1,5 +1,10 @@
-// TODO: Add copyright stuff
-
+/*******************************************************************************
+ * IT4Innovations - National Supercomputing Center
+ * Copyright (c) 2017 - 2019 All Right Reserved, https://www.it4i.cz
+ *
+ * This file is subject to the terms and conditions defined in
+ * file 'LICENSE.txt', which is part of this project.
+ ******************************************************************************/
 package org.scijava.parallel;
 
 import java.io.ByteArrayInputStream;
@@ -22,8 +27,11 @@ import org.scijava.service.Service;
 
 import lombok.extern.slf4j.Slf4j;
 
-// TODO: Add description
-
+/**
+ * Provider implementation of {@link ParallelService}
+ * 
+ * @author Petr Bainar
+ */
 @Slf4j
 @Plugin(type = Service.class)
 public class DefaultParallelService extends
@@ -31,7 +39,7 @@ public class DefaultParallelService extends
 {
 
 	@Parameter
-	PrefService prefService;
+	private PrefService prefService;
 
 	@Parameter
 	private ParadigmManagerService paradigmManagerService;
@@ -40,11 +48,8 @@ public class DefaultParallelService extends
 	private List<ParallelizationParadigmProfile> profiles;
 
 	/** A string constant to be used by {@link PrefService} */
-	private final String PROFILES = "profiles";
+	private static final String PROFILES_PROPERTY_NAME = "profiles";
 	
-
-
-
 	// -- ParallelService methods --
 
 	@Override
@@ -86,7 +91,8 @@ public class DefaultParallelService extends
 	public void saveProfiles() {
 		final List<String> serializedProfiles = new LinkedList<>();
 		profiles.forEach(p -> serializedProfiles.add(serializeProfile(p)));
-		prefService.put(this.getClass(), PROFILES, serializedProfiles);
+		prefService.put(this.getClass(), PROFILES_PROPERTY_NAME,
+			serializedProfiles);
 	}
 
 	@Override
@@ -142,12 +148,12 @@ public class DefaultParallelService extends
 	// -- Service methods --
 	
 	private void clearProfiles() {
-		prefService.remove(this.getClass(), PROFILES);
+		prefService.remove(this.getClass(), PROFILES_PROPERTY_NAME);
 	}
 
 	private void retrieveProfiles() {
 		profiles = new LinkedList<>();
-		prefService.getList(this.getClass(), PROFILES).stream().map(
+		prefService.getList(this.getClass(), PROFILES_PROPERTY_NAME).stream().map(
 			this::deserializeProfile).filter(Objects::nonNull).forEach(p -> profiles
 				.add(p));
 	}
@@ -185,7 +191,7 @@ public class DefaultParallelService extends
 			}
 		}
 		catch (final Exception e) {
-			// TODO: Proper error handling
+			log.error(e.getMessage(), e);
 		}
 		return null;
 	}

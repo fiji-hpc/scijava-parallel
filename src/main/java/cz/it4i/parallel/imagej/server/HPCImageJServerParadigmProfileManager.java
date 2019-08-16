@@ -2,7 +2,6 @@ package cz.it4i.parallel.imagej.server;
 
 
 import org.scijava.Context;
-import org.scijava.parallel.HavingOwnerWindow;
 import org.scijava.parallel.ParadigmManager;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
@@ -13,6 +12,7 @@ import cz.it4i.parallel.runners.MultipleHostsParadigmManagerUsingRunner;
 import cz.it4i.parallel.runners.ParadigmProfileUsingRunner;
 import cz.it4i.parallel.runners.ServerRunner;
 import cz.it4i.parallel.ui.HPCImageJServerRunnerWithUI;
+import cz.it4i.parallel.ui.HavingOwnerWindow;
 import javafx.stage.Window;
 
 

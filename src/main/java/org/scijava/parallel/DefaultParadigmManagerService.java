@@ -1,3 +1,10 @@
+/*******************************************************************************
+ * IT4Innovations - National Supercomputing Center
+ * Copyright (c) 2017 - 2019 All Right Reserved, https://www.it4i.cz
+ *
+ * This file is subject to the terms and conditions defined in
+ * file 'LICENSE.txt', which is part of this project.
+ ******************************************************************************/
 package org.scijava.parallel;
 
 import java.util.LinkedList;
@@ -12,6 +19,11 @@ import org.scijava.service.Service;
 
 import cz.it4i.parallel.Routines;
 
+/**
+ * Provided implementation of {@link ParadigmManagerService}.
+ * 
+ * @author Jan Kožusznik
+ */
 @Plugin(type = Service.class)
 public class DefaultParadigmManagerService extends AbstractService implements
 	ParadigmManagerService
@@ -28,10 +40,8 @@ public class DefaultParadigmManagerService extends AbstractService implements
 	public List<ParadigmManager> getManagers(
 		Class<? extends ParallelizationParadigm> paradigmClazz)
 	{
-		List<ParadigmManager> list = managers.stream().filter(m -> m
-			.getSupportedParadigmType().equals(paradigmClazz)).collect(
-				Collectors.toList());
-		return list;
+		return managers.stream().filter(m -> m.getSupportedParadigmType().equals(
+			paradigmClazz)).collect(Collectors.toList());
 	}
 
 	@Override

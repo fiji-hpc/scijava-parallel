@@ -3,7 +3,6 @@ package cz.it4i.parallel.ui;
 
 import org.scijava.Context;
 import org.scijava.Priority;
-import org.scijava.parallel.HavingOwnerWindow;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import org.scijava.prefs.PrefService;

@@ -1,4 +1,10 @@
-// TODO: Add copyright stuff
+/*******************************************************************************
+ * IT4Innovations - National Supercomputing Center
+ * Copyright (c) 2017 - 2019 All Right Reserved, https://www.it4i.cz
+ *
+ * This file is subject to the terms and conditions defined in
+ * file 'LICENSE.txt', which is part of this project.
+ ******************************************************************************/
 
 package org.scijava.parallel;
 
@@ -12,7 +18,13 @@ import java.util.stream.Collectors;
 import org.scijava.command.Command;
 import org.scijava.plugin.SingletonPlugin;
 
-// TODO: Add description
+import cz.it4i.parallel.SciJavaParallelRuntimeException;
+
+/**
+ * Objects of this type are used for parallelization in scijava.
+ * 
+ * @author Petr Bainar, Jan Kožusznik
+ */
 
 public interface ParallelizationParadigm extends SingletonPlugin, Closeable {
 
@@ -44,10 +56,10 @@ public interface ParallelizationParadigm extends SingletonPlugin, Closeable {
 			}
 			catch (InterruptedException exc) {
 				Thread.currentThread().interrupt();
-				throw new RuntimeException(exc);
+				throw new SciJavaParallelRuntimeException(exc);
 			}
 			catch (ExecutionException exc) {
-				throw new RuntimeException(exc);
+				throw new SciJavaParallelRuntimeException(exc);
 			}
 		}).collect(Collectors.toList());
 	}
@@ -57,7 +69,7 @@ public interface ParallelizationParadigm extends SingletonPlugin, Closeable {
 
 	// -- Closeable methods --
 	@Override
-	default public void close() {
+	default void close() {
 
 	}
 

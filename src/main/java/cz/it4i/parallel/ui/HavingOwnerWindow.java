@@ -1,4 +1,4 @@
-package org.scijava.parallel;
+package cz.it4i.parallel.ui;
 
 
 public interface HavingOwnerWindow<T> {

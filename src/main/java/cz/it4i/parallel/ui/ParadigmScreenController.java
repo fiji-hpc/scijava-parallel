@@ -7,7 +7,6 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 import org.apache.commons.lang3.BooleanUtils;
-import org.scijava.parallel.HavingOwnerWindow;
 import org.scijava.parallel.ParadigmManager;
 import org.scijava.parallel.ParadigmManagerService;
 import org.scijava.parallel.ParallelService;
