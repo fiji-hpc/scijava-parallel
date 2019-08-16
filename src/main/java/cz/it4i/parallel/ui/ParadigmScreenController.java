@@ -98,6 +98,7 @@ public class ParadigmScreenController extends Pane implements CloseableControl
 		cf.exceptionally(t -> {
 			chkActive.setSelected(false);
 			userCheckedProfiles.put(activeProfile.toString(), false);
+			JavaFXRoutines.runOnFxThread(() -> showError("Connection error!", t.getMessage()));
 			return null;
 		});		
 	}
@@ -167,16 +168,20 @@ public class ParadigmScreenController extends Pane implements CloseableControl
 				cmbProfiles.getSelectionModel().select(profile);	
 			}
 		} catch (IllegalArgumentException exc) {
-			Alert alert = new Alert(AlertType.ERROR);
-			alert.setTitle("Error Dialog");
-			alert.setHeaderText("There is already a profile with the same name!");
-			alert.setContentText(exc.getMessage());
-
-			alert.showAndWait();
+				showError("There is already a profile with the same name!", exc.getMessage());
 		}
 		if (!paradigmIsCorrect) {
 			parallelService.deleteProfile(profile.toString());
 		}
+	}
+
+	private void showError(String header, String message) {
+		Alert alert = new Alert(AlertType.ERROR);
+		alert.setTitle("Error Dialog");
+		alert.setHeaderText(header);
+		alert.setContentText(message);
+
+		alert.showAndWait();		
 	}
 
 	public void deleteProfile() {
