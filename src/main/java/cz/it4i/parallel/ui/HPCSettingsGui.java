@@ -162,7 +162,7 @@ public class HPCSettingsGui implements Command
 	public void run() {
 		// Convert the authentication choice from String to Enum:
 		AuthenticationChoice authenticationChoiceEnum;
-		if (authenticationChoice.equals("Key file")) {
+		if (authenticationChoice.equals("Key file") || authenticationChoice.equals("KEY_FILE")) {
 			authenticationChoiceEnum = AuthenticationChoice.KEY_FILE;
 		}
 		else {
