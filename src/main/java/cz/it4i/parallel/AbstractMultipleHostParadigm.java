@@ -1,5 +1,6 @@
 package cz.it4i.parallel;
 
+import java.util.AbstractList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -15,12 +16,14 @@ public abstract class AbstractMultipleHostParadigm extends AbstractBaseParadigm
 
 	private Map<String, ParallelWorker> hostName2Worker = new HashMap<>();
 
+	private int ncores;
+
 	@Override
 	public void setHosts(Collection<Host> hosts) {
 		this.hosts.clear();
 		this.hosts.addAll(hosts.stream().map(Host::getName).collect(Collectors
 			.toList()));
-		int ncores = hosts.iterator().next().getNCores();
+		ncores = hosts.iterator().next().getNCores();
 		if (!hosts.stream().allMatch(host -> host.getNCores() == ncores)) {
 			throw new UnsupportedOperationException(
 				"Only hosts with same number of cores are supported");
@@ -30,6 +33,22 @@ public abstract class AbstractMultipleHostParadigm extends AbstractBaseParadigm
 	@Override
 	public List<String> getHosts() {
 		return hosts;
+	}
+
+	@Override
+	public List<Integer> getNCores() {
+		return new AbstractList<Integer>() {
+
+			@Override
+			public Integer get(int index) {
+				return ncores;
+			}
+
+			@Override
+			public int size() {
+				return hosts.size();
+			}
+		};
 	}
 
 	@Override

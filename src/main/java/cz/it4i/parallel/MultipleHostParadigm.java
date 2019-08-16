@@ -12,6 +12,8 @@ public interface MultipleHostParadigm extends ParallelizationParadigm {
 
 	List<String> getHosts();
 
+	List<Integer> getNCores();
+
 	List<Map<String, Object>> runOnHosts(String commandName,
 		Map<String, Object> parameters, List<String> hosts);
 }
