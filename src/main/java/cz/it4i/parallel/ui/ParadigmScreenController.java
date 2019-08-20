@@ -85,30 +85,6 @@ public class ParadigmScreenController extends Pane implements CloseableControl
 		performOperationWithServer(this::activateDeactivateOperation);
 	}
 
-	private void haveUserCheckSettings() {
-		if (!(activeProfile instanceof ParadigmProfileUsingRunner)) {
-			return;
-		}
-		if (chkActive.isSelected()) {
-			boolean userHasCheckedSettings = false;
-			
-			ParadigmProfileUsingRunner<?> profile =
-				(ParadigmProfileUsingRunner<?>) activeProfile;
-
-			String name = activeProfile.toString();
-			if(!userCheckedProfiles.containsKey(name)) {
-				userCheckedProfiles.put(name, false);
-			}
-			
-			userHasCheckedSettings = userCheckedProfiles.get(activeProfile.toString());
-			
-			if (!userHasCheckedSettings) {
-				runEditProfile(profile);
-				userCheckedProfiles.put(name, true);
-			}
-		}
-	}
-
 	public void initWithServices(ParallelService service,
 		ParadigmManagerService initParadigmManagerService)
 	{
@@ -278,21 +254,14 @@ public class ParadigmScreenController extends Pane implements CloseableControl
 	}
 
 	private void haveUserCheckSettings() {
+		if (!(activeProfile instanceof ParadigmProfileUsingRunner)) {
+			return;
+		}
 		if (chkActive.isSelected()) {
-			boolean userHasCheckedSettings = false;
-
 			ParadigmProfileUsingRunner<?> profile =
 				(ParadigmProfileUsingRunner<?>) activeProfile;
-
 			String name = activeProfile.toString();
-			if (!userCheckedProfiles.containsKey(name)) {
-				userCheckedProfiles.put(name, false);
-			}
-
-			userHasCheckedSettings = userCheckedProfiles.get(activeProfile
-				.toString());
-
-			if (!userHasCheckedSettings) {
+			if (!userCheckedProfiles.computeIfAbsent(name, x -> false)) {
 				runEditProfile(profile);
 				userCheckedProfiles.put(name, true);
 			}
