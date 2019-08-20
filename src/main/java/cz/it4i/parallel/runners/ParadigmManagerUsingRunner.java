@@ -125,12 +125,21 @@ public abstract class ParadigmManagerUsingRunner<T extends AbstractBaseParadigm,
 		typedProfile.initRunnerIfNeeded(this::initRunner);
 		ServerRunner<?> runner = typedProfile.getAssociatedRunner();
 		paradigm.setInitCommand(() -> {
-			if (runner.getStatus() == Status.NON_ACTIVE) {
-				runner.start();
+			try {
+				if (runner.getStatus() == Status.NON_ACTIVE) {
+					runner.start();
+				}
+				initParadigm(typedProfile, (T) paradigm);
 			}
-			initParadigm(typedProfile, (T) paradigm);
+			catch (RuntimeException exc) {
+				typedProfile.disposeRunner();
+				throw exc;
+			}
 		});
-		paradigm.setCloseCommand(runner::close);
+		paradigm.setCloseCommand(() -> {
+			runner.close();
+			typedProfile.disposeRunner();
+		});
 	}
 
 	private RunnerSettingsEditor<S> getEditor(

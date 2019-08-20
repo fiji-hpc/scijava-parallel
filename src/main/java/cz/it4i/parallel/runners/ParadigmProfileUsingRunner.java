@@ -33,6 +33,10 @@ public class ParadigmProfileUsingRunner<T extends RunnerSettings> extends
 		this.typeOfRunner = typeOfRunner;
 	}
 
+	public void disposeRunner() {
+		associatedRunner = null;
+	}
+
 	Class<T> getTypeOfSettings() {
 		if (associatedRunner != null) {
 			return associatedRunner.getTypeOfSettings();
@@ -53,7 +57,6 @@ public class ParadigmProfileUsingRunner<T extends RunnerSettings> extends
 		associatedRunner = createInstanceOfRunner();
 		initializer.accept(associatedRunner);
 		associatedRunner.init(settings);
-
 	}
 
 	private ServerRunner<T> createInstanceOfRunner() {
