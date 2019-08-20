@@ -35,5 +35,5 @@ public interface ParadigmManager
 	void prepareParadigm(ParallelizationParadigmProfile profile,
 		ParallelizationParadigm paradigm);
 
-	void shutdownIfPossible(ParallelizationParadigmProfile profile);
+	void shutdownOnClose(ParallelizationParadigmProfile profile);
 }

@@ -39,9 +39,6 @@ public class HPCImageJServerRunner extends
 	public HPCImageJServerRunner init(HPCSettings aSettings) {
 		this.settings = aSettings;
 		super.init(aSettings);
-		if (settings.getJobID() != null) {
-			startOrReconnectServer(this::reconnectServerIfRunningOrDisconnect);
-		}
 		return this;
 	}
 
@@ -63,6 +60,7 @@ public class HPCImageJServerRunner extends
 	@Override
 	public List< Integer > getPorts()
 	{
+		reconnectIfNeeded();
 		return ports;
 	}
 
@@ -82,9 +80,12 @@ public class HPCImageJServerRunner extends
 		return HPCSettings.class;
 	}
 
+
 	@Override
 	protected void doCloseInternally(boolean shutdown) {
+		reconnectIfNeeded();
 		super.doCloseInternally(shutdown);
+		job = null;
 		launcher.close();
 		launcher = null;
 	}
@@ -120,12 +121,19 @@ public class HPCImageJServerRunner extends
 			userName, keyFile, keyFilePassword, adapterType, redirectStdInErr);
 	}
 
+	private void reconnectIfNeeded() {
+		if (job == null && getStatus() == Status.ACTIVE) {
+			startOrReconnectServer(this::reconnectServerIfRunningOrDisconnect);
+		}
+	}
+
 	private void reconnectServerIfRunningOrDisconnect() {
 		if (launcher.isJobRunning(settings.getJobID())) {
 			job = launcher.getSubmittedJob(settings.getJobID());
 		}
 		else {
 			settings.setJobID(null);
+			job = null;
 			launcher.close();
 			launcher = null;
 		}

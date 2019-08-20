@@ -1,6 +1,5 @@
 package cz.it4i.parallel.runners;
 
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -81,7 +80,7 @@ public abstract class ParadigmManagerUsingRunner<T extends AbstractBaseParadigm,
 	}
 
 	@Override
-	public void shutdownIfPossible(ParallelizationParadigmProfile profile)
+	public void shutdownOnClose(ParallelizationParadigmProfile profile)
 	{
 		runForObjectIfOfTypeElseException(profile,
 			ParadigmProfileUsingRunner.class, typedProfile -> {
@@ -123,30 +122,22 @@ public abstract class ParadigmManagerUsingRunner<T extends AbstractBaseParadigm,
 	private void prepareParadigmInternal(
 		ParadigmProfileUsingRunner<S> typedProfile, AbstractBaseParadigm paradigm)
 	{
-		AtomicReference<ServerRunner<?>> runnerHolder = new AtomicReference<>();
-
+		
+		typedProfile.prepareRunner(this::initRunner);
 		paradigm.setInitCommand(() -> {
-			typedProfile.initRunnerIfNeeded(this::initRunner);
 			ServerRunner<?> serverRunner = typedProfile.getAssociatedRunner();
-			runnerHolder.set(serverRunner);
-			try {
-				if (serverRunner.getStatus() == Status.NON_ACTIVE) {
-					serverRunner.start();
-				}
-				initParadigm(typedProfile, (T) paradigm);
+			serverRunner.getPorts();
+			if (serverRunner.getStatus() == Status.NON_ACTIVE) {
+				serverRunner.start();
 			}
-			catch (RuntimeException exc) {
-				typedProfile.disposeRunner();
-				throw exc;
-			}
+			initParadigm(typedProfile, (T) paradigm);
 		});
 
 		paradigm.setCloseCommand(() -> {
-			ServerRunner<?> serverRunner = runnerHolder.get();
+			ServerRunner<?> serverRunner = typedProfile.getAssociatedRunner();
 			if (serverRunner != null) {
 				serverRunner.close();
 			}
-			typedProfile.disposeRunner();
 		});
 	}
 
