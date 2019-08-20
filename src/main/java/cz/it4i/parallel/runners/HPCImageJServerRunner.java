@@ -90,6 +90,10 @@ public class HPCImageJServerRunner extends
 		launcher = null;
 	}
 
+	protected void doReconnect() {
+		startOrReconnectServer(this::reconnectServerIfRunningOrDisconnect);
+	}
+
 	@Override
 	protected void doStartServer() throws IOException {
 		startOrReconnectServer(this::startNewServer);
@@ -123,7 +127,7 @@ public class HPCImageJServerRunner extends
 
 	private void reconnectIfNeeded() {
 		if (job == null && getStatus() == Status.ACTIVE) {
-			startOrReconnectServer(this::reconnectServerIfRunningOrDisconnect);
+			doReconnect();
 		}
 	}
 

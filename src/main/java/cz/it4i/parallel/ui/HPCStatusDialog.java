@@ -21,12 +21,20 @@ class HPCStatusDialog implements Closeable {
 		Runnable runner = () -> {
 			BorderPane panel = new BorderPane();
 			this.dialog = new Stage(StageStyle.UNDECORATED);
-			Scene scene = new Scene(panel, 240, 80);
+			Scene scene = new Scene(panel, 310, 80);
 			dialog.initOwner(parent);
 			dialog.setScene(scene);
 			this.label = new Label("Waiting for job schedule.");
 			panel.setCenter(label);
 			dialog.setResizable(false);
+		};
+		runInternally(runner);
+	}
+
+	void imageJServerReconnecting() {
+		Runnable runner = () -> {
+			this.label.setText("Waiting for a " + serverName + " reconnection.");
+			dialog.show();
 		};
 		runInternally(runner);
 	}

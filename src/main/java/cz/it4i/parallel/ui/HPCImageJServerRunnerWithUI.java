@@ -50,6 +50,16 @@ public class HPCImageJServerRunnerWithUI extends HPCImageJServerRunner {
 		}
 	}
 
+	@Override
+	protected void doReconnect() {
+		try (HPCStatusDialog dialog = new HPCStatusDialog(owner, getServerName())) {
+			log.debug("close");
+			dialog.imageJServerReconnecting();
+			super.doReconnect();
+			log.debug("close done");
+		}
+	}
+
 	protected String getServerName() {
 		return "ImageJ server";
 	}
