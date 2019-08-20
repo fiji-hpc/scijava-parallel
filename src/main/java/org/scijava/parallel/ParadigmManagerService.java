@@ -22,4 +22,9 @@ public interface ParadigmManagerService extends SciJavaService {
 	List<ParadigmManager> getManagers(
 		Class<? extends ParallelizationParadigm> paradigmType);
 
+	default ParadigmManager getManagers(ParallelizationParadigmProfile profile) {
+		return getManagers(profile.getParadigmType()).stream().filter(m -> m
+			.isProfileSupported(profile)).findAny().orElse(null);
+	}
+
 }

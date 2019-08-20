@@ -41,8 +41,6 @@ public class HPCSettings extends RunnerSettings
 
 	private final HPCSchedulerType adapterType;
 
-	private final boolean shutdownOnClose;
-
 	private final boolean redirectStdInErr;
 
 	@Builder
@@ -67,7 +65,6 @@ public class HPCSettings extends RunnerSettings
 		this.jobID = jobID;
 		this.adapterType = adapterType != null ? adapterType
 			: HPCSchedulerType.SLURM;
-		this.shutdownOnClose = shutdownOnClose;
 		this.redirectStdInErr = redirectStdInErr;
 	}
 

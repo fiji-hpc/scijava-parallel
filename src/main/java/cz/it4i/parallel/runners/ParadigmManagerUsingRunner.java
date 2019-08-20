@@ -1,5 +1,6 @@
 package cz.it4i.parallel.runners;
 
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -122,12 +123,15 @@ public abstract class ParadigmManagerUsingRunner<T extends AbstractBaseParadigm,
 	private void prepareParadigmInternal(
 		ParadigmProfileUsingRunner<S> typedProfile, AbstractBaseParadigm paradigm)
 	{
-		typedProfile.initRunnerIfNeeded(this::initRunner);
-		ServerRunner<?> runner = typedProfile.getAssociatedRunner();
+		AtomicReference<ServerRunner<?>> runnerHolder = new AtomicReference<>();
+
 		paradigm.setInitCommand(() -> {
+			typedProfile.initRunnerIfNeeded(this::initRunner);
+			ServerRunner<?> serverRunner = typedProfile.getAssociatedRunner();
+			runnerHolder.set(serverRunner);
 			try {
-				if (runner.getStatus() == Status.NON_ACTIVE) {
-					runner.start();
+				if (serverRunner.getStatus() == Status.NON_ACTIVE) {
+					serverRunner.start();
 				}
 				initParadigm(typedProfile, (T) paradigm);
 			}
@@ -136,8 +140,12 @@ public abstract class ParadigmManagerUsingRunner<T extends AbstractBaseParadigm,
 				throw exc;
 			}
 		});
+
 		paradigm.setCloseCommand(() -> {
-			runner.close();
+			ServerRunner<?> serverRunner = runnerHolder.get();
+			if (serverRunner != null) {
+				serverRunner.close();
+			}
 			typedProfile.disposeRunner();
 		});
 	}

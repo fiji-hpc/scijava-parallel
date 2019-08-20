@@ -69,6 +69,9 @@ public class HPCSettingsScreenWindow {
 			settings = this.controller.getSettings();
 			// Store the settings for this form.
 			storeLastForm.storeLastForm(settings);
+			if (oldSettings != null) {
+				settings.setJobID(oldSettings.getJobID());
+			}
 		}
 		else {
 			// The user has not accepted any settings and therefore they should be

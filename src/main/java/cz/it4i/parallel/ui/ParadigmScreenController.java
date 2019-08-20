@@ -26,7 +26,9 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.Pane;
 import javafx.stage.Window;
 import javafx.util.StringConverter;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class ParadigmScreenController extends Pane implements CloseableControl
 {
 
@@ -96,6 +98,7 @@ public class ParadigmScreenController extends Pane implements CloseableControl
 			chkActive.setSelected(false);
 			userCheckedProfiles.put(activeProfile.toString(), false);
 			JavaFXRoutines.runOnFxThread(() -> SimpleDialog.showError("Connection error!", t.getMessage()));
+			log.info(t.getMessage(), t);
 			return null;
 		});		
 	}
@@ -250,10 +253,7 @@ public class ParadigmScreenController extends Pane implements CloseableControl
 
 
 	private ParadigmManager findManager(ParallelizationParadigmProfile profile) {
-		ParadigmManager result = paradigmManagerService.getManagers(profile
-			.getParadigmType())
-			.stream().filter(m -> m.isProfileSupported(profile)).findAny().orElse(
-				null);
+		ParadigmManager result = paradigmManagerService.getManagers(profile);
 		if (result instanceof HavingOwnerWindow<?>) {
 			HavingOwnerWindow<?> havingParent = (HavingOwnerWindow<?>) result;
 			if (havingParent.getType().isInstance(getOwnerWindow())) {
@@ -306,12 +306,7 @@ public class ParadigmScreenController extends Pane implements CloseableControl
 
 	private void initProfile() {		
 		ParallelizationParadigm paradigm = parallelService.getParadigm();
-		
 		if (paradigm != null) {
-			ParadigmManager manager = findManager(activeProfile);
-			if (manager != null) {
-				manager.prepareParadigm(activeProfile, paradigm);
-			}
 			paradigm.init();
 			parallelService.saveProfiles();
 		}

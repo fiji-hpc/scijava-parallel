@@ -59,13 +59,19 @@ public class DefaultParallelService extends
 				Collectors.toList());
 
 		if (selectedProfiles.size() == 1) {
-
+			ParallelizationParadigmProfile profile = selectedProfiles.get(0);
 			final List<ParallelizationParadigm> foundParadigms = getInstances()
-				.stream().filter(paradigm -> paradigm.getClass().equals(selectedProfiles
-					.get(0).getParadigmType())).collect(Collectors.toList());
-
+				.stream().filter(paradigm -> paradigm.getClass().equals(profile
+					.getParadigmType())).collect(Collectors.toList());
 			if (foundParadigms.size() == 1) {
-				return foundParadigms.get(0);
+				ParallelizationParadigm paradigm = foundParadigms.get(0);
+				if (paradigm.getStatus() == Status.NON_ACTIVE) {
+					ParadigmManager manager = paradigmManagerService.getManagers(profile);
+					if (manager != null) {
+						manager.prepareParadigm(profile, paradigm);
+					}
+				}
+				return paradigm;
 			}
 		}
 
@@ -140,6 +146,7 @@ public class DefaultParallelService extends
 		super.dispose();
 		if (getParadigm() != null && getParadigm().getStatus() == Status.ACTIVE) {
 			getParadigm().close();
+			saveProfiles();
 		}
 	}
 

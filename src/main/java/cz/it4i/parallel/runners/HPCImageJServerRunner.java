@@ -149,7 +149,9 @@ public class HPCImageJServerRunner extends
 		command.run();
 		if (job != null) {
 			ports = job.createTunnels(getStartPort(), getStartPort());
+			settings.setJobID(job.getID());
 		}
+
 	}
 
 }
