@@ -80,7 +80,7 @@ public abstract class ParadigmManagerUsingRunner<T extends AbstractBaseParadigm,
 	}
 
 	@Override
-	public void shutdownOnClose(ParallelizationParadigmProfile profile)
+	public void setShutdownOnParadigmClose(ParallelizationParadigmProfile profile)
 	{
 		runForObjectIfOfTypeElseException(profile,
 			ParadigmProfileUsingRunner.class, typedProfile -> {

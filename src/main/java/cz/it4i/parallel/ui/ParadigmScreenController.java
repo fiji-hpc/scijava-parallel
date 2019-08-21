@@ -216,7 +216,7 @@ public class ParadigmScreenController extends Pane implements CloseableControl
 		if (!chkRunning.isSelected()) {
 			ParadigmManager manager = findManager(activeProfile);
 			if (manager != null) {
-				manager.shutdownOnClose(activeProfile);
+				manager.setShutdownOnParadigmClose(activeProfile);
 			}
 			if (!chkActive.isSelected()) {
 				ParallelizationParadigm paradigm = parallelService.getParadigm();
