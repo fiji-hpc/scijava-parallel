@@ -21,7 +21,7 @@ import cz.it4i.fiji.scpclient.SshCommandClient;
 import cz.it4i.fiji.scpclient.SshExecutionSession;
 import cz.it4i.parallel.runners.ClusterJobLauncher.Job.POutThread;
 
-class ClusterJobLauncher implements Closeable {
+public class ClusterJobLauncher implements Closeable {
 
 	private static final Logger log = LoggerFactory.getLogger(
 		ClusterJobLauncher.class);
