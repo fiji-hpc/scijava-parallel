@@ -19,13 +19,18 @@ public class LocalImageJRunner extends
 	RunningRemoteServer
 {
 
-	public LocalImageJRunner(List<String> parameters, IntConsumer portWaiting) {
+	public LocalImageJRunner(List<String> parameters, IntConsumer portWaiting,
+		int portNumber)
+	{
 		super(parameters, portWaiting);
+		this.portNumber = portNumber;
 	}
 
 	private Process imageJServerProcess;
 
 	private String fijiExecutable;
+
+	private final int portNumber;
 
 	@Override
 	public List<Integer> getNCores() {
@@ -39,8 +44,8 @@ public class LocalImageJRunner extends
 	}
 
 	@Override
-	public List<Integer> getPorts() {
-		return Collections.singletonList(8080);
+	public final List<Integer> getPorts() {
+		return Collections.singletonList(portNumber);
 	}
 
 	@Override

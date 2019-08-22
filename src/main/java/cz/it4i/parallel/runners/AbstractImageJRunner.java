@@ -68,7 +68,7 @@ public abstract class AbstractImageJRunner<T extends RunnerSettings>
 		}
 	}
 
-	protected List<String> getParameters() {
+	protected final List<String> getParameters() {
 		return parameters;
 	}
 
