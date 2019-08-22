@@ -29,7 +29,7 @@ import javafx.util.StringConverter;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class ParadigmScreenController extends Pane implements CloseableControl
+class ParadigmScreenController extends Pane implements CloseableControl
 {
 
 	@FXML

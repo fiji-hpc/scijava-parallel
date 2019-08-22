@@ -13,7 +13,7 @@ import javafx.stage.Stage;
 import lombok.Getter;
 import lombok.Setter;
 
-public class LocalSettingsScreenController extends AnchorPane {
+class LocalSettingsScreenController extends AnchorPane {
 
 	@FXML
 	private TextField localFijiExecutablePathTextField;

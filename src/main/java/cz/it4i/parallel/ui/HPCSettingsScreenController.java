@@ -24,7 +24,7 @@ import javafx.util.StringConverter;
 import lombok.Getter;
 import lombok.Setter;
 
-public class HPCSettingsScreenController extends AnchorPane {
+class HPCSettingsScreenController extends AnchorPane {
 
 	@FXML
 	private TextField hostTextField;

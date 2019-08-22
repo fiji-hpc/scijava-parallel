@@ -21,12 +21,12 @@ import cz.it4i.fiji.scpclient.SshCommandClient;
 import cz.it4i.fiji.scpclient.SshExecutionSession;
 import cz.it4i.parallel.runners.ClusterJobLauncher.Job.POutThread;
 
-public class ClusterJobLauncher implements Closeable {
+class ClusterJobLauncher implements Closeable {
 
-	private final static Logger log = LoggerFactory.getLogger(
+	private static final Logger log = LoggerFactory.getLogger(
 		ClusterJobLauncher.class);
 
-	private final static long REMOTE_CONSOLE_READ_TIMEOUT = 500;
+	private static final long REMOTE_CONSOLE_READ_TIMEOUT = 500;
 
 	private Collection<POutThread> threads = new LinkedList<>();
 
@@ -250,7 +250,9 @@ public class ClusterJobLauncher implements Closeable {
 		try {
 			Thread.sleep(timeout);
 		}
-		catch (InterruptedException exc) {}
+		catch (InterruptedException exc) {
+			Thread.currentThread().interrupt();
+		}
 	}
 
 }

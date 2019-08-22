@@ -14,7 +14,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 
-public class HPCSettingsScreenWindow {
+class HPCSettingsScreenWindow {
 
 	@Plugin(type = RunnerSettingsEditor.class, priority = Priority.HIGH)
 	public static class Editor implements RunnerSettingsEditor<HPCSettings> {
