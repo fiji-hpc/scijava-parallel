@@ -9,4 +9,3 @@ Fiji that could be used as worker should contain libraries from update site of I
 * httpcore-4.4.4.jar 
 * httpmime-4.3.1.jar
 * json-simple-1.1.jar
- 
