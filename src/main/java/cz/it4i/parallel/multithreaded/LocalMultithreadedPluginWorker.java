@@ -23,7 +23,7 @@ public class LocalMultithreadedPluginWorker implements ParallelWorker {
 	@Parameter
 	private DatasetIOService datasetIOService;
 
-	private final static Logger log = LoggerFactory.getLogger(
+	private static final Logger log = LoggerFactory.getLogger(
 		cz.it4i.parallel.multithreaded.LocalMultithreadedPluginWorker.class);
 
 	@Parameter
@@ -47,7 +47,11 @@ public class LocalMultithreadedPluginWorker implements ParallelWorker {
 		try {
 			return commandService.run(commandTypeName, true, inputMap).get().getOutputs();
 		}
-		catch (InterruptedException | ExecutionException e) {
+		catch (ExecutionException e) {
+			log.error(e.getMessage(), e);
+		}
+		catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
 			log.error(e.getMessage(), e);
 		}
 

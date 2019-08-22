@@ -165,6 +165,7 @@ public class DefaultRequestBrokerService extends AbstractService implements
 			return null;
 		}
 		catch (InterruptedException exc) {
+			Thread.currentThread().interrupt();
 			return null;
 		}
 	}
