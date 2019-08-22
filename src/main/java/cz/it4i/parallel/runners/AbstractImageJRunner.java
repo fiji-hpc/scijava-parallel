@@ -2,25 +2,36 @@
 package cz.it4i.parallel.runners;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
+import java.util.function.IntConsumer;
 
 import cz.it4i.parallel.SciJavaParallelRuntimeException;
 import lombok.AccessLevel;
 import lombok.Setter;
 
-public abstract class AbstractImageJServerRunner<T extends RunnerSettings>
+public abstract class AbstractImageJRunner<T extends RunnerSettings>
 	implements AutoCloseable, ServerRunner<T>
 {
 
-	private static final List<String> IMAGEJ_SERVER_PARAMETERS = Arrays.asList(
-		"-Dimagej.legacy.modernOnlyCommands=true", "--", "--ij2", "--headless",
-		"--server");
+	
 
 	@Setter(value = AccessLevel.PROTECTED)
 	private boolean shutdownOnClose;
 
 	private boolean shutdownOnNextClose;
+
+	private final List<String> parameters;
+
+	private final IntConsumer portWaiting;
+
+
+	public AbstractImageJRunner(List<String> parameters,
+		IntConsumer portWaiting)
+	{
+		super();
+		this.parameters = parameters;
+		this.portWaiting = portWaiting;
+	}
 
 	@Override
 	public ServerRunner<T> init(T settings) {
@@ -58,7 +69,7 @@ public abstract class AbstractImageJServerRunner<T extends RunnerSettings>
 	}
 
 	protected List<String> getParameters() {
-		return IMAGEJ_SERVER_PARAMETERS;
+		return parameters;
 	}
 
 	protected abstract void doStartServer()
@@ -66,10 +77,8 @@ public abstract class AbstractImageJServerRunner<T extends RunnerSettings>
 
 	protected abstract void shutdown();
 
-	protected void waitForServer(Integer port)
-	{
-		WaitForHTTPServerRunTS.create("http://localhost:" + port + "/modules")
-			.run();
+	private void waitForServer(Integer port) {
+		portWaiting.accept(port);
 	}
 
 }

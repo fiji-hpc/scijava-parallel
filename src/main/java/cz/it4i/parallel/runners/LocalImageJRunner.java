@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.IntConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -13,10 +14,14 @@ import org.scijava.parallel.Status;
 
 import cz.it4i.parallel.RunningRemoteServer;
 
-public class ImageJServerRunner extends
-	AbstractImageJServerRunner<ImageJServerRunnerSettings> implements
+public class LocalImageJRunner extends
+	AbstractImageJRunner<LocalImageJRunnerSettings> implements
 	RunningRemoteServer
 {
+
+	public LocalImageJRunner(List<String> parameters, IntConsumer portWaiting) {
+		super(parameters, portWaiting);
+	}
 
 	private Process imageJServerProcess;
 
@@ -49,12 +54,12 @@ public class ImageJServerRunner extends
 	}
 
 	@Override
-	public Class<ImageJServerRunnerSettings> getTypeOfSettings() {
-		return ImageJServerRunnerSettings.class;
+	public Class<LocalImageJRunnerSettings> getTypeOfSettings() {
+		return LocalImageJRunnerSettings.class;
 	}
 
 	@Override
-	public ImageJServerRunner init(ImageJServerRunnerSettings settings) {
+	public LocalImageJRunner init(LocalImageJRunnerSettings settings) {
 		super.init(settings);
 		fijiExecutable = settings.getFijiExecutable();
 		return this;

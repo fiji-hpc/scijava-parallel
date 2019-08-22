@@ -3,7 +3,7 @@ package cz.it4i.parallel.ui;
 
 import java.io.File;
 import java.nio.file.Path;
-import cz.it4i.parallel.runners.ImageJServerRunnerSettings;
+import cz.it4i.parallel.runners.LocalImageJRunnerSettings;
 import cz.it4i.swing_javafx_ui.JavaFXRoutines;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -28,15 +28,15 @@ public class LocalSettingsScreenController extends AnchorPane {
 
 	@Getter
 	@Setter
-	private ImageJServerRunnerSettings settings;
+	private LocalImageJRunnerSettings settings;
 
 	public LocalSettingsScreenController() {
 		JavaFXRoutines.initRootAndController("local-settings-screen.fxml", this);
 	}
 	
-	private ImageJServerRunnerSettings createSettings() {
+	private LocalImageJRunnerSettings createSettings() {
 		Path fijiPath = localFijiExecutablePath.toPath();
-		return ImageJServerRunnerSettings.builder().fiji(fijiPath.toString())
+		return LocalImageJRunnerSettings.builder().fiji(fijiPath.toString())
 			.build();
 	}
 
@@ -77,7 +77,7 @@ public class LocalSettingsScreenController extends AnchorPane {
 
 	}
 
-	public void setInitialFormValues(ImageJServerRunnerSettings oldSettings) {
+	public void setInitialFormValues(LocalImageJRunnerSettings oldSettings) {
 		if (oldSettings == null) {
 			localFijiExecutablePathTextField.setText("Empty");
 		}

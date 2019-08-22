@@ -20,7 +20,7 @@ import org.scijava.widget.FileWidget;
 import org.scijava.widget.TextWidget;
 
 import cz.it4i.parallel.SciJavaParallelRuntimeException;
-import cz.it4i.parallel.runners.ImageJServerRunnerSettings;
+import cz.it4i.parallel.runners.LocalImageJRunnerSettings;
 import cz.it4i.parallel.runners.RunnerSettingsEditor;
 
 @Plugin(type = Command.class, headless = false)
@@ -29,20 +29,20 @@ public class ImageJSettingsGui implements Command
 	
 	@Plugin(type = RunnerSettingsEditor.class)
 	public static class Editor implements
-		RunnerSettingsEditor<ImageJServerRunnerSettings>
+		RunnerSettingsEditor<LocalImageJRunnerSettings>
 	{
 
 		@Parameter
 		private Context context;
 
 		@Override
-		public Class<ImageJServerRunnerSettings> getTypeOfSettings() {
-			return ImageJServerRunnerSettings.class;
+		public Class<LocalImageJRunnerSettings> getTypeOfSettings() {
+			return LocalImageJRunnerSettings.class;
 		}
 
 		@Override
-		public ImageJServerRunnerSettings edit(
-			ImageJServerRunnerSettings aSettings)
+		public LocalImageJRunnerSettings edit(
+			LocalImageJRunnerSettings aSettings)
 		{
 			Map<String, Object> inputs = new HashMap<>();
 			if (aSettings != null) {
@@ -52,7 +52,7 @@ public class ImageJSettingsGui implements Command
 		}
 	}
 
-	public static void fillInputs(ImageJServerRunnerSettings settings,
+	public static void fillInputs(LocalImageJRunnerSettings settings,
 		Map<String, Object> inputs)
 	{
 		Path fiji = Paths.get(settings.getFijiExecutable());
@@ -60,7 +60,7 @@ public class ImageJSettingsGui implements Command
 		inputs.put("command", fiji.getFileName().toString());
 	}
 
-	public static ImageJServerRunnerSettings showDialog(Context context,
+	public static LocalImageJRunnerSettings showDialog(Context context,
 		Map<String, Object> inputs)
 	{
 		CommandService command = context.service(CommandService.class);
@@ -73,7 +73,7 @@ public class ImageJSettingsGui implements Command
 				module = command.run(ImageJSettingsGui.class, true, inputs);
 			}
 	
-			return (ImageJServerRunnerSettings) module.get().getOutput("settings");
+			return (LocalImageJRunnerSettings) module.get().getOutput("settings");
 		}
 		catch (InterruptedException | ExecutionException e) {
 			Thread.currentThread().interrupt();
@@ -89,12 +89,12 @@ public class ImageJSettingsGui implements Command
 	private String command = "ImageJ-linux64";
 
 	@Parameter(type = ItemIO.OUTPUT)
-	private ImageJServerRunnerSettings settings;
+	private LocalImageJRunnerSettings settings;
 
 	@Override
 	public void run() {
 		Path fiji = localDirectory.toPath().resolve(command);
-		settings = ImageJServerRunnerSettings.builder().fiji(fiji.toString())
+		settings = LocalImageJRunnerSettings.builder().fiji(fiji.toString())
 			.build();
 	}
 }

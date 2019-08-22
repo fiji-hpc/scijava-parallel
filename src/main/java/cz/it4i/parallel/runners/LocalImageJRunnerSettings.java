@@ -4,7 +4,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 
-public class ImageJServerRunnerSettings extends RunnerSettings
+public class LocalImageJRunnerSettings extends RunnerSettings
 {
 
 	private static final long serialVersionUID = 4430991592979282602L;
@@ -13,7 +13,7 @@ public class ImageJServerRunnerSettings extends RunnerSettings
 	private String fijiExecutable;
 
 	@Builder
-	private ImageJServerRunnerSettings(String fiji)
+	private LocalImageJRunnerSettings(String fiji)
 	{
 		super(true);
 		fijiExecutable = fiji;

@@ -6,6 +6,7 @@ import com.jcraft.jsch.JSchException;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.IntConsumer;
 import java.util.stream.Collectors;
 
 import org.scijava.parallel.Status;
@@ -14,8 +15,8 @@ import cz.it4i.parallel.Routines;
 import cz.it4i.parallel.RunningRemoteServer;
 import cz.it4i.parallel.runners.ClusterJobLauncher.Job;
 
-public class HPCImageJServerRunner extends
-	AbstractImageJServerRunner<HPCSettings> implements
+public class HPCImageJRunner extends
+	AbstractImageJRunner<HPCSettings> implements
 	RunningRemoteServer
 {
 
@@ -27,16 +28,17 @@ public class HPCImageJServerRunner extends
 
 	private ClusterJobLauncher launcher;
 
-	public HPCImageJServerRunner() {
-	}
+	private final int startPort;
 
-	public HPCImageJServerRunner(HPCSettings settings) {
-		settings = settings.clone();
-		init(settings);
+	public HPCImageJRunner(List<String> parameters, IntConsumer portWaiting,
+		int startPort)
+	{
+		super(parameters, portWaiting);
+		this.startPort = startPort;
 	}
 
 	@Override
-	public HPCImageJServerRunner init(HPCSettings aSettings) {
+	public HPCImageJRunner init(HPCSettings aSettings) {
 		this.settings = aSettings;
 		super.init(aSettings);
 		return this;
@@ -99,8 +101,8 @@ public class HPCImageJServerRunner extends
 		startOrReconnectServer(this::startNewServer);
 	}
 
-	protected int getStartPort() {
-		return 8080;
+	private int getStartPort() {
+		return startPort;
 	}
 
 	@Override

@@ -3,24 +3,23 @@ package cz.it4i.parallel.ui;
 
 
 
-import org.scijava.Context;
+import java.util.List;
+import java.util.function.IntConsumer;
 
-import cz.it4i.parallel.runners.HPCImageJServerRunner;
-import cz.it4i.parallel.runners.HPCSettings;
+import cz.it4i.parallel.runners.HPCImageJRunner;
 import javafx.stage.Window;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class HPCImageJServerRunnerWithUI extends HPCImageJServerRunner {
+public class HPCImageJRunnerWithUI extends HPCImageJRunner {
+
+	public HPCImageJRunnerWithUI(List<String> parameters, IntConsumer portWaiting,
+		int startPort)
+	{
+		super(parameters, portWaiting, startPort);
+	}
 
 	private Window owner;
-
-	public HPCImageJServerRunnerWithUI() {
-	}
-
-	public HPCImageJServerRunnerWithUI(HPCSettings settings) {
-		super(settings);
-	}
 
 	public void initOwnerWindow(Window aOwner) {
 		this.owner = aOwner;
@@ -67,12 +66,6 @@ public class HPCImageJServerRunnerWithUI extends HPCImageJServerRunner {
 	void imageJServerRunning() {
 		log.info("job: " + getJob().getID() + " started on hosts: " + getJob()
 			.getNodes());
-	}
-	public static HPCImageJServerRunnerWithUI gui(Context context)
-	{
-		HPCImageJServerRunnerWithUI result = new HPCImageJServerRunnerWithUI(
-			HPCSettingsGui.showDialog(context));
-		return result;
 	}
 
 }

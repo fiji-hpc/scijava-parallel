@@ -7,7 +7,7 @@ import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import org.scijava.prefs.PrefService;
 
-import cz.it4i.parallel.runners.ImageJServerRunnerSettings;
+import cz.it4i.parallel.runners.LocalImageJRunnerSettings;
 import cz.it4i.parallel.runners.RunnerSettingsEditor;
 import javafx.scene.Scene;
 import javafx.stage.Modality;
@@ -18,7 +18,7 @@ public class LocalSettingsScreenWindow {
 
 	@Plugin(type = RunnerSettingsEditor.class, priority = Priority.HIGH)
 	public static class Editor implements
-		RunnerSettingsEditor<ImageJServerRunnerSettings>, HavingOwnerWindow<Window>
+		RunnerSettingsEditor<LocalImageJRunnerSettings>, HavingOwnerWindow<Window>
 	{
 
 		@Parameter
@@ -26,13 +26,13 @@ public class LocalSettingsScreenWindow {
 		private Window owner;
 
 		@Override
-		public Class<ImageJServerRunnerSettings> getTypeOfSettings() {
-			return ImageJServerRunnerSettings.class;
+		public Class<LocalImageJRunnerSettings> getTypeOfSettings() {
+			return LocalImageJRunnerSettings.class;
 		}
 
 		@Override
-		public ImageJServerRunnerSettings edit(
-			ImageJServerRunnerSettings settings)
+		public LocalImageJRunnerSettings edit(
+			LocalImageJRunnerSettings settings)
 		{
 			LocalSettingsScreenWindow localSettingsScreenWindow =
 				new LocalSettingsScreenWindow();
@@ -59,17 +59,17 @@ public class LocalSettingsScreenWindow {
 
 	private PrefService prefService;
 
-	public ImageJServerRunnerSettings showDialog(
-		final ImageJServerRunnerSettings oldSettings)
+	public LocalImageJRunnerSettings showDialog(
+		final LocalImageJRunnerSettings oldSettings)
 	{
-		ImageJServerRunnerSettings settings;
+		LocalImageJRunnerSettings settings;
 
 		// Get the old settings:
 		settings = oldSettings;
 
 		// if the old settings are null set the last time's
 		// user approved settings of this form.
-		LastFormLoader<ImageJServerRunnerSettings> storeLastForm =
+		LastFormLoader<LocalImageJRunnerSettings> storeLastForm =
 			new LastFormLoader<>(prefService, "localSettingsForm", this.getClass());
 		if (settings == null) {
 			settings = storeLastForm.loadLastForm();
