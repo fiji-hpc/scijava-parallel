@@ -12,12 +12,12 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
-import org.scijava.parallel.ParallelizationParadigm;
-import org.scijava.parallel.PersistentParallelizationParadigm;
 import org.scijava.parallel.Status;
 
 import cz.it4i.parallel.Host;
 import cz.it4i.parallel.MultipleHostParadigm;
+import cz.it4i.parallel.PersistentRPCParadigm;
+import cz.it4i.parallel.RPCParadigm;
 import cz.it4i.parallel.RunningRemoteServer;
 import cz.it4i.parallel.plugins.RequestBrokerServiceCallCommand;
 import cz.it4i.parallel.plugins.RequestBrokerServiceGetResultCommand;
@@ -29,7 +29,7 @@ import lombok.Data;
 
 
 public class PersistentParallelizationParadigmImpl implements
-	PersistentParallelizationParadigm
+	PersistentRPCParadigm
 {
 
 	public static final String INPUTS = "inputs";
@@ -41,7 +41,7 @@ public class PersistentParallelizationParadigmImpl implements
 			UNKNOWN;
 	}
 
-	private final ParallelizationParadigm paradigm;
+	private final RPCParadigm paradigm;
 
 
 	private final Map<CompletableFuture<Map<String, Object>>, Serializable> futures2id =
@@ -54,15 +54,15 @@ public class PersistentParallelizationParadigmImpl implements
 
 	private PInnerCallStrategy callStrategy;
 
-	public static PersistentParallelizationParadigm addPersistencyToParadigm(
-		ParallelizationParadigm paradigm, RunningRemoteServer runningServer)
+	public static PersistentRPCParadigm addPersistencyToParadigm(
+		RPCParadigm paradigm, RunningRemoteServer runningServer)
 	{
 		return addPersistencyToParadigm(paradigm, runningServer, paradigm.getClass()
 			.getCanonicalName());
 	}
 
-	public static PersistentParallelizationParadigm addPersistencyToParadigm(
-		ParallelizationParadigm paradigm, RunningRemoteServer runningServer,
+	public static PersistentRPCParadigm addPersistencyToParadigm(
+		RPCParadigm paradigm, RunningRemoteServer runningServer,
 		String paradigmClassName)
 	{
 
@@ -91,7 +91,7 @@ public class PersistentParallelizationParadigmImpl implements
 	}
 
 	private PersistentParallelizationParadigmImpl(
-		ParallelizationParadigm paradigmParam, PInnerCallStrategy callStrategy)
+		RPCParadigm paradigmParam, PInnerCallStrategy callStrategy)
 	{
 		paradigm = paradigmParam;
 		this.callStrategy = callStrategy;
@@ -264,9 +264,9 @@ public class PersistentParallelizationParadigmImpl implements
 
 	private static class PInnerCallStrategyOneHost implements PInnerCallStrategy {
 
-		private ParallelizationParadigm paradigm;
+		private RPCParadigm paradigm;
 
-		public PInnerCallStrategyOneHost(ParallelizationParadigm paradigm) {
+		public PInnerCallStrategyOneHost(RPCParadigm paradigm) {
 			this.paradigm = paradigm;
 		}
 

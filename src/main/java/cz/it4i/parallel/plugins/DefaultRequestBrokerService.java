@@ -24,6 +24,7 @@ import org.scijava.service.Service;
 
 import cz.it4i.parallel.Host;
 import cz.it4i.parallel.MultipleHostParadigm;
+import cz.it4i.parallel.RPCParadigm;
 import cz.it4i.parallel.SciJavaParallelRuntimeException;
 import lombok.extern.slf4j.Slf4j;
 
@@ -136,7 +137,8 @@ public class DefaultRequestBrokerService extends AbstractService implements
 		String commandName,
 		List<Map<String, Object>> parameters)
 	{
-		return parallelService.getParadigm().runAllAsync(commandName, parameters);
+		return parallelService.getParadigmOfType(RPCParadigm.class).runAllAsync(
+			commandName, parameters);
 	}
 
 

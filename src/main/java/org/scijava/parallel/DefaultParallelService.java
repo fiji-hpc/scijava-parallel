@@ -77,6 +77,17 @@ public class DefaultParallelService extends
 	}
 
 	@Override
+	public <T extends ParallelizationParadigm> T getParadigmOfType(
+		Class<T> type)
+	{
+		ParallelizationParadigm result = getParadigm();
+		if (result != null && type.isInstance(result)) {
+			return type.cast(result);
+		}
+		return null;
+	}
+
+	@Override
 	public List<ParallelizationParadigmProfile> getProfiles() {
 		return profiles;
 	}

@@ -5,7 +5,7 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this project.
  ******************************************************************************/
-package org.scijava.parallel;
+package cz.it4i.parallel;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -13,15 +13,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
+import org.scijava.parallel.ParallelizationParadigm;
+
 /**
  * Extension of {@link ParallelizationParadigm} that allows send request,
  * disconnect, save/load requests IDs, reconnect and get results.
  * 
  * @author Jan Kožusznik
  */
-public interface PersistentParallelizationParadigm extends
-	ParallelizationParadigm
-{
+public interface PersistentRPCParadigm extends RPCParadigm {
 
 	public interface CompletableFutureID extends Serializable {
 

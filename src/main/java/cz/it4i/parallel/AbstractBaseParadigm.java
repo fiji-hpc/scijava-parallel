@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 
 import org.scijava.Context;
 import org.scijava.command.CommandService;
-import org.scijava.parallel.ParallelizationParadigm;
 import org.scijava.parallel.Status;
 import org.scijava.plugin.Parameter;
 import org.scijava.thread.ThreadService;
@@ -24,7 +23,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public abstract class AbstractBaseParadigm implements ParallelizationParadigm {
+public abstract class AbstractBaseParadigm implements RPCParadigm {
 
 	protected WorkerPool workerPool;
 
