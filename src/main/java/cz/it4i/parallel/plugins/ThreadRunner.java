@@ -15,7 +15,7 @@ import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import org.scijava.thread.ThreadService;
 
-import cz.it4i.parallel.Routines;
+import cz.it4i.parallel.InternalExceptionRoutines;
 import lombok.AllArgsConstructor;
 
 @Plugin(headless = true, type = ThreadRunner.class)
@@ -45,7 +45,7 @@ public class ThreadRunner implements Command {
 		final Executor executor = new ThreadService2ExecutorAdapter(service);
 		final ModuleInfo info = moduleService.getModuleById("command:" + moduleId);
 		outputs = inputs.stream().map(input -> CompletableFuture.supplyAsync(
-			() -> Routines.supplyWithExceptionHandling(() -> moduleService.run(info,
+			() -> InternalExceptionRoutines.supplyWithExceptionHandling(() -> moduleService.run(info,
 				true, input).get()).getOutputs(), executor)).collect(Collectors
 					.toList()).stream().map(CompletableFuture::join).collect(Collectors
 						.toList());

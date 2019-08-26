@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 import org.scijava.parallel.Status;
 
-import cz.it4i.parallel.Routines;
+import cz.it4i.parallel.InternalExceptionRoutines;
 import cz.it4i.parallel.RunningRemoteServer;
 import cz.it4i.parallel.runners.ClusterJobLauncher.Job;
 
@@ -154,11 +154,12 @@ public class HPCImageJRunner extends
 
 	private void startOrReconnectServer(Runnable command) {
 
-		launcher = Routines.supplyWithExceptionHandling(
+		launcher = InternalExceptionRoutines.supplyWithExceptionHandling(
 			() -> createClusterJobLauncher(settings.getHost(), settings.getPort(),
-				settings.getUserName(), settings.getAuthenticationChoice(), settings.getPassword(), settings.getKeyFile().toString(), settings
-					.getKeyFilePassword(), settings.getAdapterType(), settings
-						.isRedirectStdInErr()));
+				settings.getUserName(), settings.getAuthenticationChoice(), settings
+					.getPassword(), settings.getKeyFile().toString(), settings
+						.getKeyFilePassword(), settings.getAdapterType(), settings
+							.isRedirectStdInErr()));
 
 		command.run();
 		if (job != null) {

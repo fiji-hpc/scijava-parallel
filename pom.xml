@@ -109,6 +109,11 @@
 			<version>0.1.1</version>
 		</dependency>
 		<dependency>
+			<groupId>it4i-fiji</groupId>
+			<artifactId>it4i-common</artifactId>
+			<version>0.0.1</version>
+		</dependency>
+		<dependency>
 			<groupId>net.imagej</groupId>
 			<artifactId>imagej</artifactId>
 		</dependency>

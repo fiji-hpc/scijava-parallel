@@ -17,7 +17,7 @@ import org.scijava.plugin.PluginService;
 import org.scijava.service.AbstractService;
 import org.scijava.service.Service;
 
-import cz.it4i.parallel.Routines;
+import cz.it4i.parallel.InternalExceptionRoutines;
 
 /**
  * Provided implementation of {@link ParadigmManagerService}.
@@ -51,10 +51,9 @@ public class DefaultParadigmManagerService extends AbstractService implements
 	}
 
 	private void retrieveManagers() {
-		managers = pluginService.getPluginsOfType(ParadigmManager.class)
-			.stream().map(p -> Routines.supplyWithExceptionHandling(
-				p::createInstance)).collect(Collectors
-					.toList());
+		managers = pluginService.getPluginsOfType(ParadigmManager.class).stream()
+			.map(p -> InternalExceptionRoutines.supplyWithExceptionHandling(
+				p::createInstance)).collect(Collectors.toList());
 		managers.forEach(man -> context().inject(man));
 	}
 
