@@ -99,6 +99,7 @@ public class PersistentParallelizationParadigmImpl implements
 
 	@Override
 	public void init() {
+		// no init is needed
 	}
 
 	@Override
@@ -161,12 +162,7 @@ public class PersistentParallelizationParadigmImpl implements
 
 	@Override
 	public Collection<CompletableFuture<Map<String, Object>>> getAll() {
-
 		throw new UnsupportedOperationException();
-//			return (Collection<CompletableFuture<Map<String, Object>>>) paradigm
-//				.runAllAsync(RequestBrokerServiceGetAllCommand.class.getCanonicalName(),
-//					Collections.emptyList()).get(0).get().get(REQUEST_IDS);
-
 	}
 
 	private void setHosts(List<Host> hosts) {

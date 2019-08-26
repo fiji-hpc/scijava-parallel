@@ -2,7 +2,6 @@
 package cz.it4i.parallel.runners;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
@@ -73,7 +72,7 @@ public class LocalImageJRunner extends
 	@Override
 	protected void doStartServer() throws IOException {
 		String fijiPath = fijiExecutable;
-		if (fijiPath == null || !Files.exists(Paths.get(fijiPath))) {
+		if (fijiPath == null || !Paths.get(fijiPath).toFile().exists()) {
 			throw new IllegalArgumentException(
 				"Cannot find the specified ImageJ or Fiji executable (" + fijiPath +
 					"). The property 'Fiji.executable.path' may not be configured properly in the 'configuration.properties' file.");

@@ -1,6 +1,9 @@
 
 package cz.it4i.parallel.runners;
 
+import static java.lang.System.err;
+import static java.lang.System.out;
+
 import com.jcraft.jsch.JSchException;
 
 import java.io.Closeable;
@@ -19,6 +22,7 @@ import org.slf4j.LoggerFactory;
 
 import cz.it4i.fiji.scpclient.SshCommandClient;
 import cz.it4i.fiji.scpclient.SshExecutionSession;
+import cz.it4i.parallel.SciJavaParallelRuntimeException;
 import cz.it4i.parallel.runners.ClusterJobLauncher.Job.POutThread;
 
 public class ClusterJobLauncher implements Closeable {
@@ -57,8 +61,12 @@ public class ClusterJobLauncher implements Closeable {
 			try {
 				return nodesFuture.get();
 			}
-			catch (InterruptedException | ExecutionException exc) {
-				throw new RuntimeException(exc);
+			catch (ExecutionException exc) {
+				throw new SciJavaParallelRuntimeException(exc);
+			}
+			catch (InterruptedException exc) {
+				Thread.currentThread().interrupt();
+				throw new SciJavaParallelRuntimeException(exc);
 			}
 		}
 
@@ -106,9 +114,9 @@ public class ClusterJobLauncher implements Closeable {
 
 			adapter.waitForStart(client, jobId);
 			if (redirectOut) {
-				startOutThread(System.out, "OU");
+				startOutThread(out, "OU");
 				if (!adapter.isOutErrTogether()) {
-					startOutThread(System.err, "ER");
+					startOutThread(err, "ER");
 				}
 			}
 		}
@@ -121,8 +129,8 @@ public class ClusterJobLauncher implements Closeable {
 			return adapter.getNodes(client, jobId);
 		}
 
-		private void startOutThread(PrintStream out, String suffix) {
-			POutThread thread = new POutThread(out, suffix);
+		private void startOutThread(PrintStream aOut, String suffix) {
+			POutThread thread = new POutThread(aOut, suffix);
 			threads.add(thread);
 			thread.start();
 		

@@ -50,7 +50,7 @@ public class HPCImageJRunner extends
 
 	@Override
 	public List<Integer> getNCores() {
-		return getRemoteHosts().stream().map(__ -> settings.getNcpus()).collect(
+		return getRemoteHosts().stream().map(x -> settings.getNcpus()).collect(
 			Collectors.toList());
 	}
 
@@ -68,7 +68,7 @@ public class HPCImageJRunner extends
 
 	@Override
 	public List<Integer> getRemotePorts() {
-		return ports.stream().map(X -> getStartPort()).collect(Collectors.toList());
+		return ports.stream().map(x -> getStartPort()).collect(Collectors.toList());
 	}
 
 	@Override
@@ -114,17 +114,17 @@ public class HPCImageJRunner extends
 		settings.setJobID(null);
 	}
 
-	private ClusterJobLauncher createClusterJobLauncher(String host, Integer port,
-		String userName, AuthenticationChoice authenticationChoice, String password,
-		String keyFile, String keyFilePassword, HPCSchedulerType adapterType,
-		boolean redirectStdInErr) throws JSchException
-	{
-		if (authenticationChoice == AuthenticationChoice.PASSWORD) {
-			return ClusterJobLauncher.createWithPasswordAuthentication(host, port,
-				userName, password, adapterType, redirectStdInErr);
+	private ClusterJobLauncher createClusterJobLauncher() throws JSchException {
+		if (settings.getAuthenticationChoice() == AuthenticationChoice.PASSWORD) {
+			return ClusterJobLauncher.createWithPasswordAuthentication(settings
+				.getHost(), settings.getPort(), settings.getUserName(), settings
+					.getPassword(), settings.getAdapterType(), settings
+						.isRedirectStdInErr());
 		}
-		return ClusterJobLauncher.createWithKeyAuthentication(host, port,
-			userName, keyFile, keyFilePassword, adapterType, redirectStdInErr);
+		return ClusterJobLauncher.createWithKeyAuthentication(settings.getHost(),
+			settings.getPort(), settings.getUserName(), settings.getKeyFile()
+				.toString(), settings.getKeyFilePassword(), settings.getAdapterType(),
+			settings.isRedirectStdInErr());
 	}
 
 	private void reconnectIfNeeded() {
@@ -155,12 +155,7 @@ public class HPCImageJRunner extends
 	private void startOrReconnectServer(Runnable command) {
 
 		launcher = InternalExceptionRoutines.supplyWithExceptionHandling(
-			() -> createClusterJobLauncher(settings.getHost(), settings.getPort(),
-				settings.getUserName(), settings.getAuthenticationChoice(), settings
-					.getPassword(), settings.getKeyFile().toString(), settings
-						.getKeyFilePassword(), settings.getAdapterType(), settings
-							.isRedirectStdInErr()));
-
+			this::createClusterJobLauncher);
 		command.run();
 		if (job != null) {
 			ports = job.createTunnels(getStartPort(), getStartPort());
