@@ -10,10 +10,10 @@ import org.scijava.parallel.Status;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.PluginService;
 
-import cz.it4i.parallel.AbstractBaseParadigm;
+import cz.it4i.parallel.AbstractBaseRPCParadigmImpl;
 
 
-public abstract class ParadigmManagerUsingRunner<T extends AbstractBaseParadigm, S extends RunnerSettings>
+public abstract class ParadigmManagerUsingRunner<T extends AbstractBaseRPCParadigmImpl, S extends RunnerSettings>
 	implements
 	ParadigmManager
 {
@@ -76,7 +76,7 @@ public abstract class ParadigmManagerUsingRunner<T extends AbstractBaseParadigm,
 		runForObjectIfOfTypeElseException(profile,
 			ParadigmProfileUsingRunner.class,
 			typedProfile -> prepareParadigmInternal(typedProfile,
-				(AbstractBaseParadigm) paradigm));
+				(AbstractBaseRPCParadigmImpl) paradigm));
 	}
 
 	@Override
@@ -120,7 +120,7 @@ public abstract class ParadigmManagerUsingRunner<T extends AbstractBaseParadigm,
 
 	@SuppressWarnings("unchecked")
 	private void prepareParadigmInternal(
-		ParadigmProfileUsingRunner<S> typedProfile, AbstractBaseParadigm paradigm)
+		ParadigmProfileUsingRunner<S> typedProfile, AbstractBaseRPCParadigmImpl paradigm)
 	{
 		
 		typedProfile.prepareRunner(this::initRunner);
