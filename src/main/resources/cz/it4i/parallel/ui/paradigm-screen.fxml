@@ -9,7 +9,7 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.Pane?>
 
-<fx:root maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="399.0" prefWidth="698.0" style="-fx-background-color: white;" stylesheets="@style.css" type="Pane" xmlns="http://javafx.com/javafx/8.0.212" xmlns:fx="http://javafx.com/fxml/1" fx:controller="cz.it4i.parallel.ui.ParadigmScreenController">
+<fx:root maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="399.0" prefWidth="698.0" style="-fx-background-color: white;" stylesheets="@style.css" type="Pane" xmlns="http://javafx.com/javafx/8.0.172" xmlns:fx="http://javafx.com/fxml/1" fx:controller="cz.it4i.parallel.ui.ParadigmScreenController">
    <children>
       <Label layoutX="55.0" layoutY="33.0" style="-fx-font-weight: bold;" text="Name" />
       <Label layoutX="251.0" layoutY="33.0" style="-fx-font-weight: BOLD;" text="Paradigm type" />
