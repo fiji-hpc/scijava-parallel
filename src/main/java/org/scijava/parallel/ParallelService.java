@@ -25,14 +25,6 @@ public interface ParallelService extends
 
 	/**
 	 * Returns an instance of the parallelization paradigm corresponding to the
-	 * chosen profile, if available
-	 * 
-	 * @return Instance of the corresponding parallelization paradigm
-	 */
-	public ParallelizationParadigm getParadigm();
-
-	/**
-	 * Returns an instance of the parallelization paradigm corresponding to the
 	 * chosen profile and type, if available
 	 * 
 	 * @return Instance of the corresponding parallelization paradigm

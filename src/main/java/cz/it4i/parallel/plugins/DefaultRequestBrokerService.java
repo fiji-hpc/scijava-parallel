@@ -73,9 +73,10 @@ public class DefaultRequestBrokerService extends AbstractService implements
 				parallelService.addProfile(new ParallelizationParadigmProfile(clazz,
 					clazz.getName()));
 				parallelService.selectProfile(clazz.getName());
-				ParallelizationParadigm paradigm = parallelService.getParadigm();
-				((MultipleHostParadigm) paradigm).setHosts(Host
-					.constructListFromNamesAndCores(hostNames, ncores));
+				MultipleHostParadigm paradigm = parallelService.getParadigmOfType(
+					MultipleHostParadigm.class);
+				paradigm.setHosts(Host.constructListFromNamesAndCores(hostNames,
+					ncores));
 				paradigm.init();
 				paradigmInitialized = true;
 			}

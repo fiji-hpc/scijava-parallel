@@ -224,7 +224,8 @@ public class ParadigmScreenController extends Pane implements CloseableControl
 				typedManager.setShutdownOnParadigmClose(activeProfile);
 			}
 			if (!chkActive.isSelected()) {
-				ParallelizationParadigm paradigm = parallelService.getParadigm();
+				ParallelizationParadigm paradigm = parallelService.getParadigmOfType(
+					ParallelizationParadigm.class);
 				paradigm.init();
 			}
 		}
@@ -233,7 +234,9 @@ public class ParadigmScreenController extends Pane implements CloseableControl
 	}
 
 	private void closeProfile() {
-		try (ParallelizationParadigm paradigm = parallelService.getParadigm()) {
+		try (ParallelizationParadigm paradigm = parallelService.getParadigmOfType(
+			ParallelizationParadigm.class))
+		{
 			// only close
 		}
 	}
@@ -306,7 +309,8 @@ public class ParadigmScreenController extends Pane implements CloseableControl
 	}
 
 	private void initProfile() {		
-		ParallelizationParadigm paradigm = parallelService.getParadigm();
+		ParallelizationParadigm paradigm = parallelService.getParadigmOfType(
+			ParallelizationParadigm.class);
 		if (paradigm != null) {
 			paradigm.init();
 			parallelService.saveProfiles();
@@ -373,7 +377,8 @@ public class ParadigmScreenController extends Pane implements CloseableControl
 			txtActiveProfile.setText(profile.get().toString());
 			txtActiveProfileType.setText(profile.get().getParadigmType()
 				.getSimpleName());
-			boolean paradigmActive = parallelService.getParadigm()
+			boolean paradigmActive = parallelService.getParadigmOfType(
+				ParallelizationParadigm.class)
 				.getStatus() == Status.ACTIVE;
 			chkActive.setSelected(paradigmActive);
 			chkActive.setDisable(false);

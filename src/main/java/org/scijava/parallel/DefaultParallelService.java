@@ -53,34 +53,10 @@ public class DefaultParallelService extends
 	// -- ParallelService methods --
 
 	@Override
-	public ParallelizationParadigm getParadigm() {
-		ParallelizationParadigmProfile selectedProfile = getProfile();
-		if (selectedProfile != null) {
-
-			final List<ParallelizationParadigm> foundParadigms = getInstances()
-				.stream().filter(paradigm -> paradigm.getClass().equals(selectedProfile
-					.getParadigmType())).collect(Collectors.toList());
-			if (foundParadigms.size() == 1) {
-				ParallelizationParadigm paradigm = foundParadigms.get(0);
-				if (paradigm.getStatus() == Status.NON_ACTIVE) {
-					ParadigmManager manager = paradigmManagerService.getManagers(
-						selectedProfile);
-					if (manager != null) {
-						manager.prepareParadigm(selectedProfile, paradigm);
-					}
-				}
-				return paradigm;
-			}
-		}
-
-		return null;
-	}
-
-	@Override
 	public <T extends ParallelizationParadigm> T getParadigmOfType(
 		Class<T> type)
 	{
-		ParallelizationParadigm result = getParadigm();
+		ParallelizationParadigm result = getSelectedParadigm();
 		if (result != null && type.isInstance(result)) {
 			return type.cast(result);
 		}
@@ -113,11 +89,12 @@ public class DefaultParallelService extends
 	@Override
 	public void selectProfile(final String name) {
 		ParallelizationParadigmProfile oldSelectedProfile = getProfile();
-		ParallelizationParadigm oldSelectedParadigm = getParadigm();
+		ParallelizationParadigm oldSelectedParadigm = getSelectedParadigm();
 		profiles.stream().filter(Objects::nonNull).forEach(p -> p.setSelected(p
 			.getName().equals(name)));
-		if (oldSelectedProfile != null && oldSelectedProfile != getProfile() &&
-			oldSelectedParadigm.getStatus() == Status.ACTIVE)
+		if (oldSelectedProfile != null && oldSelectedParadigm != null &&
+			oldSelectedProfile != getProfile() && oldSelectedParadigm
+				.getStatus() == Status.ACTIVE)
 		{
 			oldSelectedParadigm.close();
 		}
@@ -154,16 +131,39 @@ public class DefaultParallelService extends
 	@Override
 	public void dispose() {
 		super.dispose();
-		if (getParadigm() != null && getParadigm().getStatus() == Status.ACTIVE) {
-			getParadigm().close();
-			saveProfiles();
-		}
+		getInstances().stream().filter(par -> par.getStatus() == Status.ACTIVE)
+			.forEach(par -> par.close());
 	}
 
 	// -- Helper methods --
 
 	// -- Service methods --
 	
+	// -- ParallelService methods --
+	
+	private ParallelizationParadigm getSelectedParadigm() {
+		ParallelizationParadigmProfile selectedProfile = getProfile();
+		if (selectedProfile != null) {
+	
+			final List<ParallelizationParadigm> foundParadigms = getInstances()
+				.stream().filter(paradigm -> paradigm.getClass().equals(selectedProfile
+					.getParadigmType())).collect(Collectors.toList());
+			if (foundParadigms.size() == 1) {
+				ParallelizationParadigm paradigm = foundParadigms.get(0);
+				if (paradigm.getStatus() == Status.NON_ACTIVE) {
+					ParadigmManager manager = paradigmManagerService.getManagers(
+						selectedProfile);
+					if (manager != null) {
+						manager.prepareParadigm(selectedProfile, paradigm);
+					}
+				}
+				return paradigm;
+			}
+		}
+	
+		return null;
+	}
+
 	private void clearProfiles() {
 		prefService.remove(this.getClass(), PROFILES_PROPERTY_NAME);
 	}
