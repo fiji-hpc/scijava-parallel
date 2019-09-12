@@ -15,7 +15,10 @@ import org.scijava.parallel.ParallelizationParadigmProfile;
 import org.scijava.parallel.Status;
 import org.scijava.plugin.PluginInfo;
 
+import cz.it4i.parallel.AbstractBaseRPCParadigmImpl;
+import cz.it4i.parallel.runners.ParadigmManagerUsingRunner;
 import cz.it4i.parallel.runners.ParadigmProfileUsingRunner;
+import cz.it4i.parallel.runners.RunnerSettings;
 import cz.it4i.swing_javafx_ui.CloseableControl;
 import cz.it4i.swing_javafx_ui.JavaFXRoutines;
 import javafx.fxml.FXML;
@@ -215,8 +218,10 @@ public class ParadigmScreenController extends Pane implements CloseableControl
 	private void runEndOperation() {
 		if (!chkRunning.isSelected()) {
 			ParadigmManager manager = findManager(activeProfile);
-			if (manager != null) {
-				manager.setShutdownOnParadigmClose(activeProfile);
+			if (manager instanceof ParadigmManagerUsingRunner) {
+				@SuppressWarnings("unchecked")
+				ParadigmManagerUsingRunner<? extends AbstractBaseRPCParadigmImpl, ? extends RunnerSettings> typedManager = (ParadigmManagerUsingRunner<? extends AbstractBaseRPCParadigmImpl, ? extends RunnerSettings>)manager;
+				typedManager.setShutdownOnParadigmClose(activeProfile);
 			}
 			if (!chkActive.isSelected()) {
 				ParallelizationParadigm paradigm = parallelService.getParadigm();

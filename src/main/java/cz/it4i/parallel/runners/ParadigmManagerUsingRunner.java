@@ -79,7 +79,6 @@ public abstract class ParadigmManagerUsingRunner<T extends AbstractBaseRPCParadi
 				(AbstractBaseRPCParadigmImpl) paradigm));
 	}
 
-	@Override
 	public void setShutdownOnParadigmClose(ParallelizationParadigmProfile profile)
 	{
 		runForObjectIfOfTypeElseException(profile,
