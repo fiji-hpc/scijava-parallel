@@ -133,12 +133,9 @@ public class ClusterJobLauncher implements Closeable {
 			POutThread thread = new POutThread(aOut, suffix);
 			threads.add(thread);
 			thread.start();
-		
 		}
 
-		class POutThread extends Thread
-
-		{
+		class POutThread extends Thread {
 
 			private OutputStream outputStream;
 			private String suffix;
@@ -153,9 +150,9 @@ public class ClusterJobLauncher implements Closeable {
 			@Override
 			public void run() {
 				try (SshExecutionSession session = (usedSession = client
-					.openSshExecutionSession(
-						"ssh -t " + getNodes().get(0) + " tail -f -n +1 " + adapter
-							.getOutputFileName(jobId, suffix), true)))
+					.openSshExecutionSession("ssh -t " + getNodes().get(0) +
+						" tail -f -n +1 " + adapter.getOutputFileName(jobId, suffix),
+						true)))
 				{
 					byte[] buffer = new byte[1024];
 					int readed;
@@ -185,17 +182,16 @@ public class ClusterJobLauncher implements Closeable {
 	private boolean redirectStdOutErr;
 
 	public static ClusterJobLauncher createWithKeyAuthentication(String hostName,
-		int port, String userName, String keyLocation,
-		String keyPassword, HPCSchedulerType hpcSchedulerType,
-		boolean redirectStdOutErr) throws JSchException
+		int port, String userName, String keyLocation, String keyPassword,
+		HPCSchedulerType hpcSchedulerType, boolean redirectStdOutErr)
+		throws JSchException
 	{
 		return new ClusterJobLauncher(new SshCommandClient(hostName, userName,
 			keyLocation, keyPassword), port, hpcSchedulerType, redirectStdOutErr);
 	}
 
 	public static ClusterJobLauncher createWithPasswordAuthentication(
-		String hostName,
-		int port, String userName, String password,
+		String hostName, int port, String userName, String password,
 		HPCSchedulerType hpcSchedulerType, boolean redirectStdOutErr)
 
 	{
@@ -248,7 +244,8 @@ public class ClusterJobLauncher implements Closeable {
 			adapter.getSpawnCommand() + " `readlink -f "+command+"` " + parameters + "\n" +
 			"/usr/bin/tail -f /dev/null' > " + fileName + " && " +
 			"chmod +x " + fileName +" && " +
-			adapter.constructSubmitCommand(nodes, ncpus, "`readlink -f " + fileName + "`")).get(0);
+			"SCRIPT_FILE_NAME=`readlink -f "+ fileName + "` && "+
+			adapter.constructSubmitCommand(nodes, ncpus, "$SCRIPT_FILE_NAME")).get(0);
 // @formatter:on
 		client.executeCommand("rm " + fileName);
 		return result;

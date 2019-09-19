@@ -1,3 +1,4 @@
+
 package cz.it4i.parallel.runners;
 
 import static cz.it4i.parallel.runners.ClusterJobLauncher.sleepForWhile;
@@ -10,6 +11,7 @@ import cz.it4i.fiji.scpclient.SshExecuteCommandException;
 class SlurmHPCSchedulerBridge implements HPCSchedulerBridge {
 
 	private static final String DIRECTORY_FOR_OUT = "~/.scijava-parallel";
+
 	@Override
 	public String getSpawnCommand() {
 		return "srun";
@@ -57,15 +59,15 @@ class SlurmHPCSchedulerBridge implements HPCSchedulerBridge {
 	@Override
 	public boolean isJobRunning(SshCommandClient client, String jobID) {
 		try {
-		List<String> results = client.executeCommand(
-			"squeue --format '%M %t' --job " + jobID);
-		if (results.size() != 2) {
-			return false;
-		}
-		String result = results.get(1);
-		String[] tokens = result.split(" +");
-		String state = tokens[1];
-		return state.equals("R");
+			List<String> results = client.executeCommand(
+				"squeue --format '%M %t' --job " + jobID);
+			if (results.size() != 2) {
+				return false;
+			}
+			String result = results.get(1);
+			String[] tokens = result.split(" +");
+			String state = tokens[1];
+			return state.equals("R");
 		}
 		catch (RuntimeException exc) {
 			if (exc.getCause() instanceof SshExecuteCommandException) {

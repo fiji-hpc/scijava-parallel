@@ -1,3 +1,4 @@
+
 package cz.it4i.parallel.runners;
 
 import static cz.it4i.parallel.runners.ClusterJobLauncher.sleepForWhile;
@@ -12,6 +13,8 @@ import cz.it4i.fiji.scpclient.SshCommandClient;
 
 class PBSHPCSchedulerBridge implements HPCSchedulerBridge {
 
+	private static final String OUTPUT_DIRECTORY = "$HOME/.scijava-parallel/";
+
 	@Override
 	public String getSpawnCommand() {
 		return "pbsdsh --";
@@ -19,8 +22,11 @@ class PBSHPCSchedulerBridge implements HPCSchedulerBridge {
 
 	@Override
 	public String constructSubmitCommand(long nodes, long ncpus, String command) {
-		return "qsub  -q qexp -l select=" + nodes + ":ncpus=" + ncpus + " " +
-			command;
+		// -o and -e are used to redirect standard output and error streams to the
+		// desired output directory.
+		return createOutputDirectoryIfItDoesNotExist() +
+			"qsub -q qexp -o " + OUTPUT_DIRECTORY + " -e " + OUTPUT_DIRECTORY +
+			" -l select=" + nodes + ":ncpus=" + ncpus + " " + command;
 	}
 
 	@Override
@@ -81,6 +87,11 @@ class PBSHPCSchedulerBridge implements HPCSchedulerBridge {
 	@Override
 	public void stop(SshCommandClient client, String jobId) {
 		client.executeCommand("qdel " + jobId);
+	}
+
+	private String createOutputDirectoryIfItDoesNotExist() {
+		return "if [ ! -d \"" + OUTPUT_DIRECTORY + "\" ]; then mkdir -p \"" +
+			OUTPUT_DIRECTORY + "\"; fi && cd \"" + OUTPUT_DIRECTORY + "\"; ";
 	}
 
 }
