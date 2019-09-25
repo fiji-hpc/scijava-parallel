@@ -8,7 +8,6 @@ import java.util.concurrent.CompletableFuture;
 
 import org.apache.commons.lang3.BooleanUtils;
 import org.scijava.parallel.ParadigmManager;
-import org.scijava.parallel.ParadigmManagerService;
 import org.scijava.parallel.ParallelService;
 import org.scijava.parallel.ParallelizationParadigm;
 import org.scijava.parallel.ParallelizationParadigmProfile;
@@ -16,6 +15,7 @@ import org.scijava.parallel.Status;
 import org.scijava.plugin.PluginInfo;
 
 import cz.it4i.parallel.AbstractBaseRPCParadigmImpl;
+import cz.it4i.parallel.ParadigmManagerService;
 import cz.it4i.parallel.runners.ParadigmManagerUsingRunner;
 import cz.it4i.parallel.runners.ParadigmProfileUsingRunner;
 import cz.it4i.parallel.runners.RunnerSettings;
@@ -217,11 +217,10 @@ public class ParadigmScreenController extends Pane implements CloseableControl
 
 	private void runEndOperation() {
 		if (!chkRunning.isSelected()) {
-			ParadigmManager manager = findManager(activeProfile);
-			if (manager instanceof ParadigmManagerUsingRunner) {
-				@SuppressWarnings("unchecked")
-				ParadigmManagerUsingRunner<? extends AbstractBaseRPCParadigmImpl, ? extends RunnerSettings> typedManager = (ParadigmManagerUsingRunner<? extends AbstractBaseRPCParadigmImpl, ? extends RunnerSettings>)manager;
-				typedManager.setShutdownOnParadigmClose(activeProfile);
+			if (activeProfile instanceof ParadigmProfileUsingRunner<?>) {
+				ParadigmProfileUsingRunner<?> typedProfile =
+					(ParadigmProfileUsingRunner<?>) activeProfile;
+				typedProfile.setShutdownOnParadigmClose();
 			}
 			if (!chkActive.isSelected()) {
 				ParallelizationParadigm paradigm = parallelService.getParadigmOfType(

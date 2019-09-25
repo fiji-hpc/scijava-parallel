@@ -79,17 +79,6 @@ public abstract class ParadigmManagerUsingRunner<T extends AbstractBaseRPCParadi
 				(AbstractBaseRPCParadigmImpl) paradigm));
 	}
 
-	public void setShutdownOnParadigmClose(ParallelizationParadigmProfile profile)
-	{
-		runForObjectIfOfTypeElseException(profile,
-			ParadigmProfileUsingRunner.class, typedProfile -> {
-				ServerRunner<?> runner = typedProfile.getAssociatedRunner();
-			if (runner != null && runner.getStatus() == Status.ACTIVE) {
-				runner.letShutdownOnClose();
-			}
-		});
-	}
-
 	@Override
 	public String toString() {
 		return "" + getTypeOfRunner().getSimpleName();

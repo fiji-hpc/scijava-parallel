@@ -5,11 +5,11 @@ import net.imagej.ImageJ;
 import org.scijava.Context;
 import org.scijava.command.Command;
 import org.scijava.command.CommandService;
-import org.scijava.parallel.ParadigmManagerService;
 import org.scijava.parallel.ParallelService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
+import cz.it4i.parallel.ParadigmManagerService;
 import cz.it4i.parallel.ui.ParadigmScreenWindow;
 
 @Plugin(headless = true, type = Command.class,

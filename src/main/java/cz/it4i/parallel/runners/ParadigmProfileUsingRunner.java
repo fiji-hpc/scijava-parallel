@@ -5,6 +5,7 @@ import java.util.function.Consumer;
 
 import org.scijava.parallel.ParallelizationParadigm;
 import org.scijava.parallel.ParallelizationParadigmProfile;
+import org.scijava.parallel.Status;
 
 import cz.it4i.parallel.SciJavaParallelRuntimeException;
 import lombok.Getter;
@@ -33,6 +34,14 @@ public class ParadigmProfileUsingRunner<T extends RunnerSettings> extends
 	{
 		super(paradigmType, profileName);
 		this.typeOfRunner = typeOfRunner;
+	}
+
+	public void setShutdownOnParadigmClose()
+	{
+		ServerRunner<?> runner = getAssociatedRunner();
+		if (runner != null && runner.getStatus() == Status.ACTIVE) {
+			runner.letShutdownOnClose();
+		}
 	}
 
 	Class<T> getTypeOfSettings() {

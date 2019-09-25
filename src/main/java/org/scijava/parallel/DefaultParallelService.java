@@ -25,6 +25,7 @@ import org.scijava.plugin.Plugin;
 import org.scijava.prefs.PrefService;
 import org.scijava.service.Service;
 
+import cz.it4i.parallel.ParadigmManagerService;
 import lombok.extern.slf4j.Slf4j;
 
 /**

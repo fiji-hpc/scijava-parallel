@@ -5,10 +5,13 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this project.
  ******************************************************************************/
-package org.scijava.parallel;
+package cz.it4i.parallel;
 
 import java.util.List;
 
+import org.scijava.parallel.ParadigmManager;
+import org.scijava.parallel.ParallelizationParadigm;
+import org.scijava.parallel.ParallelizationParadigmProfile;
 import org.scijava.service.SciJavaService;
 
 /**
