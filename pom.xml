@@ -13,7 +13,7 @@
 	<version>8.0.0-alpha-2</version>
 	<name>SciJava Parallel</name>
 	<description>Parallelization framework for SciJava applications.</description>
-	<url>https://</url>
+	<url>https://imagej.net/Scijava-parallel</url>
 	<inceptionYear>2018</inceptionYear>
 	<organization>
 		<name>SciJava</name>
@@ -66,13 +66,13 @@
 
 	<scm>
 		<connection>scm:git:git://github.com/fiji-hpc/scijava-parallel</connection>
-		<developerConnection>scm:git:git@github.com:fiji-hpc/scijava-paralle</developerConnection>
+		<developerConnection>scm:git:git@github.com:fiji-hpc/scijava-parallel</developerConnection>
 		<tag>HEAD</tag>
-		<url>https://github.com/fiji-hpc/scijava-paralle</url>
+		<url>https://github.com/fiji-hpc/scijava-parallel</url>
 	</scm>
 	<issueManagement>
 		<system>GitHub Issues</system>
-		<url>https://github.com/fiji-hpc/scijava-paralle</url>
+		<url>https://github.com/fiji-hpc/scijava-parallel</url>
 	</issueManagement>
 	<ciManagement>
 		<system>none</system>
