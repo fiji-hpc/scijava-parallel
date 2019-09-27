@@ -13,7 +13,7 @@ import org.scijava.plugin.PluginService;
 import cz.it4i.parallel.AbstractBaseRPCParadigmImpl;
 
 
-public abstract class ParadigmManagerUsingRunner<T extends AbstractBaseRPCParadigmImpl, S extends RunnerSettings>
+public abstract class ParadigmManagerUsingRunner<T extends ParallelizationParadigm, S extends RunnerSettings>
 	implements
 	ParadigmManager
 {
