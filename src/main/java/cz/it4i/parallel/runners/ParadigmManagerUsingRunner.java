@@ -10,7 +10,7 @@ import org.scijava.parallel.Status;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.PluginService;
 
-import cz.it4i.parallel.AbstractBaseRPCParadigmImpl;
+import cz.it4i.parallel.internal.AbstractBaseRPCParadigmImpl;
 
 
 public abstract class ParadigmManagerUsingRunner<T extends ParallelizationParadigm, S extends RunnerSettings>

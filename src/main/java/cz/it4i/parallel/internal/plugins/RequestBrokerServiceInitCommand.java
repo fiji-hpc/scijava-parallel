@@ -1,7 +1,6 @@
-package cz.it4i.parallel.plugins;
+package cz.it4i.parallel.internal.plugins;
 
 import java.util.List;
-import java.util.Map;
 
 import org.scijava.ItemIO;
 import org.scijava.command.Command;
@@ -9,23 +8,24 @@ import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
 @Plugin(headless = true, type = Command.class)
-public class RequestBrokerServiceCallCommand implements Command {
+public class RequestBrokerServiceInitCommand implements Command {
 
 	@Parameter
 	private DefaultRequestBrokerService service;
 
 	@Parameter(type = ItemIO.INPUT)
-	private List<Map<String, Object>> inputs;
+	private List<String> names;
 
 	@Parameter(type = ItemIO.INPUT)
-	private String moduleId;
+	private List<Integer> ncores;
 
-	@Parameter(type = ItemIO.OUTPUT)
-	private List<Object> requestIDs;
+	@Parameter(type = ItemIO.INPUT)
+	private String paradigmClassName;
+
 
 	@Override
 	public void run() {
-		requestIDs = service.call(moduleId, inputs);
+		service.initParallelizationParadigm(paradigmClassName, names, ncores);
 	}
 
 }

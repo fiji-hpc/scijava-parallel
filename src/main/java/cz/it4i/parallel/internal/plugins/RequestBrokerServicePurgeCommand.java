@@ -1,4 +1,4 @@
-package cz.it4i.parallel.plugins;
+package cz.it4i.parallel.internal.plugins;
 
 import java.util.List;
 
@@ -8,24 +8,19 @@ import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
 @Plugin(headless = true, type = Command.class)
-public class RequestBrokerServiceInitCommand implements Command {
+public class RequestBrokerServicePurgeCommand implements Command {
 
 	@Parameter
 	private DefaultRequestBrokerService service;
 
 	@Parameter(type = ItemIO.INPUT)
-	private List<String> names;
+	private List<Object> requestIDs;
 
-	@Parameter(type = ItemIO.INPUT)
-	private List<Integer> ncores;
-
-	@Parameter(type = ItemIO.INPUT)
-	private String paradigmClassName;
 
 
 	@Override
 	public void run() {
-		service.initParallelizationParadigm(paradigmClassName, names, ncores);
+		service.purge(requestIDs);
 	}
 
 }

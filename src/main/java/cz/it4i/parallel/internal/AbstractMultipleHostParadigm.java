@@ -1,4 +1,4 @@
-package cz.it4i.parallel;
+package cz.it4i.parallel.internal;
 
 import java.util.AbstractList;
 import java.util.Collection;
@@ -7,6 +7,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import cz.it4i.parallel.Host;
+import cz.it4i.parallel.MultipleHostParadigm;
 
 public abstract class AbstractMultipleHostParadigm extends AbstractBaseRPCParadigmImpl
 	implements MultipleHostParadigm

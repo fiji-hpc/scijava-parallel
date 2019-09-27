@@ -1,4 +1,4 @@
-package cz.it4i.parallel.plugins;
+package cz.it4i.parallel.internal.plugins;
 
 import java.util.Collection;
 import java.util.Collections;

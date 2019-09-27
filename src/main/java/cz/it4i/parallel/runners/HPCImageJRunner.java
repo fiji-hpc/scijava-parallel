@@ -11,8 +11,8 @@ import java.util.stream.Collectors;
 
 import org.scijava.parallel.Status;
 
-import cz.it4i.parallel.InternalExceptionRoutines;
 import cz.it4i.parallel.RunningRemoteServer;
+import cz.it4i.parallel.internal.InternalExceptionRoutines;
 import cz.it4i.parallel.runners.ClusterJobLauncher.Job;
 
 public class HPCImageJRunner extends

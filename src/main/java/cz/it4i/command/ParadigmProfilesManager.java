@@ -9,7 +9,7 @@ import org.scijava.parallel.ParallelService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
-import cz.it4i.parallel.ParadigmManagerService;
+import cz.it4i.parallel.internal.ParadigmManagerService;
 import cz.it4i.parallel.ui.ParadigmScreenWindow;
 
 @Plugin(headless = true, type = Command.class,

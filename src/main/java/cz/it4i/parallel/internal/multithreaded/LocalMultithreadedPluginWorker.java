@@ -1,5 +1,5 @@
 
-package cz.it4i.parallel.multithreaded;
+package cz.it4i.parallel.internal.multithreaded;
 
 import io.scif.services.DatasetIOService;
 
@@ -13,7 +13,7 @@ import org.scijava.plugin.Parameter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import cz.it4i.parallel.ParallelWorker;
+import cz.it4i.parallel.internal.ParallelWorker;
 
 public class LocalMultithreadedPluginWorker implements ParallelWorker {
 
@@ -24,7 +24,7 @@ public class LocalMultithreadedPluginWorker implements ParallelWorker {
 	private DatasetIOService datasetIOService;
 
 	private static final Logger log = LoggerFactory.getLogger(
-		cz.it4i.parallel.multithreaded.LocalMultithreadedPluginWorker.class);
+		cz.it4i.parallel.internal.multithreaded.LocalMultithreadedPluginWorker.class);
 
 	@Parameter
 	private Context context;

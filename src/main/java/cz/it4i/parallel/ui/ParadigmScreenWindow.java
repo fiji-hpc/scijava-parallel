@@ -6,7 +6,7 @@ import java.util.concurrent.RunnableFuture;
 
 import org.scijava.parallel.ParallelService;
 
-import cz.it4i.parallel.ParadigmManagerService;
+import cz.it4i.parallel.internal.ParadigmManagerService;
 import cz.it4i.swing_javafx_ui.JavaFXRoutines;
 import javafx.application.Platform;
 import javafx.scene.Scene;

@@ -1,4 +1,4 @@
-package cz.it4i.parallel.plugins;
+package cz.it4i.parallel.internal.plugins;
 
 import java.util.List;
 import java.util.Map;
@@ -15,7 +15,7 @@ import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import org.scijava.thread.ThreadService;
 
-import cz.it4i.parallel.InternalExceptionRoutines;
+import cz.it4i.parallel.internal.InternalExceptionRoutines;
 import lombok.AllArgsConstructor;
 
 @Plugin(headless = true, type = ThreadRunner.class)

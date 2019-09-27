@@ -5,11 +5,12 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE', which is part of this project.
  ******************************************************************************/
-package cz.it4i.parallel;
+package cz.it4i.parallel.internal;
 
 import cz.it4i.common.ExceptionRoutines;
 import cz.it4i.common.ExceptionRoutines.RunnableWithException;
 import cz.it4i.common.ExceptionRoutines.SupplierWithException;
+import cz.it4i.parallel.SciJavaParallelRuntimeException;
 
 public final class InternalExceptionRoutines {
 

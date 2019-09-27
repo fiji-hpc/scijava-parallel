@@ -1,5 +1,5 @@
 
-package cz.it4i.parallel;
+package cz.it4i.parallel.internal;
 
 import java.io.Closeable;
 import java.util.Iterator;

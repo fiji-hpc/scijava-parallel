@@ -5,7 +5,7 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this project.
  ******************************************************************************/
-package cz.it4i.parallel;
+package cz.it4i.parallel.internal.persistence;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -14,6 +14,8 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import org.scijava.parallel.ParallelizationParadigm;
+
+import cz.it4i.parallel.RPCParadigm;
 
 /**
  * Extension of {@link ParallelizationParadigm} that allows send request,

@@ -1,5 +1,5 @@
 
-package cz.it4i.parallel;
+package cz.it4i.parallel.internal;
 
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 
@@ -19,6 +19,8 @@ import org.scijava.parallel.Status;
 import org.scijava.plugin.Parameter;
 import org.scijava.thread.ThreadService;
 
+import cz.it4i.parallel.RPCParadigm;
+import cz.it4i.parallel.SciJavaParallelRuntimeException;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 

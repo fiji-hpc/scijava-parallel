@@ -1,4 +1,4 @@
-package cz.it4i.parallel.persistence;
+package cz.it4i.parallel.internal.persistence;
 
 import com.google.common.collect.Streams;
 
@@ -16,13 +16,12 @@ import org.scijava.parallel.Status;
 
 import cz.it4i.parallel.Host;
 import cz.it4i.parallel.MultipleHostParadigm;
-import cz.it4i.parallel.PersistentRPCParadigm;
 import cz.it4i.parallel.RPCParadigm;
 import cz.it4i.parallel.RunningRemoteServer;
-import cz.it4i.parallel.plugins.RequestBrokerServiceCallCommand;
-import cz.it4i.parallel.plugins.RequestBrokerServiceGetResultCommand;
-import cz.it4i.parallel.plugins.RequestBrokerServiceInitCommand;
-import cz.it4i.parallel.plugins.RequestBrokerServicePurgeCommand;
+import cz.it4i.parallel.internal.plugins.RequestBrokerServiceCallCommand;
+import cz.it4i.parallel.internal.plugins.RequestBrokerServiceGetResultCommand;
+import cz.it4i.parallel.internal.plugins.RequestBrokerServiceInitCommand;
+import cz.it4i.parallel.internal.plugins.RequestBrokerServicePurgeCommand;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 

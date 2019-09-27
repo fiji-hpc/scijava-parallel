@@ -1,4 +1,4 @@
-package cz.it4i.parallel.plugins;
+package cz.it4i.parallel.internal.plugins;
 
 import java.util.Collection;
 import java.util.List;
@@ -6,7 +6,7 @@ import java.util.Map;
 
 import org.scijava.service.SciJavaService;
 
-import cz.it4i.parallel.plugins.DefaultRequestBrokerService.State;
+import cz.it4i.parallel.internal.plugins.DefaultRequestBrokerService.State;
 
 public interface RequestBrokerService extends SciJavaService {
 
