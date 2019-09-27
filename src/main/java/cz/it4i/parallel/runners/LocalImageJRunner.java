@@ -11,7 +11,7 @@ import java.util.stream.Stream;
 
 import org.scijava.parallel.Status;
 
-import cz.it4i.parallel.RunningRemoteServer;
+import cz.it4i.parallel.internal.persistence.RunningRemoteServer;
 
 public class LocalImageJRunner extends
 	AbstractImageJRunner<LocalImageJRunnerSettings> implements

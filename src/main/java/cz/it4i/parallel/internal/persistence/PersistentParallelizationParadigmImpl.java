@@ -17,7 +17,6 @@ import org.scijava.parallel.Status;
 import cz.it4i.parallel.Host;
 import cz.it4i.parallel.MultipleHostParadigm;
 import cz.it4i.parallel.RPCParadigm;
-import cz.it4i.parallel.RunningRemoteServer;
 import cz.it4i.parallel.internal.plugins.RequestBrokerServiceCallCommand;
 import cz.it4i.parallel.internal.plugins.RequestBrokerServiceGetResultCommand;
 import cz.it4i.parallel.internal.plugins.RequestBrokerServiceInitCommand;
