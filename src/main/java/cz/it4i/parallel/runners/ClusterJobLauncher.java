@@ -25,7 +25,7 @@ import cz.it4i.fiji.scpclient.SshExecutionSession;
 import cz.it4i.parallel.SciJavaParallelRuntimeException;
 import cz.it4i.parallel.runners.ClusterJobLauncher.Job.POutThread;
 
-public class ClusterJobLauncher implements Closeable {
+class ClusterJobLauncher implements Closeable {
 
 	private static final Logger log = LoggerFactory.getLogger(
 		ClusterJobLauncher.class);

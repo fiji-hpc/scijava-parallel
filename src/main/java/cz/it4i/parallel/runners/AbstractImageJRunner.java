@@ -9,7 +9,7 @@ import cz.it4i.parallel.SciJavaParallelRuntimeException;
 import lombok.AccessLevel;
 import lombok.Setter;
 
-public abstract class AbstractImageJRunner<T extends RunnerSettings>
+abstract class AbstractImageJRunner<T extends RunnerSettings>
 	implements AutoCloseable, ServerRunner<T>
 {
 
