@@ -1,7 +1,7 @@
+
 package cz.it4i.parallel.ui;
 
 import java.io.Closeable;
-
 import cz.it4i.swing_javafx_ui.JavaFXRoutines;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
@@ -24,7 +24,7 @@ class HPCStatusDialog implements Closeable {
 			Scene scene = new Scene(panel, 310, 80);
 			dialog.initOwner(parent);
 			dialog.setScene(scene);
-			this.label = new Label("Waiting for job schedule.");
+			this.label = new Label("Waiting for job to be scheduled.");
 			panel.setCenter(label);
 			dialog.setResizable(false);
 		};
@@ -33,7 +33,7 @@ class HPCStatusDialog implements Closeable {
 
 	void imageJServerReconnecting() {
 		Runnable runner = () -> {
-			this.label.setText("Waiting for a " + serverName + " reconnection.");
+			this.label.setText("Waiting for the " + serverName + " to reconnect.");
 			dialog.show();
 		};
 		runInternally(runner);
@@ -41,7 +41,7 @@ class HPCStatusDialog implements Closeable {
 
 	void imageJServerStarting() {
 		Runnable runner = () -> {
-			this.label.setText("Waiting for a " + serverName + " start.");
+			this.label.setText("Waiting for the " + serverName + " to start.");
 			dialog.show();
 		};
 		runInternally(runner);
@@ -49,7 +49,7 @@ class HPCStatusDialog implements Closeable {
 
 	void imageJServerStopping() {
 		Runnable runner = () -> {
-			label.setText("Waiting for stop.");
+			label.setText("Waiting for the server to stop.");
 			dialog.show();
 		};
 
