@@ -1,5 +1,5 @@
-package cz.it4i.parallel.ui;
 
+package cz.it4i.parallel.ui;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -30,12 +30,11 @@ import javafx.util.StringConverter;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class ParadigmScreenController extends Pane implements CloseableControl
-{
+public class ParadigmScreenController extends Pane implements CloseableControl {
 
 	@FXML
 	private ComboBox<Class<? extends ParallelizationParadigm>> paradigms;
-	
+
 	@FXML
 	private ComboBox<ParallelizationParadigmProfile> cmbProfiles;
 
@@ -71,14 +70,14 @@ public class ParadigmScreenController extends Pane implements CloseableControl
 	private ParadigmManagerService paradigmManagerService;
 
 	private ParallelizationParadigmProfile activeProfile;
-	
+
 	private Map<String, Boolean> userCheckedProfiles;
 
 	public ParadigmScreenController() {
 		JavaFXRoutines.initRootAndController("paradigm-screen.fxml", this);
 		txtNameOfNewProfile.textProperty().addListener((a, b,
 			c) -> updateCreateNewProfileButton());
-		
+
 		userCheckedProfiles = new HashMap<>();
 	}
 
@@ -97,7 +96,6 @@ public class ParadigmScreenController extends Pane implements CloseableControl
 		updateCreateNewProfileButton();
 	}
 
-
 	@Override
 	public void close() {
 		// do nothing
@@ -107,10 +105,10 @@ public class ParadigmScreenController extends Pane implements CloseableControl
 		ParadigmManager manager = cmbParadigmManagers.getItems().isEmpty() ? null
 			: cmbParadigmManagers.getSelectionModel().getSelectedItem();
 		ParallelizationParadigmProfile profile;
-		
+
 		// If paradigm has not been configured it should not be created:
 		boolean paradigmIsCorrect = false;
-		
+
 		if (manager != null) {
 			profile = manager.createProfile(txtNameOfNewProfile.getText());
 		}
@@ -118,10 +116,10 @@ public class ParadigmScreenController extends Pane implements CloseableControl
 			profile = new ParallelizationParadigmProfile(paradigms.getValue(),
 				txtNameOfNewProfile.getText());
 		}
-		
+
 		try {
 			parallelService.addProfile(profile);
-			if(manager != null) {
+			if (manager != null) {
 				paradigmIsCorrect = manager.editProfile(profile);
 			}
 			else {
@@ -133,8 +131,10 @@ public class ParadigmScreenController extends Pane implements CloseableControl
 				cmbProfiles.getSelectionModel().select(profile);
 				txtNameOfNewProfile.setText("");
 			}
-		} catch (IllegalArgumentException exc) {
-				SimpleDialog.showError("There is already a profile with the same name!", exc.getMessage());
+		}
+		catch (IllegalArgumentException exc) {
+			SimpleDialog.showError("There is already a profile with the same name!",
+				exc.getMessage());
 		}
 		if (!paradigmIsCorrect) {
 			parallelService.deleteProfile(profile.toString());
@@ -152,6 +152,14 @@ public class ParadigmScreenController extends Pane implements CloseableControl
 				1);
 			if (indexToSelect >= 0) {
 				cmbProfiles.getSelectionModel().select(indexToSelect);
+
+				// If the selected profile is deleted, select the last one, if
+				// any are available:
+				if (toDelete == activeProfile) {
+					parallelService.selectProfile(cmbProfiles.getSelectionModel()
+						.getSelectedItem().toString());
+					updateActiveProfile();
+				}
 			}
 			if (BooleanUtils.isTrue(toDelete.isSelected())) {
 				updateActiveProfile();
@@ -161,11 +169,11 @@ public class ParadigmScreenController extends Pane implements CloseableControl
 
 	public void editProfile() {
 		if (!cmbProfiles.getSelectionModel().isEmpty()) {
-			ParallelizationParadigmProfile profile = cmbProfiles.getSelectionModel().getSelectedItem();
+			ParallelizationParadigmProfile profile = cmbProfiles.getSelectionModel()
+				.getSelectedItem();
 			runEditProfile(profile);
 		}
 	}
-
 
 	@FXML
 	public void runEnd() {
@@ -254,7 +262,6 @@ public class ParadigmScreenController extends Pane implements CloseableControl
 		return result;
 	}
 
-
 	private Window getOwnerWindow() {
 		return getScene().getWindow();
 	}
@@ -284,19 +291,24 @@ public class ParadigmScreenController extends Pane implements CloseableControl
 			.getPlugins())
 		{
 			paradigms.getItems().add(info.getPluginClass());
-			
-			paradigms.setConverter(new StringConverter<Class<? extends ParallelizationParadigm>>() {
-				@Override
-				public String toString(Class<? extends ParallelizationParadigm> item) {
-					return (item == null) ? "" : item.getSimpleName();
-				}
 
-				@Override
-				public Class<? extends ParallelizationParadigm> fromString(String s) {
-					throw new UnsupportedOperationException();
-				}
-			});
-			
+			paradigms.setConverter(
+				new StringConverter<Class<? extends ParallelizationParadigm>>()
+				{
+
+					@Override
+					public String toString(
+						Class<? extends ParallelizationParadigm> item)
+				{
+						return (item == null) ? "" : item.getSimpleName();
+					}
+
+					@Override
+					public Class<? extends ParallelizationParadigm> fromString(String s) {
+						throw new UnsupportedOperationException();
+					}
+				});
+
 		}
 		JavaFXRoutines.runOnFxThread(() -> {
 			if (!paradigms.getItems().isEmpty()) {
@@ -306,7 +318,7 @@ public class ParadigmScreenController extends Pane implements CloseableControl
 		});
 	}
 
-	private void initProfile() {		
+	private void initProfile() {
 		ParallelizationParadigm paradigm = parallelService.getParadigmOfType(
 			ParallelizationParadigm.class);
 		if (paradigm != null) {
@@ -361,7 +373,6 @@ public class ParadigmScreenController extends Pane implements CloseableControl
 		parallelService.saveProfiles();
 	}
 
-
 	private void updateCreateNewProfileButton() {
 		btnCreate.setDisable(txtNameOfNewProfile.getText().trim().isEmpty());
 	}
@@ -376,8 +387,7 @@ public class ParadigmScreenController extends Pane implements CloseableControl
 			txtActiveProfileType.setText(profile.get().getParadigmType()
 				.getSimpleName());
 			boolean paradigmActive = parallelService.getParadigmOfType(
-				ParallelizationParadigm.class)
-				.getStatus() == Status.ACTIVE;
+				ParallelizationParadigm.class).getStatus() == Status.ACTIVE;
 			chkActive.setSelected(paradigmActive);
 			chkActive.setDisable(false);
 			if (profile.get() instanceof ParadigmProfileUsingRunner) {
