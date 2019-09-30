@@ -130,7 +130,8 @@ public class ParadigmScreenController extends Pane implements CloseableControl
 
 			if (paradigmIsCorrect) {
 				cmbProfiles.getItems().add(profile);
-				cmbProfiles.getSelectionModel().select(profile);	
+				cmbProfiles.getSelectionModel().select(profile);
+				txtNameOfNewProfile.setText("");
 			}
 		} catch (IllegalArgumentException exc) {
 				SimpleDialog.showError("There is already a profile with the same name!", exc.getMessage());
