@@ -96,6 +96,10 @@ public abstract class AbstractBaseRPCParadigmImpl implements RPCParadigm {
 
 	// -- SimpleOstravaParadigm methods --
 	
+	protected final void addWorker(ParallelWorker worker) {
+		workerPool.addWorker(worker);
+	}
+
 	protected abstract void initWorkerPool();
 
 	protected List<List<Map<String, Object>>> chunkParameters(

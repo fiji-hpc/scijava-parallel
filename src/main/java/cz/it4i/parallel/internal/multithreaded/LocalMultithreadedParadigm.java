@@ -39,7 +39,7 @@ public class LocalMultithreadedParadigm extends AbstractBaseRPCParadigmImpl {
 	@Override
 	protected void initWorkerPool() {
 		for (int i = 0; i < poolSize; i++) {
-			workerPool.addWorker(new LocalMultithreadedPluginWorker());
+			addWorker(new LocalMultithreadedPluginWorker());
 		}
 	}
 

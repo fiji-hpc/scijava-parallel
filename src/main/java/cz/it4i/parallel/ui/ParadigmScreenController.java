@@ -14,11 +14,8 @@ import org.scijava.parallel.ParallelizationParadigmProfile;
 import org.scijava.parallel.Status;
 import org.scijava.plugin.PluginInfo;
 
-import cz.it4i.parallel.internal.AbstractBaseRPCParadigmImpl;
 import cz.it4i.parallel.internal.ParadigmManagerService;
-import cz.it4i.parallel.runners.ParadigmManagerUsingRunner;
 import cz.it4i.parallel.runners.ParadigmProfileUsingRunner;
-import cz.it4i.parallel.runners.RunnerSettings;
 import cz.it4i.swing_javafx_ui.CloseableControl;
 import cz.it4i.swing_javafx_ui.JavaFXRoutines;
 import javafx.fxml.FXML;

@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import cz.it4i.parallel.internal.ParallelWorker;
 
-public class LocalMultithreadedPluginWorker implements ParallelWorker {
+class LocalMultithreadedPluginWorker implements ParallelWorker {
 
 	@Parameter
 	private CommandService commandService;
