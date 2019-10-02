@@ -3,9 +3,11 @@ package cz.it4i.parallel.runners;
 import java.lang.reflect.InvocationTargetException;
 import java.util.function.Consumer;
 
+import org.scijava.Context;
 import org.scijava.parallel.ParallelizationParadigm;
 import org.scijava.parallel.ParallelizationParadigmProfile;
 import org.scijava.parallel.Status;
+import org.scijava.plugin.Parameter;
 
 import cz.it4i.parallel.SciJavaParallelRuntimeException;
 import lombok.Getter;
@@ -26,6 +28,10 @@ public class ParadigmProfileUsingRunner<T extends RunnerSettings> extends
 
 	@Getter
 	private transient ServerRunner<T> associatedRunner;
+
+	@Parameter
+	private transient Context ctx;
+
 
 	public ParadigmProfileUsingRunner(
 		Class<? extends ServerRunner<T>> typeOfRunner,
@@ -67,7 +73,9 @@ public class ParadigmProfileUsingRunner<T extends RunnerSettings> extends
 
 	private ServerRunner<T> createInstanceOfRunner() {
 		try {
-			return typeOfRunner.getConstructor().newInstance();
+			ServerRunner<T> result = typeOfRunner.getConstructor().newInstance();
+			ctx.inject(result);
+			return result;
 		}
 		catch (InstantiationException | IllegalAccessException
 				| IllegalArgumentException | InvocationTargetException

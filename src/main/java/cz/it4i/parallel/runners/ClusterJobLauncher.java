@@ -1,22 +1,19 @@
 
 package cz.it4i.parallel.runners;
 
-import static java.lang.System.err;
-import static java.lang.System.out;
-
 import com.jcraft.jsch.JSchException;
 
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.PrintStream;
+import java.io.InterruptedIOException;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
+import org.scijava.plugin.Parameter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,6 +21,7 @@ import cz.it4i.fiji.scpclient.SshCommandClient;
 import cz.it4i.fiji.scpclient.SshExecutionSession;
 import cz.it4i.parallel.SciJavaParallelRuntimeException;
 import cz.it4i.parallel.runners.ClusterJobLauncher.Job.POutThread;
+import cz.it4i.parallel.runners.RedirectingOutputService.OutputType;
 
 class ClusterJobLauncher implements Closeable {
 
@@ -33,6 +31,9 @@ class ClusterJobLauncher implements Closeable {
 	private static final long REMOTE_CONSOLE_READ_TIMEOUT = 500;
 
 	private Collection<POutThread> threads = new LinkedList<>();
+
+	@Parameter
+	private RedirectingOutputService redirectingOutputService;
 
 	public class Job {
 
@@ -44,13 +45,15 @@ class ClusterJobLauncher implements Closeable {
 
 		private CompletableFuture<List<String>> nodesFuture;
 
-		private boolean redirectOut;
 
-		private Job(String jobId, boolean openOut) {
+		private boolean threadsAreRunning;
+
+		private Job(String jobId) {
 			super();
 			this.jobId = jobId;
-			this.redirectOut = openOut;
 			nodesFuture = CompletableFuture.supplyAsync(this::getNodesFromServer);
+			redirectingOutputService.registerOutputSource(
+				this::redirectedOutputChanged);
 		}
 
 		public CompletableFuture<List<String>> getNodesFuture() {
@@ -113,11 +116,8 @@ class ClusterJobLauncher implements Closeable {
 			}
 
 			adapter.waitForStart(client, jobId);
-			if (redirectOut) {
-				startOutThread(out, "OU");
-				if (!adapter.isOutErrTogether()) {
-					startOutThread(err, "ER");
-				}
+			if (ClusterJobLauncher.this.redirectStdOutErr) {
+				redirectingOutputService.startAcceptOutput();
 			}
 		}
 
@@ -129,22 +129,62 @@ class ClusterJobLauncher implements Closeable {
 			return adapter.getNodes(client, jobId);
 		}
 
-		private void startOutThread(PrintStream aOut, String suffix) {
-			POutThread thread = new POutThread(aOut, suffix);
+		private void startOutThread(String suffix) {
+			POutThread thread = new POutThread(suffix);
 			threads.add(thread);
 			thread.start();
 		}
 
+		private void runThreads() {
+			threadsAreRunning = true;
+			startOutThread("OU");
+			if (!adapter.isOutErrTogether()) {
+				startOutThread("ER");
+			}
+		}
+
+		private void redirectedOutputChanged(boolean isOpen) {
+			if (isOpen) {
+				startOutput();
+			}
+			else {
+				stopOutput();
+			}
+		}
+
+		// Do not remove the parameter deadEvent:
+		private synchronized void stopOutput() {
+			if (threadsAreRunning) {
+				threads.forEach(POutThread::interrupt);
+				threads.clear();
+				threadsAreRunning = false;
+			}
+		}
+
+		private synchronized void startOutput() {
+			// Start thread if not already running:
+			if (!threadsAreRunning) {
+				runThreads();
+			}
+		
+		}
+
 		class POutThread extends Thread {
 
-			private OutputStream outputStream;
 			private String suffix;
 			private SshExecutionSession usedSession;
+			private OutputType streamType;
 
-			public POutThread(OutputStream outputStream, String suffix) {
+			public POutThread(String suffix) {
 				super();
-				this.outputStream = outputStream;
 				this.suffix = suffix;
+				if (suffix.equals("OU")) {
+					streamType = OutputType.OUTPUT;
+				}
+				else {
+					streamType = OutputType.ERROR;
+				}
+
 			}
 
 			@Override
@@ -155,12 +195,20 @@ class ClusterJobLauncher implements Closeable {
 						true)))
 				{
 					byte[] buffer = new byte[1024];
-					int readed;
-					InputStream is = session.getStdout();
-					while (-1 != (readed = is.read(buffer))) {
-						outputStream.write(buffer, 0, readed);
+					int readLength;
+					InputStream inputStream = session.getStdout();
+					while ((readLength = inputStream.read(buffer)) != -1) {
+
+						redirectingOutputService.writeOutput(new String(buffer, 0,
+							readLength), this.streamType);
 						sleepForWhile(REMOTE_CONSOLE_READ_TIMEOUT);
+						if (Thread.interrupted()) {
+							return;
+						}
 					}
+				}
+				catch (InterruptedIOException exc) {
+					// ignore
 				}
 				catch (IOException exc) {
 					log.error(exc.getMessage(), exc);
@@ -169,8 +217,8 @@ class ClusterJobLauncher implements Closeable {
 
 			@Override
 			public void interrupt() {
-				usedSession.close();
 				super.interrupt();
+				usedSession.close();
 			}
 		}
 	}
@@ -214,11 +262,11 @@ class ClusterJobLauncher implements Closeable {
 		long usedNodes, long ncpus)
 	{
 		String jobId = runJob(directory, command, parameters, usedNodes, ncpus);
-		return new Job(jobId, redirectStdOutErr);
+		return new Job(jobId);
 	}
 
 	public Job getSubmittedJob(String jobId) {
-		return new Job(jobId, redirectStdOutErr);
+		return new Job(jobId);
 	}
 
 	public boolean isJobRunning(String jobID) {

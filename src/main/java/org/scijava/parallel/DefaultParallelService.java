@@ -212,6 +212,7 @@ public class DefaultParallelService extends
 				if (ParallelizationParadigmProfile.class.isAssignableFrom(o
 					.getClass()))
 				{
+					this.getContext().inject(o);
 					return (ParallelizationParadigmProfile) o;
 				}
 			}

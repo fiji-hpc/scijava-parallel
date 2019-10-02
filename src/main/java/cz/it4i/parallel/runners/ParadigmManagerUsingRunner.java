@@ -44,8 +44,12 @@ public abstract class ParadigmManagerUsingRunner<T extends ParallelizationParadi
 
 	@Override
 	public final ParallelizationParadigmProfile createProfile(String name) {
-		return new ParadigmProfileUsingRunner<>(getTypeOfRunner(),
+
+		ParallelizationParadigmProfile result = new ParadigmProfileUsingRunner<>(
+			getTypeOfRunner(),
 			getSupportedParadigmType(), name);
+		pluginService.getContext().inject(result);
+		return result;
 	}
 
 	@Override

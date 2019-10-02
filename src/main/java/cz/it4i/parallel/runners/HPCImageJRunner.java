@@ -9,7 +9,9 @@ import java.util.List;
 import java.util.function.IntConsumer;
 import java.util.stream.Collectors;
 
+import org.scijava.Context;
 import org.scijava.parallel.Status;
+import org.scijava.plugin.Parameter;
 
 import cz.it4i.parallel.internal.InternalExceptionRoutines;
 import cz.it4i.parallel.internal.persistence.RunningRemoteServer;
@@ -29,6 +31,9 @@ public class HPCImageJRunner extends
 	private ClusterJobLauncher launcher;
 
 	private final int startPort;
+
+	@Parameter
+	private Context context;
 
 	public HPCImageJRunner(List<String> parameters, IntConsumer portWaiting,
 		int startPort)
@@ -156,6 +161,7 @@ public class HPCImageJRunner extends
 
 		launcher = InternalExceptionRoutines.supplyWithExceptionHandling(
 			this::createClusterJobLauncher);
+		context.inject(launcher);
 		command.run();
 		if (job != null) {
 			ports = job.createTunnels(getStartPort(), getStartPort());
