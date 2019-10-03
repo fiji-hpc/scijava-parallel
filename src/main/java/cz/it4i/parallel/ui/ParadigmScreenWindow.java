@@ -36,7 +36,7 @@ public class ParadigmScreenWindow {
 				parentStage.setResizable(false);
 				parentStage.setTitle("Pradigm Profiles Manager");
 				parentStage.setScene(scene);
-				parentStage.showAndWait();
+				parentStage.show();
 			});
 			f.get();
 		}
