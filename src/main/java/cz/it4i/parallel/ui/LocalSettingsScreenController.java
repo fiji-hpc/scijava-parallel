@@ -5,6 +5,7 @@ import java.io.File;
 import java.nio.file.Path;
 import cz.it4i.parallel.runners.LocalImageJRunnerSettings;
 import cz.it4i.swing_javafx_ui.JavaFXRoutines;
+import cz.it4i.swing_javafx_ui.SimpleDialog;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;

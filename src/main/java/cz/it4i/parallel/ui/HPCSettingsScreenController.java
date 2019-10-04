@@ -7,6 +7,7 @@ import cz.it4i.parallel.runners.AuthenticationChoice;
 import cz.it4i.parallel.runners.HPCSchedulerType;
 import cz.it4i.parallel.runners.HPCSettings;
 import cz.it4i.swing_javafx_ui.JavaFXRoutines;
+import cz.it4i.swing_javafx_ui.SimpleDialog;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
