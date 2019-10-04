@@ -45,7 +45,6 @@ class ClusterJobLauncher implements Closeable {
 
 		private CompletableFuture<List<String>> nodesFuture;
 
-
 		private boolean threadsAreRunning;
 
 		private Job(String jobId) {
@@ -118,6 +117,7 @@ class ClusterJobLauncher implements Closeable {
 			adapter.waitForStart(client, jobId);
 			if (ClusterJobLauncher.this.redirectStdOutErr) {
 				redirectingOutputService.startAcceptOutput();
+				runThreads();
 			}
 		}
 
@@ -152,7 +152,6 @@ class ClusterJobLauncher implements Closeable {
 			}
 		}
 
-		// Do not remove the parameter deadEvent:
 		private synchronized void stopOutput() {
 			if (threadsAreRunning) {
 				threads.forEach(POutThread::interrupt);
@@ -166,25 +165,24 @@ class ClusterJobLauncher implements Closeable {
 			if (!threadsAreRunning) {
 				runThreads();
 			}
-		
+
 		}
 
 		class POutThread extends Thread {
 
 			private String suffix;
 			private SshExecutionSession usedSession;
-			private OutputType streamType;
+			private OutputType outputType;
 
 			public POutThread(String suffix) {
 				super();
 				this.suffix = suffix;
 				if (suffix.equals("OU")) {
-					streamType = OutputType.OUTPUT;
+					outputType = OutputType.OUTPUT;
 				}
 				else {
-					streamType = OutputType.ERROR;
+					outputType = OutputType.ERROR;
 				}
-
 			}
 
 			@Override
@@ -200,7 +198,7 @@ class ClusterJobLauncher implements Closeable {
 					while ((readLength = inputStream.read(buffer)) != -1) {
 
 						redirectingOutputService.writeOutput(new String(buffer, 0,
-							readLength), this.streamType);
+							readLength), this.outputType);
 						sleepForWhile(REMOTE_CONSOLE_READ_TIMEOUT);
 						if (Thread.interrupted()) {
 							return;
