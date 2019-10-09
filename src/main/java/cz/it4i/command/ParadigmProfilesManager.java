@@ -10,7 +10,7 @@ import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
 import cz.it4i.parallel.internal.ParadigmManagerService;
-import cz.it4i.parallel.ui.ParadigmScreenWindow;
+import cz.it4i.parallel.internal.ui.ParadigmScreenWindow;
 
 @Plugin(headless = true, type = Command.class,
 	menuPath = "Plugins>Scijava parallel>Paradigm Profiles Manager")
