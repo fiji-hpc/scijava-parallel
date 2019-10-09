@@ -10,7 +10,7 @@
 		<relativePath />
 	</parent>
 	<artifactId>scijava-parallel</artifactId>
-	<version>8.0.0-RC-1</version>
+	<version>8.0.0</version>
 	<name>SciJava Parallel</name>
 	<description>Parallelization framework for SciJava applications.</description>
 	<url>https://imagej.net/Scijava-parallel</url>
