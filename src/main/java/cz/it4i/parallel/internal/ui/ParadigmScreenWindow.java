@@ -32,7 +32,7 @@ public class ParadigmScreenWindow {
 			RunnableFuture<Void> f = JavaFXRoutines.runOnFxThread(() -> {
 				final Scene scene = new Scene(controller);
 				final Stage parentStage = new Stage();
-				parentStage.initModality(Modality.APPLICATION_MODAL);
+				parentStage.initModality(Modality.NONE);
 				parentStage.setResizable(false);
 				parentStage.setTitle("Pradigm Profiles Manager");
 				parentStage.setScene(scene);
