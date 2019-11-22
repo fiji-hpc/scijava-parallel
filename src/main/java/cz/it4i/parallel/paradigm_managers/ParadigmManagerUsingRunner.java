@@ -14,8 +14,7 @@ import cz.it4i.parallel.internal.AbstractBaseRPCParadigmImpl;
 
 
 public abstract class ParadigmManagerUsingRunner<T extends ParallelizationParadigm, S extends RunnerSettings>
-	implements
-	ParadigmManager
+	implements ParadigmManager
 {
 
 	@Parameter
