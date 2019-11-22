@@ -8,7 +8,7 @@ import org.scijava.plugin.Plugin;
 import org.scijava.prefs.PrefService;
 
 import cz.it4i.parallel.paradigm_managers.LocalImageJRunnerSettings;
-import cz.it4i.parallel.paradigm_managers.RunnerSettingsEditor;
+import cz.it4i.parallel.paradigm_managers.ParadigmProfileSettingsEditor;
 import cz.it4i.parallel.paradigm_managers.ui.HavingOwnerWindow;
 import javafx.scene.Scene;
 import javafx.stage.Modality;
@@ -17,9 +17,9 @@ import javafx.stage.Window;
 
 class LocalSettingsScreenWindow {
 
-	@Plugin(type = RunnerSettingsEditor.class, priority = Priority.HIGH)
+	@Plugin(type = ParadigmProfileSettingsEditor.class, priority = Priority.HIGH)
 	public static class Editor implements
-		RunnerSettingsEditor<LocalImageJRunnerSettings>, HavingOwnerWindow<Window>
+		ParadigmProfileSettingsEditor<LocalImageJRunnerSettings>, HavingOwnerWindow<Window>
 	{
 
 		@Parameter

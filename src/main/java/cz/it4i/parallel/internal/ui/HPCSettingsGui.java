@@ -24,14 +24,14 @@ import cz.it4i.parallel.SciJavaParallelRuntimeException;
 import cz.it4i.parallel.paradigm_managers.AuthenticationChoice;
 import cz.it4i.parallel.paradigm_managers.HPCSchedulerType;
 import cz.it4i.parallel.paradigm_managers.HPCSettings;
-import cz.it4i.parallel.paradigm_managers.RunnerSettingsEditor;
+import cz.it4i.parallel.paradigm_managers.ParadigmProfileSettingsEditor;
 
 @Plugin(type = Command.class, headless = false)
 public class HPCSettingsGui implements Command
 {
 	
-	@Plugin(type = RunnerSettingsEditor.class)
-	public static class Editor implements RunnerSettingsEditor<HPCSettings> {
+	@Plugin(type = ParadigmProfileSettingsEditor.class)
+	public static class Editor implements ParadigmProfileSettingsEditor<HPCSettings> {
 
 		@Parameter
 		private Context context;

@@ -5,23 +5,19 @@ import java.util.function.Consumer;
 
 import org.scijava.Context;
 import org.scijava.parallel.ParallelizationParadigm;
-import org.scijava.parallel.ParallelizationParadigmProfile;
 import org.scijava.parallel.Status;
 import org.scijava.plugin.Parameter;
 
 import cz.it4i.parallel.SciJavaParallelRuntimeException;
 import lombok.Getter;
-import lombok.Setter;
 
 public class ParadigmProfileUsingRunner<T extends RunnerSettings> extends
-	ParallelizationParadigmProfile
+	ParadigmProfileWithSettings<T>
 {
 
 	private static final long serialVersionUID = -3983910892928520135L;
 
-	@Getter
-	@Setter
-	private T settings;
+
 
 	@Getter
 	private final Class<? extends ServerRunner<T>> typeOfRunner;
@@ -50,17 +46,21 @@ public class ParadigmProfileUsingRunner<T extends RunnerSettings> extends
 		}
 	}
 
-	Class<T> getTypeOfSettings() {
+	@Override
+	protected Class<T> getTypeOfSettings() {
+		Class<T> result;
 		if (associatedRunner != null) {
-			return associatedRunner.getTypeOfSettings();
+			result = associatedRunner.getTypeOfSettings();
 		}
-		else if (settings != null) {
-			@SuppressWarnings("unchecked")
-			Class<T> result = (Class<T>) settings.getClass();
-			return result;
-		}
+		else {
 
-		return createInstanceOfRunner().getTypeOfSettings();
+			result = super.getTypeOfSettings();
+			
+		}
+		if (result == null) {
+			result = createInstanceOfRunner().getTypeOfSettings();
+		}
+		return result;
 	}
 
 	void prepareRunner(Consumer<ServerRunner<T>> initializer) {
@@ -68,7 +68,7 @@ public class ParadigmProfileUsingRunner<T extends RunnerSettings> extends
 			associatedRunner = createInstanceOfRunner();
 		}
 		initializer.accept(associatedRunner);
-		associatedRunner.init(settings);
+		associatedRunner.init(getSettings());
 	}
 
 	private ServerRunner<T> createInstanceOfRunner() {

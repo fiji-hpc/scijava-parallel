@@ -8,7 +8,7 @@ import org.scijava.plugin.Plugin;
 import org.scijava.prefs.PrefService;
 
 import cz.it4i.parallel.paradigm_managers.HPCSettings;
-import cz.it4i.parallel.paradigm_managers.RunnerSettingsEditor;
+import cz.it4i.parallel.paradigm_managers.ParadigmProfileSettingsEditor;
 import javafx.scene.Scene;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -16,8 +16,8 @@ import javafx.stage.Window;
 
 class HPCSettingsScreenWindow {
 
-	@Plugin(type = RunnerSettingsEditor.class, priority = Priority.HIGH)
-	public static class Editor implements RunnerSettingsEditor<HPCSettings> {
+	@Plugin(type = ParadigmProfileSettingsEditor.class, priority = Priority.HIGH)
+	public static class Editor implements ParadigmProfileSettingsEditor<HPCSettings> {
 
 		@Parameter
 		private Context context;

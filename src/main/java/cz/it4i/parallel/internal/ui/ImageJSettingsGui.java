@@ -21,15 +21,15 @@ import org.scijava.widget.TextWidget;
 
 import cz.it4i.parallel.SciJavaParallelRuntimeException;
 import cz.it4i.parallel.paradigm_managers.LocalImageJRunnerSettings;
-import cz.it4i.parallel.paradigm_managers.RunnerSettingsEditor;
+import cz.it4i.parallel.paradigm_managers.ParadigmProfileSettingsEditor;
 
 @Plugin(type = Command.class, headless = false)
 public class ImageJSettingsGui implements Command
 {
 	
-	@Plugin(type = RunnerSettingsEditor.class)
+	@Plugin(type = ParadigmProfileSettingsEditor.class)
 	public static class Editor implements
-		RunnerSettingsEditor<LocalImageJRunnerSettings>
+		ParadigmProfileSettingsEditor<LocalImageJRunnerSettings>
 	{
 
 		@Parameter
