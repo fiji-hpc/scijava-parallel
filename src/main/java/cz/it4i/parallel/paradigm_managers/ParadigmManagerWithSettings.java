@@ -28,6 +28,10 @@ public abstract class ParadigmManagerWithSettings<S extends Serializable>
 	private PluginService pluginService;
 
 	@Override
+	public abstract ParadigmProfileWithSettings<? extends S> createProfile(
+		String name);
+
+	@Override
 	public boolean editProfile(ParallelizationParadigmProfile profile) {
 		return runWithResultForObjectIfOfTypeElseException(profile,
 			ParadigmProfileWithSettings.class, this::editSettings);

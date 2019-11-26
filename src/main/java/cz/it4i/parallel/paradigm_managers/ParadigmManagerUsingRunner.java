@@ -29,9 +29,11 @@ public abstract class ParadigmManagerUsingRunner<T extends ParallelizationParadi
 	}
 
 	@Override
-	public final ParallelizationParadigmProfile createProfile(String name) {
+	public final ParadigmProfileWithSettings<? extends S> createProfile(
+		String name)
+	{
 
-		ParallelizationParadigmProfile result = new ParadigmProfileUsingRunner<>(
+		ParadigmProfileUsingRunner<S> result = new ParadigmProfileUsingRunner<>(
 			getTypeOfRunner(),
 			getSupportedParadigmType(), name);
 		pluginService.getContext().inject(result);
