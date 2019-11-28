@@ -359,8 +359,9 @@ public class ParadigmScreenController extends Pane implements CloseableControl {
 		cf.exceptionally(t -> {
 			chkActive.setSelected(false);
 			userCheckedProfiles.put(activeProfile.toString(), false);
-			JavaFXRoutines.runOnFxThread(() -> SimpleDialog.showError(
-				"Connection error!", t.getMessage()));
+			JavaFXRoutines.runOnFxThread(() -> SimpleDialog.showException(
+				"Connection error!", "See the exception bellow for more details.",
+				new Exception(t)));
 			log.info(t.getMessage(), t);
 			return null;
 		});
