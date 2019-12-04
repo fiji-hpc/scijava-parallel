@@ -19,7 +19,7 @@ import org.scijava.plugin.Plugin;
 import org.scijava.widget.FileWidget;
 import org.scijava.widget.TextWidget;
 
-import cz.it4i.parallel.SciJavaParallelRuntimeException;
+import cz.it4i.cluster_job_launcher.CJLauncherRuntimeException;
 import cz.it4i.parallel.paradigm_managers.LocalImageJRunnerSettings;
 import cz.it4i.parallel.paradigm_managers.ParadigmProfileSettingsEditor;
 
@@ -77,7 +77,7 @@ public class ImageJSettingsGui implements Command
 		}
 		catch (InterruptedException | ExecutionException e) {
 			Thread.currentThread().interrupt();
-			throw new SciJavaParallelRuntimeException(e);
+			throw new CJLauncherRuntimeException(e);
 		}
 	}
 

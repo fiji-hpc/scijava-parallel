@@ -8,7 +8,7 @@ import org.scijava.parallel.ParallelizationParadigm;
 import org.scijava.parallel.Status;
 import org.scijava.plugin.Parameter;
 
-import cz.it4i.parallel.SciJavaParallelRuntimeException;
+import cz.it4i.cluster_job_launcher.CJLauncherRuntimeException;
 import lombok.Getter;
 
 public class ParadigmProfileUsingRunner<T extends RunnerSettings> extends
@@ -81,7 +81,7 @@ public class ParadigmProfileUsingRunner<T extends RunnerSettings> extends
 				| IllegalArgumentException | InvocationTargetException
 				| NoSuchMethodException | SecurityException exc)
 		{
-			throw new SciJavaParallelRuntimeException(exc);
+			throw new CJLauncherRuntimeException(exc);
 		}
 	}
 

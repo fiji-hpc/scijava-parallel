@@ -13,9 +13,10 @@ import org.scijava.Context;
 import org.scijava.parallel.Status;
 import org.scijava.plugin.Parameter;
 
+import cz.it4i.cluster_job_launcher.ClusterJobLauncher;
+import cz.it4i.cluster_job_launcher.ClusterJobLauncher.Job;
 import cz.it4i.parallel.internal.InternalExceptionRoutines;
 import cz.it4i.parallel.internal.persistence.RunningRemoteServer;
-import cz.it4i.parallel.paradigm_managers.ClusterJobLauncher.Job;
 
 public class HPCImageJRunner extends
 	AbstractImageJRunner<HPCSettings> implements

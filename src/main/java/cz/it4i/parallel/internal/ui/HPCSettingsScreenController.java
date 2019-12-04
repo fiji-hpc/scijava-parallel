@@ -3,8 +3,8 @@ package cz.it4i.parallel.internal.ui;
 
 import java.io.File;
 
+import cz.it4i.cluster_job_launcher.HPCSchedulerType;
 import cz.it4i.parallel.paradigm_managers.AuthenticationChoice;
-import cz.it4i.parallel.paradigm_managers.HPCSchedulerType;
 import cz.it4i.parallel.paradigm_managers.HPCSettings;
 import cz.it4i.swing_javafx_ui.JavaFXRoutines;
 import cz.it4i.swing_javafx_ui.SimpleDialog;

@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.function.IntConsumer;
 
-import cz.it4i.parallel.SciJavaParallelRuntimeException;
+import cz.it4i.cluster_job_launcher.CJLauncherRuntimeException;
 import lombok.AccessLevel;
 import lombok.Setter;
 
@@ -47,7 +47,7 @@ abstract class AbstractImageJRunner<T extends RunnerSettings>
 			getPorts().parallelStream().forEach(this::waitForServer);
 		}
 		catch (IOException exc) {
-			throw new SciJavaParallelRuntimeException(exc);
+			throw new CJLauncherRuntimeException(exc);
 		}
 	}
 

@@ -16,6 +16,8 @@ import java.util.stream.Collectors;
 import org.scijava.command.Command;
 import org.scijava.parallel.ParallelizationParadigm;
 
+import cz.it4i.cluster_job_launcher.CJLauncherRuntimeException;
+
 
 public interface RPCParadigm extends ParallelizationParadigm {
 
@@ -43,10 +45,10 @@ public interface RPCParadigm extends ParallelizationParadigm {
 			}
 			catch (InterruptedException exc) {
 				Thread.currentThread().interrupt();
-				throw new SciJavaParallelRuntimeException(exc);
+				throw new CJLauncherRuntimeException(exc);
 			}
 			catch (ExecutionException exc) {
-				throw new SciJavaParallelRuntimeException(exc);
+				throw new CJLauncherRuntimeException(exc);
 			}
 		}).collect(Collectors.toList());
 	}
