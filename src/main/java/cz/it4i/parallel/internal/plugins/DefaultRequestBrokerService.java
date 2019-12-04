@@ -22,10 +22,10 @@ import org.scijava.plugin.Plugin;
 import org.scijava.service.AbstractService;
 import org.scijava.service.Service;
 
-import cz.it4i.cluster_job_launcher.CJLauncherRuntimeException;
 import cz.it4i.parallel.Host;
 import cz.it4i.parallel.MultipleHostParadigm;
 import cz.it4i.parallel.RPCParadigm;
+import cz.it4i.parallel.SciJavaParallelRuntimeException;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -85,7 +85,7 @@ public class DefaultRequestBrokerService extends AbstractService implements
 			}
 		}
 		catch (ClassNotFoundException exc) {
-			throw new CJLauncherRuntimeException(exc);
+			throw new SciJavaParallelRuntimeException(exc);
 		}
 	}
 

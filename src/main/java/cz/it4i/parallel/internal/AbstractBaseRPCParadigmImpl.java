@@ -19,8 +19,8 @@ import org.scijava.parallel.Status;
 import org.scijava.plugin.Parameter;
 import org.scijava.thread.ThreadService;
 
-import cz.it4i.cluster_job_launcher.CJLauncherRuntimeException;
 import cz.it4i.parallel.RPCParadigm;
+import cz.it4i.parallel.SciJavaParallelRuntimeException;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -156,7 +156,7 @@ public abstract class AbstractBaseRPCParadigmImpl implements RPCParadigm {
 			}
 			catch (Exception e) {
 				// this should not happen!
-				throw new CJLauncherRuntimeException(e);
+				throw new SciJavaParallelRuntimeException(e);
 			}
 			finally {
 				workerPool.addWorker(pw);

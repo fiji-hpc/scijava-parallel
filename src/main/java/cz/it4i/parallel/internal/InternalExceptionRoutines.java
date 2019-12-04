@@ -7,10 +7,10 @@
  ******************************************************************************/
 package cz.it4i.parallel.internal;
 
-import cz.it4i.cluster_job_launcher.CJLauncherRuntimeException;
 import cz.it4i.common.ExceptionRoutines;
 import cz.it4i.common.ExceptionRoutines.RunnableWithException;
 import cz.it4i.common.ExceptionRoutines.SupplierWithException;
+import cz.it4i.parallel.SciJavaParallelRuntimeException;
 
 public final class InternalExceptionRoutines {
 
@@ -18,19 +18,19 @@ public final class InternalExceptionRoutines {
 
 	public static void rethrowAsUnchecked(Throwable exc) {
 		ExceptionRoutines.rethrowAsUnchecked(exc,
-			CJLauncherRuntimeException::new);
+			SciJavaParallelRuntimeException::new);
 	}
 
 	public static void runWithExceptionHandling(RunnableWithException runnable)
 	{
 		ExceptionRoutines.runWithExceptionHandling(runnable,
-			CJLauncherRuntimeException::new);
+			SciJavaParallelRuntimeException::new);
 	}
 
 	public static <T> T supplyWithExceptionHandling(
 		SupplierWithException<T> supplier)
 	{
 		return ExceptionRoutines.supplyWithExceptionHandling(supplier,
-			CJLauncherRuntimeException::new);
+			SciJavaParallelRuntimeException::new);
 	}
 }
