@@ -2,6 +2,7 @@ package cz.it4i.parallel.paradigm_managers;
 
 import java.io.File;
 
+import cz.it4i.cluster_job_launcher.AuthenticationChoice;
 import cz.it4i.cluster_job_launcher.HPCSchedulerType;
 import cz.it4i.parallel.SciJavaParallelRuntimeException;
 import lombok.Builder;

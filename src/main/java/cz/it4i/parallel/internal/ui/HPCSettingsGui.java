@@ -20,9 +20,9 @@ import org.scijava.widget.FileWidget;
 import org.scijava.widget.NumberWidget;
 import org.scijava.widget.TextWidget;
 
+import cz.it4i.cluster_job_launcher.AuthenticationChoice;
 import cz.it4i.cluster_job_launcher.HPCSchedulerType;
 import cz.it4i.parallel.SciJavaParallelRuntimeException;
-import cz.it4i.parallel.paradigm_managers.AuthenticationChoice;
 import cz.it4i.parallel.paradigm_managers.HPCSettings;
 import cz.it4i.parallel.paradigm_managers.ParadigmProfileSettingsEditor;
 
