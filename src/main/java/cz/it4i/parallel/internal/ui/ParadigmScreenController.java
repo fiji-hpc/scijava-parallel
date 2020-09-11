@@ -2,11 +2,13 @@
 package cz.it4i.parallel.internal.ui;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 import org.apache.commons.lang3.BooleanUtils;
+import org.scijava.InstantiableException;
 import org.scijava.parallel.ParadigmManager;
 import org.scijava.parallel.ParallelService;
 import org.scijava.parallel.ParallelizationParadigm;
@@ -110,12 +112,13 @@ public class ParadigmScreenController extends Pane implements CloseableControl {
 		// If paradigm has not been configured it should not be created:
 		boolean paradigmIsCorrect = false;
 
+		String newProfileName = txtNameOfNewProfile.getText();
 		if (manager != null) {
-			profile = manager.createProfile(txtNameOfNewProfile.getText());
+			profile = manager.createProfile(newProfileName);
 		}
 		else {
 			profile = new ParallelizationParadigmProfile(paradigms.getValue(),
-				txtNameOfNewProfile.getText());
+				newProfileName);
 		}
 
 		try {
@@ -288,28 +291,37 @@ public class ParadigmScreenController extends Pane implements CloseableControl {
 	}
 
 	private void initParadigms() {
-		for (PluginInfo<ParallelizationParadigm> info : parallelService
-			.getPlugins())
-		{
-			paradigms.getItems().add(info.getPluginClass());
+		List<PluginInfo<ParallelizationParadigm>> parallelPlugins = parallelService
+			.getPlugins();
+		log.debug("Number of parallel plugins: {} ", parallelPlugins.size());
+		for (PluginInfo<ParallelizationParadigm> info : parallelPlugins) {
+			try {
+				info.loadClass();
+				paradigms.getItems().add(info.getPluginClass());
+				log.debug("Parallel plugin: {} ", info.getPluginClass());
 
-			paradigms.setConverter(
-				new StringConverter<Class<? extends ParallelizationParadigm>>()
-				{
+				paradigms.setConverter(
+					new StringConverter<Class<? extends ParallelizationParadigm>>()
+					{
 
-					@Override
-					public String toString(
-						Class<? extends ParallelizationParadigm> item)
-				{
-						return (item == null) ? "" : item.getSimpleName();
-					}
+						@Override
+						public String toString(
+							Class<? extends ParallelizationParadigm> item)
+					{
+							return (item == null) ? "" : item.getSimpleName();
+						}
 
-					@Override
-					public Class<? extends ParallelizationParadigm> fromString(String s) {
-						throw new UnsupportedOperationException();
-					}
-				});
-
+						@Override
+						public Class<? extends ParallelizationParadigm> fromString(
+							String s)
+					{
+							throw new UnsupportedOperationException();
+						}
+					});
+			}
+			catch (InstantiableException exc) {
+				log.error("Faild to load parallel plugin class.");
+			}
 		}
 		JavaFXRoutines.runOnFxThread(() -> {
 			if (!paradigms.getItems().isEmpty()) {
