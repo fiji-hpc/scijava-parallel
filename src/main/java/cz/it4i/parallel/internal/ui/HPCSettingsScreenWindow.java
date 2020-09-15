@@ -17,7 +17,9 @@ import javafx.stage.Window;
 class HPCSettingsScreenWindow {
 
 	@Plugin(type = ParadigmProfileSettingsEditor.class, priority = Priority.HIGH)
-	public static class Editor implements ParadigmProfileSettingsEditor<HPCSettings> {
+	public static class Editor implements
+		ParadigmProfileSettingsEditor<HPCSettings>
+	{
 
 		@Parameter
 		private Context context;

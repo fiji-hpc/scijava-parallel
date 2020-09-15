@@ -19,7 +19,8 @@ class LocalSettingsScreenWindow {
 
 	@Plugin(type = ParadigmProfileSettingsEditor.class, priority = Priority.HIGH)
 	public static class Editor implements
-		ParadigmProfileSettingsEditor<LocalImageJRunnerSettings>, HavingOwnerWindow<Window>
+		ParadigmProfileSettingsEditor<LocalImageJRunnerSettings>,
+		HavingOwnerWindow<Window>
 	{
 
 		@Parameter
@@ -32,9 +33,7 @@ class LocalSettingsScreenWindow {
 		}
 
 		@Override
-		public LocalImageJRunnerSettings edit(
-			LocalImageJRunnerSettings settings)
-		{
+		public LocalImageJRunnerSettings edit(LocalImageJRunnerSettings settings) {
 			LocalSettingsScreenWindow localSettingsScreenWindow =
 				new LocalSettingsScreenWindow();
 			localSettingsScreenWindow.setOwner(owner);

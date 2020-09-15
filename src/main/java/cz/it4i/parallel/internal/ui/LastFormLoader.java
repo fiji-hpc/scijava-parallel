@@ -1,3 +1,4 @@
+
 package cz.it4i.parallel.internal.ui;
 
 import java.io.ByteArrayInputStream;
@@ -8,20 +9,20 @@ import java.util.Base64;
 
 import org.scijava.prefs.PrefService;
 
-import cz.it4i.parallel.paradigm_managers.RunnerSettings;
-import lombok.extern.slf4j.Slf4j;
+import cz.it4i.swing_javafx_ui.SimpleDialog;
 
 //Code responsible for loading and storing the last used form values:
-@Slf4j
-class LastFormLoader<S extends RunnerSettings> {
-	
+public class LastFormLoader<S> {
+
 	private String formStorage;
-	
+
 	private PrefService prefService;
-	
+
 	private Class<?> formClass;
-	
-	public LastFormLoader(PrefService newPrefService, String newFormName, Class<?> newFormClass) {
+
+	public LastFormLoader(PrefService newPrefService, String newFormName,
+		Class<?> newFormClass)
+	{
 		this.prefService = newPrefService;
 		this.formStorage = newFormName;
 		this.formClass = newFormClass;
@@ -38,7 +39,9 @@ class LastFormLoader<S extends RunnerSettings> {
 			return deserializeForm(tempString);
 		}
 		catch (Exception exc) {
-			log.error(exc.getMessage());
+			SimpleDialog.showException(
+				"Failed to get stored form details from preferences.", exc.getMessage(),
+				exc);
 		}
 		return null;
 	}
@@ -51,15 +54,14 @@ class LastFormLoader<S extends RunnerSettings> {
 			}
 			return Base64.getEncoder().encodeToString(baos.toByteArray());
 		}
-		catch (final Exception e) {
-			log.error("serialization " + e.getMessage(), e);
+		catch (final Exception exc) {
+			SimpleDialog.showException("Failed to put form details in preferences.",
+				exc.getMessage(), exc);
 		}
 		return null;
 	}
 
-	private S deserializeForm(
-		final String serializedForm)
-	{
+	private S deserializeForm(final String serializedForm) {
 		try {
 			final byte[] data = Base64.getDecoder().decode(serializedForm);
 			try (final ObjectInputStream ois = new ObjectInputStream(
@@ -71,9 +73,9 @@ class LastFormLoader<S extends RunnerSettings> {
 			}
 		}
 		catch (final Exception e) {
-			log.error("deserialization - " + e.getMessage());
+			SimpleDialog.showException("Exception", "Deserialization", e);
 		}
 		return null;
 	}
-	
+
 }
