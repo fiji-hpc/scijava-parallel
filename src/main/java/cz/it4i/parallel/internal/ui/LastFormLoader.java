@@ -62,6 +62,11 @@ public class LastFormLoader<S> {
 	}
 
 	private S deserializeForm(final String serializedForm) {
+		// Check if there is no previously stored form of this type:
+		if (serializedForm == null) {
+			return null;
+		}
+
 		try {
 			final byte[] data = Base64.getDecoder().decode(serializedForm);
 			try (final ObjectInputStream ois = new ObjectInputStream(
