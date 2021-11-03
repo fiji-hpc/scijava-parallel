@@ -384,7 +384,6 @@ public class ParadigmScreenController extends Pane implements CloseableControl {
 			if (!cmbProfiles.getItems().isEmpty()) {
 				cmbProfiles.getSelectionModel().selectFirst();
 
-				// TODO Set initially selected values, second line does not work:
 				txtProfileType.setText(cmbProfiles.getSelectionModel().getSelectedItem()
 					.getParadigmType().getSimpleName());
 				setProfileManagerName(cmbProfiles.getSelectionModel().getSelectedItem(),
