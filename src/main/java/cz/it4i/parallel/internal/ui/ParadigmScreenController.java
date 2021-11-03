@@ -28,6 +28,7 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.Pane;
+import javafx.stage.Stage;
 import javafx.stage.Window;
 import javafx.util.StringConverter;
 import lombok.extern.slf4j.Slf4j;
@@ -60,13 +61,22 @@ public class ParadigmScreenController extends Pane implements CloseableControl {
 	private TextField txtProfileType;
 
 	@FXML
+	private TextField txtProfileManager;
+
+	@FXML
 	private TextField txtActiveProfile;
 
 	@FXML
 	private TextField txtActiveProfileType;
 
 	@FXML
+	private TextField txtActiveProfileManager;
+
+	@FXML
 	private CheckBox chkRunning;
+
+	@FXML
+	private Button okButton;
 
 	private ParallelService parallelService;
 
@@ -101,7 +111,8 @@ public class ParadigmScreenController extends Pane implements CloseableControl {
 
 	@Override
 	public void close() {
-		// do nothing
+		Stage stage = (Stage) okButton.getScene().getWindow();
+		stage.close();
 	}
 
 	public void createNewProfile() {
@@ -199,14 +210,34 @@ public class ParadigmScreenController extends Pane implements CloseableControl {
 
 	public void profileSelected() {
 		if (!cmbProfiles.getSelectionModel().isEmpty()) {
-			txtProfileType.setText(cmbProfiles.getSelectionModel().getSelectedItem()
-				.getParadigmType().getSimpleName());
+			ParallelizationParadigmProfile profile = cmbProfiles.getSelectionModel()
+				.getSelectedItem();
+
+			txtProfileType.setText(profile.getParadigmType().getSimpleName());
+
+			setProfileManagerName(profile, txtProfileManager);
+
 			btnDelete.setDisable(false);
 		}
 		else {
 			txtProfileType.setText("");
+			txtProfileManager.setText("");
 			btnDelete.setDisable(true);
 		}
+	}
+
+	private void setProfileManagerName(ParallelizationParadigmProfile profile,
+		TextField textField)
+	{
+		try {
+			textField.setText(paradigmManagerService.getManagers(profile).toString());
+			textField.setDisable(false);
+		}
+		catch (Exception exc) {
+			textField.setText("");
+			textField.setDisable(true);
+		}
+
 	}
 
 	public void selectProfile() {
@@ -278,7 +309,9 @@ public class ParadigmScreenController extends Pane implements CloseableControl {
 			ParadigmProfileUsingRunner<?> profile =
 				(ParadigmProfileUsingRunner<?>) activeProfile;
 			String name = activeProfile.toString();
-			if (!userCheckedProfiles.computeIfAbsent(name, x -> false)) {
+			if (Boolean.FALSE.equals(userCheckedProfiles.computeIfAbsent(name,
+				x -> false)))
+			{
 				runEditProfile(profile);
 				userCheckedProfiles.put(name, true);
 			}
@@ -325,7 +358,8 @@ public class ParadigmScreenController extends Pane implements CloseableControl {
 		}
 		JavaFXRoutines.runOnFxThread(() -> {
 			if (!paradigms.getItems().isEmpty()) {
-				paradigms.getSelectionModel().select(0);
+				paradigms.getSelectionModel().selectFirst();
+
 				paradigmSelected();
 			}
 		});
@@ -348,7 +382,13 @@ public class ParadigmScreenController extends Pane implements CloseableControl {
 		}
 		JavaFXRoutines.runOnFxThread(() -> {
 			if (!cmbProfiles.getItems().isEmpty()) {
-				cmbProfiles.getSelectionModel().select(0);
+				cmbProfiles.getSelectionModel().selectFirst();
+
+				// TODO Set initially selected values, second line does not work:
+				txtProfileType.setText(cmbProfiles.getSelectionModel().getSelectedItem()
+					.getParadigmType().getSimpleName());
+				setProfileManagerName(cmbProfiles.getSelectionModel().getSelectedItem(),
+					txtProfileManager);
 			}
 		});
 	}
@@ -396,7 +436,7 @@ public class ParadigmScreenController extends Pane implements CloseableControl {
 			.getProfiles().stream().filter(p -> p.isSelected() != null && p
 				.isSelected()).findAny();
 		if (profile.isPresent()) {
-			activeProfile = profile.get();
+			this.activeProfile = profile.get();
 			txtActiveProfile.setText(profile.get().toString());
 			txtActiveProfileType.setText(profile.get().getParadigmType()
 				.getSimpleName());
@@ -414,11 +454,14 @@ public class ParadigmScreenController extends Pane implements CloseableControl {
 			else {
 				chkRunning.setVisible(false);
 			}
+
+			setProfileManagerName(profile.get(), txtActiveProfileManager);
 		}
 		else {
 			activeProfile = null;
 			txtActiveProfile.setText("");
 			txtActiveProfileType.setText("");
+			txtActiveProfileManager.setText("");
 			chkActive.setDisable(true);
 		}
 	}
