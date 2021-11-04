@@ -122,7 +122,9 @@ public class ParadigmScreenController extends Pane implements CloseableControl {
 
 		// If paradigm has not been configured it should not be created:
 		boolean paradigmIsCorrect = false;
-
+		// If it already exists it should not be created again.
+		boolean exists = false;
+		
 		String newProfileName = txtNameOfNewProfile.getText();
 		if (manager != null) {
 			profile = manager.createProfile(newProfileName);
@@ -148,10 +150,11 @@ public class ParadigmScreenController extends Pane implements CloseableControl {
 			}
 		}
 		catch (IllegalArgumentException exc) {
+			exists = true;
 			SimpleDialog.showError("There is already a profile with the same name!",
 				exc.getMessage());
 		}
-		if (!paradigmIsCorrect) {
+		if (!paradigmIsCorrect && !exists) {
 			parallelService.deleteProfile(profile.toString());
 		}
 	}
