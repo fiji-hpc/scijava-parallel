@@ -124,7 +124,7 @@ public class ParadigmScreenController extends Pane implements CloseableControl {
 		boolean paradigmIsCorrect = false;
 		// If it already exists it should not be created again.
 		boolean exists = false;
-		
+
 		String newProfileName = txtNameOfNewProfile.getText();
 		if (manager != null) {
 			profile = manager.createProfile(newProfileName);
@@ -160,27 +160,37 @@ public class ParadigmScreenController extends Pane implements CloseableControl {
 	}
 
 	public void deleteProfile() {
+
 		if (!cmbProfiles.getSelectionModel().isEmpty()) {
 			ParallelizationParadigmProfile toDelete = cmbProfiles.getSelectionModel()
 				.getSelectedItem();
-			int indexToSelect = cmbProfiles.getSelectionModel().getSelectedIndex();
-			parallelService.deleteProfile(toDelete.toString());
-			cmbProfiles.getItems().remove(toDelete);
-			indexToSelect = Math.min(indexToSelect, cmbProfiles.getItems().size() -
-				1);
-			if (indexToSelect >= 0) {
-				cmbProfiles.getSelectionModel().select(indexToSelect);
 
-				// If the selected profile is deleted, select the last one, if
-				// any are available:
-				if (toDelete == activeProfile) {
-					parallelService.selectProfile(cmbProfiles.getSelectionModel()
-						.getSelectedItem().toString());
+			String profileName = toDelete.toString();
+			boolean userConfirmed = SimpleDialog.showConfirmation(
+				"You are about to delete profile \"" + profileName + "\" !",
+				"Press OK to to delete the profile. (Profile will be lost forever!)\n" +
+					"Press Cancel to abort.");
+
+			if (userConfirmed) {
+				int indexToSelect = cmbProfiles.getSelectionModel().getSelectedIndex();
+				parallelService.deleteProfile(toDelete.toString());
+				cmbProfiles.getItems().remove(toDelete);
+				indexToSelect = Math.min(indexToSelect, cmbProfiles.getItems().size() -
+					1);
+				if (indexToSelect >= 0) {
+					cmbProfiles.getSelectionModel().select(indexToSelect);
+
+					// If the selected profile is deleted, select the last one, if
+					// any are available:
+					if (toDelete == activeProfile) {
+						parallelService.selectProfile(cmbProfiles.getSelectionModel()
+							.getSelectedItem().toString());
+						updateActiveProfile();
+					}
+				}
+				if (BooleanUtils.isTrue(toDelete.isSelected())) {
 					updateActiveProfile();
 				}
-			}
-			if (BooleanUtils.isTrue(toDelete.isSelected())) {
-				updateActiveProfile();
 			}
 		}
 	}
