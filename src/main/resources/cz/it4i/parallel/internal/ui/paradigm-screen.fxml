@@ -9,25 +9,25 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.Pane?>
 
-<fx:root maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="350.0" prefWidth="620.0" style="-fx-background-color: WHITE;" stylesheets="@style.css" type="Pane" xmlns="http://javafx.com/javafx/" xmlns:fx="http://javafx.com/fxml/1" fx:controller="cz.it4i.parallel.internal.ui.ParadigmScreenController">
+<fx:root maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="620.0" style="-fx-background-color: WHITE;" stylesheets="@style.css" type="Pane" xmlns="http://javafx.com/javafx/" xmlns:fx="http://javafx.com/fxml/1" fx:controller="cz.it4i.parallel.internal.ui.ParadigmScreenController">
    <children>
-      <Label layoutX="16.0" layoutY="10.0" style="-fx-font-weight: bold;" text="Profile Name" />
-      <Label layoutX="225.0" layoutY="10.0" style="-fx-font-weight: BOLD;" text="Paradigm Type" />
-      <Label layoutX="435.0" layoutY="10.0" style="-fx-font-weight: bold;" text="Paradigm Manager" />
-      <Group layoutX="15.0" layoutY="30.0">
+      <Label layoutX="15.0" layoutY="20.0" style="-fx-font-weight: bold;" text="Profile Name" />
+      <Label layoutX="225.0" layoutY="20.0" style="-fx-font-weight: BOLD;" text="Paradigm Type" />
+      <Label layoutX="435.0" layoutY="20.0" style="-fx-font-weight: bold;" text="Paradigm Manager" />
+      <Group layoutX="15.0" layoutY="50.0">
          <children>
             <Separator layoutX="6.0" layoutY="8.0" prefHeight="3.0" prefWidth="590.0" />
-            <Label layoutX="1.0" style="-fx-background-color: WHITE;" text="Create a new profile" />
+            <Label style="-fx-background-color: WHITE;" text="Create a new profile" />
             <TextField fx:id="txtNameOfNewProfile" layoutY="25.0" />
             <ComboBox fx:id="paradigms" layoutX="210.0" layoutY="25.0" onAction="#paradigmSelected" prefHeight="26.0" prefWidth="170.0" />
             <ComboBox fx:id="cmbParadigmManagers" layoutX="420.0" layoutY="25.0" prefHeight="26.0" prefWidth="170.0" />
             <Button fx:id="btnCreate" layoutY="57.0" mnemonicParsing="false" onAction="#createNewProfile" prefHeight="26.0" prefWidth="58.0" text="Create" />
          </children>
       </Group>
-      <Group layoutX="15.0" layoutY="120.0">
+      <Group layoutX="15.0" layoutY="150.0">
          <children>
             <Separator layoutX="6.0" layoutY="8.0" prefHeight="3.0" prefWidth="590.0" />
-            <Label layoutX="1.0" style="-fx-background-color: WHITE;" text="Select an existing profile" />
+            <Label style="-fx-background-color: WHITE;" text="Select an existing profile" />
             <ComboBox fx:id="cmbProfiles" layoutY="25.0" onAction="#profileSelected" prefHeight="26.0" prefWidth="167.0" />
             <TextField fx:id="txtProfileType" editable="false" layoutX="210.0" layoutY="23.0" />
             <Button layoutY="58.0" mnemonicParsing="false" onAction="#selectProfile" prefHeight="26.0" prefWidth="58.0" text="Select" />
@@ -36,10 +36,10 @@
             <TextField fx:id="txtProfileManager" editable="false" layoutX="420.0" layoutY="24.0" />
          </children>
       </Group>
-      <Group layoutX="15.0" layoutY="210.0">
+      <Group layoutX="15.0" layoutY="250.0">
          <children>
             <Separator layoutX="6.0" layoutY="8.0" prefHeight="3.0" prefWidth="590.0" />
-            <Label layoutX="1.0" style="-fx-background-color: WHITE;" text="Currently selected profile" />
+            <Label style="-fx-background-color: WHITE;" text="Currently selected profile" />
             <TextField fx:id="txtActiveProfile" editable="false" layoutY="25.0" />
             <TextField fx:id="txtActiveProfileType" editable="false" layoutX="210.0" layoutY="23.0" />
             <CheckBox fx:id="chkActive" layoutY="63.0" mnemonicParsing="false" onAction="#activateDeactivate" text="Paradigm Active" />
@@ -48,6 +48,6 @@
             <Separator layoutY="93.0" prefHeight="3.0" prefWidth="595.0" />
          </children>
       </Group>
-      <Button fx:id="okButton" layoutX="555.0" layoutY="315.0" mnemonicParsing="false" onAction="#close" prefHeight="26.0" prefWidth="58.0" text="OK" />
+      <Button fx:id="okButton" layoutX="555.0" layoutY="365.0" mnemonicParsing="false" onAction="#close" prefHeight="26.0" prefWidth="58.0" text="OK" />
    </children>
 </fx:root>
