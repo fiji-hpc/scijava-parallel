@@ -21,7 +21,8 @@
             <TextField fx:id="txtNameOfNewProfile" layoutY="25.0" />
             <ComboBox fx:id="paradigms" layoutX="210.0" layoutY="25.0" onAction="#paradigmSelected" prefHeight="26.0" prefWidth="170.0" />
             <ComboBox fx:id="cmbParadigmManagers" layoutX="420.0" layoutY="25.0" prefHeight="26.0" prefWidth="170.0" />
-            <Button fx:id="btnCreate" layoutY="57.0" mnemonicParsing="false" onAction="#createNewProfile" prefHeight="26.0" prefWidth="58.0" text="Create" />
+            <Button fx:id="btnCreate" layoutY="57.0" mnemonicParsing="false" onAction="#createNewProfile" prefHeight="26.0" prefWidth="95.0" text="Create New" />
+            <Button fx:id="copyButton" layoutX="101.0" layoutY="57.0" mnemonicParsing="false" onAction="#copyProfile" prefHeight="26.0" prefWidth="95.0" text="Copy Selected" />
          </children>
       </Group>
       <Group layoutX="15.0" layoutY="150.0">
@@ -30,8 +31,8 @@
             <Label style="-fx-background-color: WHITE;" text="Select an existing profile" />
             <ComboBox fx:id="cmbProfiles" layoutY="25.0" onAction="#profileSelected" prefHeight="26.0" prefWidth="167.0" />
             <TextField fx:id="txtProfileType" editable="false" layoutX="210.0" layoutY="23.0" />
-            <Button layoutY="58.0" mnemonicParsing="false" onAction="#selectProfile" prefHeight="26.0" prefWidth="58.0" text="Select" />
-            <Button layoutX="65.0" layoutY="58.0" mnemonicParsing="false" onAction="#editProfile" prefHeight="26.0" prefWidth="58.0" text="Edit" />
+            <Button fx:id="selectButton" layoutY="58.0" mnemonicParsing="false" onAction="#selectProfile" prefHeight="26.0" prefWidth="58.0" text="Select" />
+            <Button fx:id="editButton" layoutX="65.0" layoutY="58.0" mnemonicParsing="false" onAction="#editProfile" prefHeight="26.0" prefWidth="58.0" text="Edit" />
             <Button fx:id="btnDelete" layoutX="130.0" layoutY="58.0" mnemonicParsing="false" onAction="#deleteProfile" prefHeight="26.0" prefWidth="58.0" text="Delete" />
             <TextField fx:id="txtProfileManager" editable="false" layoutX="420.0" layoutY="24.0" />
          </children>
@@ -43,11 +44,11 @@
             <TextField fx:id="txtActiveProfile" editable="false" layoutY="25.0" />
             <TextField fx:id="txtActiveProfileType" editable="false" layoutX="210.0" layoutY="23.0" />
             <CheckBox fx:id="chkActive" layoutY="63.0" mnemonicParsing="false" onAction="#activateDeactivate" text="Paradigm Active" />
-            <CheckBox fx:id="chkRunning" layoutX="210.0" layoutY="63.0" mnemonicParsing="false" onAction="#runEnd" text="Running server" />
+            <CheckBox fx:id="chkRunning" layoutX="210.0" layoutY="63.0" mnemonicParsing="false" onAction="#runEnd" text="Running Server" />
             <TextField fx:id="txtActiveProfileManager" editable="false" layoutX="420.0" layoutY="23.0" />
             <Separator layoutY="93.0" prefHeight="3.0" prefWidth="595.0" />
          </children>
       </Group>
-      <Button fx:id="okButton" layoutX="555.0" layoutY="365.0" mnemonicParsing="false" onAction="#close" prefHeight="26.0" prefWidth="58.0" text="OK" />
+      <Button fx:id="okButton" layoutX="565.0" layoutY="360.0" mnemonicParsing="false" onAction="#close" prefHeight="26.0" prefWidth="48.0" text="OK" />
    </children>
 </fx:root>

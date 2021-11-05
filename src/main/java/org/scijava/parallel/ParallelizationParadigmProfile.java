@@ -27,7 +27,7 @@ public class ParallelizationParadigmProfile
 	private static final long serialVersionUID = 5198616777775710034L;
 
 	/** Profile name */
-	private final String profileName;
+	private String profileName;
 
 	/** The {@link ParallelizationParadigm} type to be used in this profile */
 	private final Class<? extends ParallelizationParadigm> paradigmType;
@@ -73,6 +73,15 @@ public class ParallelizationParadigmProfile
 	 */
 	String getName() {
 		return profileName;
+	}
+	
+	/**
+	 * Sets the {@link #profileName}
+	 */
+	public void setName(String newProfileName) {
+		if(!newProfileName.isEmpty()) {
+			this.profileName = newProfileName;
+		}
 	}
 
 	/**

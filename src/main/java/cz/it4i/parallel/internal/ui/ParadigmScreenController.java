@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.SerializationUtils;
 import org.scijava.InstantiableException;
 import org.scijava.parallel.ParadigmManager;
 import org.scijava.parallel.ParallelService;
@@ -78,6 +79,15 @@ public class ParadigmScreenController extends Pane implements CloseableControl {
 	@FXML
 	private Button okButton;
 
+	@FXML
+	private Button selectButton;
+
+	@FXML
+	private Button editButton;
+
+	@FXML
+	private Button copyButton;
+
 	private ParallelService parallelService;
 
 	private ParadigmManagerService paradigmManagerService;
@@ -144,9 +154,7 @@ public class ParadigmScreenController extends Pane implements CloseableControl {
 			}
 
 			if (paradigmIsCorrect) {
-				cmbProfiles.getItems().add(profile);
-				cmbProfiles.getSelectionModel().select(profile);
-				txtNameOfNewProfile.setText("");
+				updateProfiles(profile);
 			}
 		}
 		catch (IllegalArgumentException exc) {
@@ -157,6 +165,37 @@ public class ParadigmScreenController extends Pane implements CloseableControl {
 		if (!paradigmIsCorrect && !exists) {
 			parallelService.deleteProfile(profile.toString());
 		}
+	}
+
+//TODO Fix the setName function to properly implement the interface.
+	public void copyProfile() {
+		if (txtNameOfNewProfile.getText().isEmpty()) {
+			SimpleDialog.showWarning("Please type a new profile name.",
+				"Please provide a name for the copy of the selected profile.");
+		}
+		else if (activeProfile != null) {
+			ParallelizationParadigmProfile copiedProfile = SerializationUtils.clone(
+				activeProfile);
+			copiedProfile.setName(txtNameOfNewProfile.getText());
+			try {
+				parallelService.addProfile(copiedProfile);
+				updateProfiles(copiedProfile);
+			}
+			catch (IllegalArgumentException exc) {
+				SimpleDialog.showError("There is already a profile with the same name!",
+					exc.getMessage());
+			}
+		}
+		else {
+			SimpleDialog.showWarning("No profile is selected!",
+				"Please select a profile.");
+		}
+	}
+
+	private void updateProfiles(ParallelizationParadigmProfile profile) {
+		cmbProfiles.getItems().add(profile);
+		cmbProfiles.getSelectionModel().select(profile);
+		txtNameOfNewProfile.setText("");
 	}
 
 	public void deleteProfile() {
@@ -230,11 +269,18 @@ public class ParadigmScreenController extends Pane implements CloseableControl {
 
 			setProfileManagerName(profile, txtProfileManager);
 
+			cmbProfiles.setDisable(false);
+			selectButton.setDisable(false);
+			editButton.setDisable(false);
 			btnDelete.setDisable(false);
 		}
 		else {
 			txtProfileType.setText("");
 			txtProfileManager.setText("");
+
+			cmbProfiles.setDisable(true);
+			selectButton.setDisable(true);
+			editButton.setDisable(true);
 			btnDelete.setDisable(true);
 		}
 	}
@@ -456,17 +502,21 @@ public class ParadigmScreenController extends Pane implements CloseableControl {
 				ParallelizationParadigm.class).getStatus() == Status.ACTIVE;
 			chkActive.setSelected(paradigmActive);
 			chkActive.setDisable(false);
+			chkActive.setVisible(true);
 			if (profile.get() instanceof ParadigmProfileUsingRunner) {
 				ParadigmProfileUsingRunner<?> typedProfile =
 					(ParadigmProfileUsingRunner<?>) profile.get();
+				chkRunning.setDisable(false);
 				chkRunning.setVisible(true);
 				chkRunning.setSelected(typedProfile.getAssociatedRunner()
 					.getStatus() == Status.ACTIVE);
 			}
 			else {
+				chkRunning.setDisable(true);
 				chkRunning.setVisible(false);
 			}
 
+			copyButton.setDisable(false);
 			setProfileManagerName(profile.get(), txtActiveProfileManager);
 		}
 		else {
@@ -475,6 +525,13 @@ public class ParadigmScreenController extends Pane implements CloseableControl {
 			txtActiveProfileType.setText("");
 			txtActiveProfileManager.setText("");
 			chkActive.setDisable(true);
+			chkRunning.setDisable(true);
+			copyButton.setDisable(true);
+
+			cmbProfiles.setDisable(true);
+			selectButton.setDisable(true);
+			editButton.setDisable(true);
+			btnDelete.setDisable(true);
 		}
 	}
 }
