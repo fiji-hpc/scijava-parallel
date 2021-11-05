@@ -506,13 +506,11 @@ public class ParadigmScreenController extends Pane implements CloseableControl {
 				ParadigmProfileUsingRunner<?> typedProfile =
 					(ParadigmProfileUsingRunner<?>) profile.get();
 				chkRunning.setDisable(false);
-				chkRunning.setVisible(true);
 				chkRunning.setSelected(typedProfile.getAssociatedRunner()
 					.getStatus() == Status.ACTIVE);
 			}
 			else {
 				chkRunning.setDisable(true);
-				chkRunning.setVisible(false);
 			}
 
 			copyButton.setDisable(false);

@@ -28,7 +28,7 @@
       <Group layoutX="15.0" layoutY="150.0">
          <children>
             <Separator layoutX="6.0" layoutY="8.0" prefHeight="3.0" prefWidth="590.0" />
-            <Label style="-fx-background-color: WHITE;" text="Select an existing profile" />
+            <Label style="-fx-background-color: WHITE;" text="Choose an existing profile" />
             <ComboBox fx:id="cmbProfiles" layoutY="25.0" onAction="#profileSelected" prefHeight="26.0" prefWidth="167.0" />
             <TextField fx:id="txtProfileType" editable="false" layoutX="210.0" layoutY="23.0" />
             <Button fx:id="selectButton" layoutY="58.0" mnemonicParsing="false" onAction="#selectProfile" prefHeight="26.0" prefWidth="58.0" text="Select" />
@@ -43,7 +43,7 @@
             <Label style="-fx-background-color: WHITE;" text="Currently selected profile" />
             <TextField fx:id="txtActiveProfile" editable="false" layoutY="25.0" />
             <TextField fx:id="txtActiveProfileType" editable="false" layoutX="210.0" layoutY="23.0" />
-            <CheckBox fx:id="chkActive" layoutY="63.0" mnemonicParsing="false" onAction="#activateDeactivate" text="Paradigm Active" />
+            <CheckBox fx:id="chkActive" layoutY="63.0" mnemonicParsing="false" onAction="#activateDeactivate" text="Profile Active" />
             <CheckBox fx:id="chkRunning" layoutX="210.0" layoutY="63.0" mnemonicParsing="false" onAction="#runEnd" text="Running Server" />
             <TextField fx:id="txtActiveProfileManager" editable="false" layoutX="420.0" layoutY="23.0" />
             <Separator layoutY="93.0" prefHeight="3.0" prefWidth="595.0" />
