@@ -167,7 +167,6 @@ public class ParadigmScreenController extends Pane implements CloseableControl {
 		}
 	}
 
-//TODO Fix the setName function to properly implement the interface.
 	public void copyProfile() {
 		if (txtNameOfNewProfile.getText().isEmpty()) {
 			SimpleDialog.showWarning("Please type a new profile name.",
