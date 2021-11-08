@@ -1,6 +1,7 @@
 
 package cz.it4i.parallel.internal.ui;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -248,14 +249,23 @@ public class ParadigmScreenController extends Pane implements CloseableControl {
 
 	public void paradigmSelected() {
 		cmbParadigmManagers.getItems().clear();
-		cmbParadigmManagers.getItems().addAll(paradigmManagerService.getManagers(
-			paradigms.getValue()));
+		List<ParadigmManager> managers = paradigmManagerService.getManagers(
+			paradigms.getValue());
+
+		if (paradigms.getValue().getTypeName().contains("HPCWorkflowJobManager")) {
+			// SSH must appear first in the combo-box and be selected by default.
+			// This is why the list is reversed. If there is a better way it should be
+			// changed.
+			Collections.reverse(managers);
+		}
+
+		cmbParadigmManagers.getItems().addAll(managers);
 		if (cmbParadigmManagers.getItems().isEmpty()) {
 			cmbParadigmManagers.setDisable(true);
 		}
 		else {
 			cmbParadigmManagers.setDisable(false);
-			cmbParadigmManagers.getSelectionModel().select(0);
+			cmbParadigmManagers.getSelectionModel().selectFirst();
 		}
 	}
 
