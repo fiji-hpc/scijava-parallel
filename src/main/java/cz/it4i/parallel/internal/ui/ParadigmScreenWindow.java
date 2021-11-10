@@ -37,7 +37,7 @@ public class ParadigmScreenWindow {
 				final Stage parentStage = new Stage();
 				parentStage.initModality(Modality.NONE);
 				parentStage.setResizable(false);
-				parentStage.setTitle("Paradigm Profiles Manager");
+				parentStage.setTitle("Paradigm Profiles Configurator");
 				parentStage.setScene(scene);
 				Image myImage = IconHelperMethods.convertIkonToImage(
 					MaterialDesign.MDI_ACCOUNT_SETTINGS_VARIANT);

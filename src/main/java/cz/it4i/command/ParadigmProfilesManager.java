@@ -13,7 +13,7 @@ import cz.it4i.parallel.internal.ParadigmManagerService;
 import cz.it4i.parallel.internal.ui.ParadigmScreenWindow;
 
 @Plugin(headless = true, type = Command.class,
-	menuPath = "Plugins>HPC-ParallelTools>Paradigm Profiles Manager")
+	menuPath = "Plugins>HPC-ParallelTools>Paradigm Profiles Configurator")
 public class ParadigmProfilesManager implements Command {
 
 	@Parameter
