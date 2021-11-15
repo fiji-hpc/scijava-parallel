@@ -9,7 +9,7 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.Pane?>
 
-<fx:root maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="620.0" style="-fx-background-color: WHITE;" stylesheets="@style.css" type="Pane" xmlns="http://javafx.com/javafx/" xmlns:fx="http://javafx.com/fxml/1" fx:controller="cz.it4i.parallel.internal.ui.ParadigmScreenController">
+<fx:root maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="620.0" stylesheets="@style.css" type="Pane" xmlns="http://javafx.com/javafx/" xmlns:fx="http://javafx.com/fxml/1" fx:controller="cz.it4i.parallel.internal.ui.ParadigmScreenController">
    <children>
       <Label layoutX="15.0" layoutY="20.0" style="-fx-font-weight: bold;" text="Profile Name" />
       <Label layoutX="225.0" layoutY="20.0" style="-fx-font-weight: BOLD;" text="Paradigm Type" />
@@ -17,7 +17,7 @@
       <Group layoutX="15.0" layoutY="50.0">
          <children>
             <Separator layoutX="6.0" layoutY="8.0" prefHeight="3.0" prefWidth="590.0" />
-            <Label style="-fx-background-color: WHITE;" text="Create a new profile" />
+            <Label style="-fx-background-color: inherit;" text="Create a new profile" />
             <TextField fx:id="txtNameOfNewProfile" layoutY="25.0" />
             <ComboBox fx:id="paradigms" layoutX="210.0" layoutY="25.0" onAction="#paradigmSelected" prefHeight="26.0" prefWidth="170.0" />
             <ComboBox fx:id="cmbParadigmManagers" layoutX="420.0" layoutY="25.0" prefHeight="26.0" prefWidth="170.0" />
@@ -28,7 +28,7 @@
       <Group layoutX="15.0" layoutY="150.0">
          <children>
             <Separator layoutX="6.0" layoutY="8.0" prefHeight="3.0" prefWidth="590.0" />
-            <Label style="-fx-background-color: WHITE;" text="Choose an existing profile" />
+            <Label style="-fx-background-color: inherit;" text="Choose an existing profile" />
             <ComboBox fx:id="cmbProfiles" layoutY="25.0" onAction="#profileSelected" prefHeight="26.0" prefWidth="167.0" />
             <TextField fx:id="txtProfileType" editable="false" layoutX="210.0" layoutY="23.0" />
             <Button fx:id="selectButton" layoutY="58.0" mnemonicParsing="false" onAction="#selectProfile" prefHeight="26.0" prefWidth="58.0" text="Select" />
@@ -40,7 +40,7 @@
       <Group layoutX="15.0" layoutY="250.0">
          <children>
             <Separator layoutX="6.0" layoutY="8.0" prefHeight="3.0" prefWidth="590.0" />
-            <Label style="-fx-background-color: WHITE;" text="Currently selected profile" />
+            <Label style="-fx-background-color: inherit;" text="Currently selected profile" />
             <TextField fx:id="txtActiveProfile" editable="false" layoutY="25.0" />
             <TextField fx:id="txtActiveProfileType" editable="false" layoutX="210.0" layoutY="23.0" />
             <CheckBox fx:id="chkActive" layoutY="63.0" mnemonicParsing="false" onAction="#activateDeactivate" text="Profile Active" />
