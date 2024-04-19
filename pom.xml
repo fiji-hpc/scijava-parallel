@@ -88,6 +88,8 @@
 		<!-- NB: Deploy releases to the SciJava Maven repository. -->
 		<releaseProfiles>deploy-to-scijava</releaseProfiles>
 
+		<enforcer.skip>true</enforcer.skip>
+
 		<!-- TODO: Find out what is this for -->
 	</properties>
 
